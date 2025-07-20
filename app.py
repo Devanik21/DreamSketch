@@ -64,7 +64,7 @@ st.markdown("""
         background: linear-gradient(-45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff, #5f27cd);
        
         
-        -webkit-text-fill-color: transparent;
+        
         
         animation: gradientShift 8s ease infinite;
     }
