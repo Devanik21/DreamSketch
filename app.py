@@ -258,48 +258,159 @@ except Exception as e:
     st.stop()
 
 # Comprehensive style categories
+# Comprehensive style categories with 300+ styles
 STYLE_CATEGORIES = {
-    "🎨 Artistic Styles": [
-        "Oil painting", "Watercolor", "Acrylic painting", "Digital art", "Concept art",
-        "Abstract art", "Impressionist", "Expressionist", "Cubist", "Surreal",
-        "Pop art", "Street art", "Graffiti", "Minimalist", "Maximalist",
-        "Art nouveau", "Art deco", "Baroque", "Renaissance", "Modern art"
+    "🎨 Classical & Renaissance": [
+        "Byzantine", "Romanesque", "Gothic", "Early Renaissance", "High Renaissance", "Mannerism",
+        "Northern Renaissance", "Venetian Renaissance", "Flemish Primitives", "Sfumato",
+        "Chiaroscuro", "Tenebrism", "Fresco", "Tempera", "Panel painting", "Illuminated manuscript",
+        "Quattrocento", "Cinquecento", "Leonardo da Vinci style", "Michelangelo style", "Raphael style"
     ],
+    
+    "🏛️ Baroque to Neoclassical": [
+        "Baroque", "Rococo", "Neoclassicism", "Academic art", "Hudson River School",
+        "Orientalism", "Romanticism", "Pre-Raphaelite", "Nazarene movement", "Biedermeier",
+        "Empire style", "Regency", "Federal style", "Greek Revival", "Gothic Revival",
+        "Caravaggio style", "Rubens style", "Rembrandt style", "Poussin style", "David style"
+    ],
+    
+    "🌈 Impressionism & Post-Impressionism": [
+        "Impressionism", "Neo-Impressionism", "Post-Impressionism", "Pointillism", "Divisionism",
+        "Cloisonnism", "Synthetism", "Symbolism", "Art Nouveau", "Jugendstil", "Liberty style",
+        "Secessionist", "Fauvism", "Expressionism", "Die Brücke", "Der Blaue Reiter",
+        "Monet style", "Renoir style", "Van Gogh style", "Cézanne style", "Seurat style"
+    ],
+    
+    "🔲 Modern Movements": [
+        "Cubism", "Analytical Cubism", "Synthetic Cubism", "Futurism", "Constructivism",
+        "Suprematism", "De Stijl", "Bauhaus", "Dadaism", "Surrealism", "Abstract Expressionism",
+        "Color Field", "Geometric Abstraction", "Lyrical Abstraction", "Orphism", "Rayonism",
+        "Picasso style", "Braque style", "Kandinsky style", "Mondrian style", "Klee style"
+    ],
+    
+    "🎭 Contemporary & Postmodern": [
+        "Pop Art", "Minimalism", "Conceptual Art", "Performance Art", "Installation Art",
+        "Land Art", "Arte Povera", "Fluxus", "Neo-Expressionism", "Photorealism", "Hyperrealism",
+        "Street Art", "Graffiti", "Stencil Art", "Lowbrow Art", "Neo-Pop", "Young British Artists",
+        "Warhol style", "Lichtenstein style", "Hockney style", "Basquiat style", "Banksy style"
+    ],
+    
+    "🌍 World Art Traditions": [
+        "Chinese Ink Painting", "Japanese Ukiyo-e", "Sumi-e", "Nihonga", "Korean Minhwa",
+        "Indian Miniature", "Mughal Painting", "Persian Miniature", "Islamic Geometric",
+        "Calligraphy", "Aboriginal Dot Painting", "African Tribal", "Aztec", "Mayan",
+        "Inuit Art", "Native American", "Polynesian", "Celtic", "Norse", "Slavic Folk Art"
+    ],
+    
     "📸 Photography Styles": [
-        "Portrait photography", "Landscape photography", "Macro photography", "Street photography",
-        "Fashion photography", "Black and white photography", "HDR photography", "Long exposure",
-        "Vintage photography", "Film photography", "Polaroid", "Documentary style",
-        "Commercial photography", "Fine art photography", "Architectural photography"
+        "Documentary Photography", "Portrait Photography", "Landscape Photography", "Street Photography",
+        "Fashion Photography", "Fine Art Photography", "Architectural Photography", "Macro Photography",
+        "Long Exposure", "HDR Photography", "Black and White", "Sepia", "Cross Processing",
+        "Lomography", "Pinhole", "Daguerreotype", "Cyanotype", "Polaroid", "Film Photography",
+        "Digital Photography", "Infrared Photography", "Underwater Photography", "Aerial Photography"
     ],
-    "🎬 Cinematic & Visual": [
-        "Cinematic", "Film noir", "Cyberpunk", "Steampunk", "Dieselpunk", "Solarpunk",
-        "Vaporwave", "Synthwave", "Retrowave", "Outrun", "Glitchcore", "Liminal space",
-        "Brutalist", "Futuristic", "Post-apocalyptic", "Utopian", "Dystopian"
+    
+    "🎬 Cinematic & Visual Media": [
+        "Film Noir", "German Expressionist Cinema", "Soviet Montage", "Italian Neorealism",
+        "French New Wave", "Cinéma Vérité", "Spaghetti Western", "Blaxploitation",
+        "Giallo", "Cyberpunk", "Steampunk", "Dieselpunk", "Atompunk", "Biopunk",
+        "Solarpunk", "Cassette Futurism", "Y2K Aesthetic", "Vaporwave", "Synthwave",
+        "Outrun", "Darkwave", "Retrowave", "Liminal Space", "Backrooms Aesthetic"
     ],
-    "🌟 Fantasy & Sci-Fi": [
-        "Fantasy art", "Science fiction", "Space opera", "Cosmic horror", "Gothic",
-        "Medieval fantasy", "High fantasy", "Dark fantasy", "Urban fantasy",
-        "Alien worlds", "Biopunk", "Space exploration", "Time travel", "Parallel universe"
+    
+    "🎮 Digital & New Media": [
+        "Digital Art", "Computer Graphics", "3D Rendering", "Pixel Art", "8-bit", "16-bit",
+        "Voxel Art", "Low Poly", "Photobashing", "Matte Painting", "Concept Art",
+        "Character Design", "Environment Design", "UI/UX Design", "Motion Graphics",
+        "Glitch Art", "Databending", "ASCII Art", "Generative Art", "Algorithmic Art",
+        "AI Art", "Neural Style Transfer", "Deep Dream", "Virtual Reality Art"
     ],
-    "🎮 Game & Animation": [
-        "Pixel art", "8-bit", "16-bit", "Anime style", "Manga style", "Studio Ghibli style",
-        "Disney style", "Pixar style", "2D animation", "3D render", "Isometric",
-        "Low poly", "Voxel art", "Game asset", "Character design", "Environment concept"
+    
+    "🌟 Fantasy & Science Fiction": [
+        "High Fantasy", "Dark Fantasy", "Urban Fantasy", "Steampunk Fantasy", "Dieselpunk",
+        "Space Opera", "Cyberpunk", "Biopunk", "Post-Apocalyptic", "Dystopian", "Utopian",
+        "Retro-Futurism", "Cosmic Horror", "Gothic Horror", "Weird Fiction", "New Weird",
+        "Solarpunk", "Climate Fiction", "Hard Sci-Fi", "Soft Sci-Fi", "Space Western",
+        "Alternate History", "Time Travel", "Parallel Universe", "Multiverse"
     ],
-    "🏛️ Historical & Cultural": [
-        "Ancient Egyptian", "Ancient Greek", "Roman", "Viking", "Samurai", "Wild West",
-        "Victorian", "Edwardian", "Art deco", "1920s", "1950s retro", "1980s",
-        "Traditional Japanese", "Chinese ink painting", "Indian miniature", "African tribal"
+    
+    "🎨 Painting Techniques": [
+        "Oil Painting", "Acrylic Painting", "Watercolor", "Gouache", "Tempera", "Encaustic",
+        "Fresco", "Casein", "Egg Tempera", "Mixed Media", "Impasto", "Glazing", "Scumbling",
+        "Alla Prima", "Wet-on-Wet", "Dry Brush", "Wash Technique", "Sgraffito", "Grisaille",
+        "Underpainting", "Color Blocking", "Palette Knife", "Finger Painting", "Spray Paint"
     ],
-    "🌍 Nature & Landscapes": [
-        "Photorealistic nature", "Dreamy landscape", "Tropical paradise", "Winter wonderland",
-        "Desert landscape", "Forest scene", "Mountain vista", "Ocean scene", "Sky study",
-        "Botanical illustration", "Wildlife photography", "Underwater scene", "Space landscape"
+    
+    "✏️ Drawing & Illustration": [
+        "Pencil Drawing", "Charcoal Drawing", "Ink Drawing", "Pen and Ink", "Crosshatching",
+        "Stippling", "Conte Crayon", "Pastels", "Colored Pencils", "Markers", "Technical Drawing",
+        "Architectural Drawing", "Scientific Illustration", "Medical Illustration", "Botanical Illustration",
+        "Fashion Illustration", "Children's Book Illustration", "Comic Book Art", "Manga", "Manhwa",
+        "Graphic Novel", "Editorial Illustration", "Advertising Illustration", "Logo Design"
     ],
-    "✨ Special Effects": [
-        "Holographic", "Neon glow", "Particle effects", "Light rays", "Bokeh", "Double exposure",
-        "Prism effects", "Crystal", "Glass", "Metal", "Fabric texture", "Wood texture",
-        "Stone texture", "Fire effects", "Water effects", "Smoke effects", "Lightning"
+    
+    "🏺 Sculpture & 3D Arts": [
+        "Classical Sculpture", "Modern Sculpture", "Abstract Sculpture", "Kinetic Sculpture",
+        "Installation Art", "Land Art", "Environmental Art", "Public Art", "Monument",
+        "Bas-Relief", "High Relief", "Carving", "Casting", "Modeling", "Assemblage",
+        "Found Object Art", "Readymade", "Welded Sculpture", "Ceramic Sculpture", "Glass Art",
+        "Ice Sculpture", "Sand Sculpture", "Digital Sculpture", "3D Printing Art"
+    ],
+    
+    "🎪 Decorative & Applied Arts": [
+        "Art Deco", "Art Nouveau", "Arts and Crafts Movement", "Bauhaus Design", "Memphis Design",
+        "Mid-Century Modern", "Scandinavian Design", "Japanese Minimalism", "Industrial Design",
+        "Product Design", "Interior Design", "Textile Design", "Pattern Design", "Wallpaper Design",
+        "Ceramic Art", "Pottery", "Porcelain", "Glassblowing", "Stained Glass", "Mosaic",
+        "Marquetry", "Intarsia", "Woodworking", "Metalworking", "Jewelry Design"
+    ],
+    
+    "📚 Printmaking & Graphic Arts": [
+        "Woodcut", "Engraving", "Etching", "Lithography", "Screen Printing", "Monotype",
+        "Linocut", "Mezzotint", "Aquatint", "Drypoint", "Collagraph", "Photogravure",
+        "Risograph", "Letterpress", "Typography", "Calligraphy", "Hand Lettering",
+        "Poster Design", "Book Design", "Magazine Layout", "Newspaper Design", "Packaging Design",
+        "Logo Design", "Corporate Identity", "Branding", "Infographic Design"
+    ],
+    
+    "🌈 Color & Light Studies": [
+        "Monochromatic", "Analogous Colors", "Complementary Colors", "Triadic Colors", "Split Complementary",
+        "Warm Palette", "Cool Palette", "Earth Tones", "Pastel Colors", "Neon Colors",
+        "High Contrast", "Low Contrast", "Chiaroscuro", "Tenebrism", "Sfumato",
+        "Atmospheric Perspective", "Linear Perspective", "Color Temperature", "Saturation Studies",
+        "Value Studies", "Light Studies", "Shadow Studies", "Reflection Studies", "Refraction"
+    ],
+    
+    "🔮 Surreal & Visionary": [
+        "Surrealism", "Magic Realism", "Visionary Art", "Psychedelic Art", "Outsider Art",
+        "Art Brut", "Naive Art", "Folk Art", "Primitive Art", "Shamanic Art",
+        "Sacred Geometry", "Mandala", "Fractal Art", "Optical Illusions", "Trompe-l'oeil",
+        "Anamorphosis", "Impossible Objects", "Dream Imagery", "Nightmare Imagery", "Mythological",
+        "Allegorical", "Symbolic", "Metaphysical", "Transcendental", "Spiritual Art"
+    ],
+    
+    "⚡ Experimental & Avant-Garde": [
+        "Abstract Expressionism", "Action Painting", "Color Field Painting", "Hard Edge",
+        "Geometric Abstraction", "Lyrical Abstraction", "Minimalism", "Process Art", "Systems Art",
+        "Conceptual Art", "Performance Art", "Video Art", "Sound Art", "Light Art",
+        "Kinetic Art", "Op Art", "Neo-Geo", "Pictures Generation", "Institutional Critique",
+        "Relational Aesthetics", "Post-Internet Art", "Net Art", "Bio Art", "Eco Art"
+    ],
+    
+    "🎭 Cultural Fusion": [
+        "Afrofuturism", "Chicano Art", "Indigenous Futurism", "Decolonial Art", "Postcolonial Art",
+        "Diaspora Art", "Hybrid Cultures", "Cultural Appropriation Critique", "Identity Art",
+        "Queer Art", "Feminist Art", "Intersectional Art", "Social Practice Art", "Community Art",
+        "Activist Art", "Protest Art", "Political Art", "Propaganda Art", "Agitprop",
+        "Counter-Culture", "Underground Comics", "Zine Aesthetic", "Punk Aesthetic", "Goth Aesthetic"
+    ],
+    
+    "🚀 Futuristic & Speculative": [
+        "Post-Human Art", "Transhumanist Art", "Xenoarchaeology", "Speculative Design", "Critical Design",
+        "Bio-Art", "Genetic Art", "Nano Art", "Quantum Art", "Holographic Art",
+        "Augmented Reality Art", "Virtual Reality Art", "Mixed Reality Art", "Metaverse Art",
+        "Blockchain Art", "NFT Art", "Cryptocurrency Art", "Post-Digital Art", "New Materialism",
+        "Object-Oriented Ontology", "Accelerationist Aesthetics", "Xenofeminism", "Cosmotechnics"
     ]
 }
 
