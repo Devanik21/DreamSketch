@@ -466,7 +466,7 @@ with st.sidebar:
                     # Create thumbnail
                     img = Image.open(BytesIO(img_data['image_data']))
                     img.thumbnail((80, 80))
-                    st.image(img, use_column_width=True)
+                    st.image(img, use_container_width=True)
                 
                 with col2:
                     if st.button(f"View #{i+1}", key=f"view_{i}", use_container_width=True):
@@ -617,7 +617,7 @@ with col1:
         img_data = st.session_state.current_image
         img = Image.open(BytesIO(img_data['image_data']))
         
-        st.image(img, caption="✨ Generated Masterpiece", use_column_width=True)
+        st.image(img, caption="✨ Generated Masterpiece", use_container_width=True)
         
         # Description if available
         if img_data.get('description'):
