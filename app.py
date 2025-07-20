@@ -59,10 +59,22 @@ st.markdown("""
 .title-text {
         font-size: 3rem;
         font-weight: 800;
-        color: #e2e8f0;
         text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
         margin: 0;
-        color: #8b5cf6;
+        background: linear-gradient(-45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff, #5f27cd);
+        background-size: 400% 400%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gradientShift 8s ease infinite;
+    }
+    
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        25% { background-position: 100% 50%; }
+        50% { background-position: 100% 100%; }
+        75% { background-position: 0% 100%; }
+        100% { background-position: 0% 50%; }
     }
     
     .subtitle {
