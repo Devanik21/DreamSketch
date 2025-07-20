@@ -56,16 +56,13 @@ st.markdown("""
         100% { background-position: 0% 50%; }
     }
     
-    .title-text {
+.title-text {
         font-size: 3rem;
         font-weight: 800;
         color: #e2e8f0;
         text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
         margin: 0;
-        background: linear-gradient(45deg, #8b5cf6, #7c3aed, #6d28d9, #5b21b6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: #8b5cf6;
     }
     
     .subtitle {
