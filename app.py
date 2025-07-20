@@ -63,7 +63,7 @@ st.markdown("""
         margin: 0;
         background: linear-gradient(-45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff, #5f27cd);
         background-size: 400% 400%;
-        -webkit-background-clip: text;
+        
         -webkit-text-fill-color: transparent;
         
         animation: gradientShift 8s ease infinite;
