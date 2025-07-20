@@ -130,8 +130,8 @@ st.markdown("""
         padding: 1rem;
     }
     
-    .stTextArea > div > div > textarea {
-        background: rgba(226, 232, 240, 0.08);
+.stTextArea > div > div > textarea {
+        background: transparent !important;
         border: 1px solid rgba(226, 232, 240, 0.15);
         border-radius: 15px;
         color: #e2e8f0;
