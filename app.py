@@ -81,18 +81,51 @@ st.markdown("""
         background: linear-gradient(135deg, #764ba2, #667eea);
     }
     
+    .stSidebar {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    }
+    
+    .stSidebar > div {
+        background: transparent;
+    }
+    
     .stSelectbox > div > div {
-        background: rgba(255,255,255,0.1);
-        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
         border-radius: 15px;
     }
     
+    .stSelectbox > div > div > div {
+        color: white !important;
+    }
+    
     .stTextInput > div > div > input {
-        background: rgba(255,255,255,0.1);
-        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
         border-radius: 15px;
         color: white;
         padding: 1rem;
+    }
+    
+    .stTextArea > div > div > textarea {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 15px;
+        color: white;
+    }
+    
+    .stCheckbox > label {
+        color: white !important;
+    }
+    
+    .stMarkdown h3 {
+        color: white !important;
+    }
+    
+    .stExpander > div > div > div > div {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 15px;
     }
     
     .download-container {
