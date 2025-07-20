@@ -65,7 +65,7 @@ st.markdown("""
         background-size: 400% 400%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        background-clip: text;
+        
         animation: gradientShift 8s ease infinite;
     }
     
