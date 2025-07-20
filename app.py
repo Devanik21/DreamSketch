@@ -62,7 +62,7 @@ st.markdown("""
         color: #e2e8f0;
         text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
         margin: 0;
-        background: linear-gradient(45deg, #e2e8f0, #cbd5e1);
+        background: linear-gradient(45deg, #8b5cf6, #7c3aed, #6d28d9, #5b21b6);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
