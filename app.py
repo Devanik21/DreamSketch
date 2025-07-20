@@ -18,26 +18,35 @@ st.set_page_config(
 # Custom CSS for beautiful gradients and styling
 st.markdown("""
 <style>
-    .stApp {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
-        background-size: 400% 400%;
-        animation: gradient 15s ease infinite;
-    }
-    
     .main {
-        background: transparent;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
     }
     
+    .stApp {
+        background: linear-gradient(135deg, #2b5876 0%, #4e4376 25%, #667eea 50%, #764ba2 75%, #2a5298 100%);
+        background-size: 400% 400%;
+        animation: backgroundFlow 20s ease infinite;
+    }
+    
+    @keyframes backgroundFlow {
+        0% { background-position: 0% 50%; }
+        25% { background-position: 100% 50%; }
+        50% { background-position: 100% 100%; }
+        75% { background-position: 0% 100%; }
+        100% { background-position: 0% 50%; }
+    }
+    
     .title-container {
-        background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #48cae4 50%, #06ffa5 75%, #ffbe0b 100%);
         background-size: 400% 400%;
         animation: gradient 12s ease infinite;
-        padding: 2rem;
+        padding: 2.5rem;
         border-radius: 25px;
         text-align: center;
         margin-bottom: 2rem;
         box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        backdrop-filter: blur(10px);
         border: 1px solid rgba(255,255,255,0.1);
     }
     
@@ -67,7 +76,7 @@ st.markdown("""
     }
     
     .stButton > button {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #667eea, #764ba2, #48cae4);
         color: white;
         border: none;
         padding: 0.75rem 2rem;
@@ -75,19 +84,19 @@ st.markdown("""
         font-weight: 600;
         font-size: 1.1rem;
         transition: all 0.3s ease;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
     }
     
     .stButton > button:hover {
         transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-        background: linear-gradient(135deg, #764ba2, #667eea);
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #764ba2, #667eea, #06ffa5);
     }
     
     .stSidebar {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+        background: linear-gradient(135deg, #2b5876 0%, #4e4376 25%, #667eea 50%, #764ba2 75%, #2a5298 100%);
         background-size: 400% 400%;
-        animation: gradient 15s ease infinite;
+        animation: backgroundFlow 20s ease infinite;
     }
     
     .stSidebar > div {
