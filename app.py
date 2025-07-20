@@ -24,18 +24,30 @@ st.markdown("""
     }
     
     .stApp {
-        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-        color: #2d3748;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
+        background-size: 400% 400%;
+        animation: backgroundFlow 25s ease infinite;
+    }
+    
+    @keyframes backgroundFlow {
+        0% { background-position: 0% 50%; }
+        25% { background-position: 100% 50%; }
+        50% { background-position: 100% 100%; }
+        75% { background-position: 0% 100%; }
+        100% { background-position: 0% 50%; }
     }
     
     .title-container {
-        background: linear-gradient(135deg, #e8f4fd 0%, #d6e9ff 50%, #b8d4ff 100%);
-        padding: 2rem;
-        border-radius: 20px;
+        background: linear-gradient(135deg, #1e2a4a 0%, #2d4a6b 25%, #3a5f8c 50%, #4674ad 75%, #5289ce 100%);
+        background-size: 300% 300%;
+        animation: gradient 15s ease infinite;
+        padding: 2.5rem;
+        border-radius: 25px;
         text-align: center;
         margin-bottom: 2rem;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-        border: 1px solid rgba(255,255,255,0.3);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.08);
     }
     
     @keyframes gradient {
@@ -46,40 +58,45 @@ st.markdown("""
     
     .title-text {
         font-size: 3rem;
-        font-weight: 700;
-        color: #2d3748;
-        text-shadow: none;
+        font-weight: 800;
+        color: #e2e8f0;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
         margin: 0;
+        background: linear-gradient(45deg, #e2e8f0, #cbd5e1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
     
     .subtitle {
-        font-size: 1.1rem;
-        color: #4a5568;
+        font-size: 1.2rem;
+        color: #cbd5e1;
         margin-top: 0.5rem;
-        text-shadow: none;
+        text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
     }
     
     .stButton > button {
-        background: linear-gradient(135deg, #4299e1, #3182ce);
-        color: white;
+        background: linear-gradient(135deg, #475569, #64748b, #6b7280);
+        color: #f1f5f9;
         border: none;
         padding: 0.75rem 2rem;
-        border-radius: 8px;
+        border-radius: 50px;
         font-weight: 600;
-        font-size: 1rem;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     }
     
     .stButton > button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
-        background: linear-gradient(135deg, #3182ce, #2c5aa0);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.5);
+        background: linear-gradient(135deg, #64748b, #6b7280, #78716c);
     }
     
     .stSidebar {
-        background: #ffffff;
-        border-right: 1px solid #e2e8f0;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
+        background-size: 400% 400%;
+        animation: backgroundFlow 25s ease infinite;
     }
     
     .stSidebar > div {
@@ -87,42 +104,42 @@ st.markdown("""
     }
     
     .stSelectbox > div > div {
-        background: #ffffff;
-        border: 1px solid #cbd5e0;
-        border-radius: 8px;
+        background: rgba(226, 232, 240, 0.08);
+        border: 1px solid rgba(226, 232, 240, 0.15);
+        border-radius: 15px;
     }
     
     .stSelectbox > div > div > div {
-        color: #2d3748 !important;
+        color: #e2e8f0 !important;
     }
     
     .stTextInput > div > div > input {
-        background: #ffffff;
-        border: 1px solid #cbd5e0;
-        border-radius: 8px;
-        color: #2d3748;
-        padding: 0.75rem;
+        background: rgba(226, 232, 240, 0.08);
+        border: 1px solid rgba(226, 232, 240, 0.15);
+        border-radius: 15px;
+        color: #e2e8f0;
+        padding: 1rem;
     }
     
     .stTextArea > div > div > textarea {
-        background: #ffffff;
-        border: 1px solid #cbd5e0;
-        border-radius: 8px;
-        color: #2d3748;
+        background: rgba(226, 232, 240, 0.08);
+        border: 1px solid rgba(226, 232, 240, 0.15);
+        border-radius: 15px;
+        color: #e2e8f0;
     }
     
     .stCheckbox > label {
-        color: #2d3748 !important;
+        color: #e2e8f0 !important;
     }
     
     .stMarkdown h3 {
-        color: #2d3748 !important;
+        color: #e2e8f0 !important;
     }
     
     .stExpander > div > div > div > div {
-        background: #f7fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
+        background: rgba(226, 232, 240, 0.05);
+        border: 1px solid rgba(226, 232, 240, 0.1);
+        border-radius: 15px;
     }
     
     .download-container {
