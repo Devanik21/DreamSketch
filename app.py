@@ -18,24 +18,27 @@ st.set_page_config(
 # Custom CSS for beautiful gradients and styling
 st.markdown("""
 <style>
+    .stApp {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
+    }
+    
     .main {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: transparent;
         color: white;
     }
     
-    .stApp {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    }
-    
     .title-container {
-        background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+        background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
         background-size: 400% 400%;
-        animation: gradient 8s ease infinite;
+        animation: gradient 12s ease infinite;
         padding: 2rem;
-        border-radius: 20px;
+        border-radius: 25px;
         text-align: center;
         margin-bottom: 2rem;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        border: 1px solid rgba(255,255,255,0.1);
     }
     
     @keyframes gradient {
@@ -82,7 +85,9 @@ st.markdown("""
     }
     
     .stSidebar {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
     }
     
     .stSidebar > div {
