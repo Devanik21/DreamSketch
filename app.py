@@ -6,6 +6,7 @@ from io import BytesIO
 import base64
 import json
 import time
+import uuid
 
 # Page config
 st.set_page_config(
@@ -14,6 +15,12 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Initialize session state
+if 'images' not in st.session_state:
+    st.session_state.images = []
+if 'current_image' not in st.session_state:
+    st.session_state.current_image = None
 
 # Custom CSS for beautiful gradients and styling
 st.markdown("""
@@ -56,16 +63,16 @@ st.markdown("""
         100% { background-position: 0% 50%; }
     }
     
-.title-text {
+    .title-text {
         font-size: 3rem;
         font-weight: 800;
         text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
         margin: 0;
         background: linear-gradient(-45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff, #5f27cd);
-       
-        
-        
-        
+        background-size: 400% 400%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         animation: gradientShift 8s ease infinite;
     }
     
@@ -94,6 +101,7 @@ st.markdown("""
         font-size: 1.1rem;
         transition: all 0.3s ease;
         box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        width: 100%;
     }
     
     .stButton > button:hover {
@@ -130,7 +138,7 @@ st.markdown("""
         padding: 1rem;
     }
     
-.stTextArea > div > div > textarea {
+    .stTextArea > div > div > textarea {
         background: transparent !important;
         border: 1px solid rgba(226, 232, 240, 0.15);
         border-radius: 15px;
@@ -160,18 +168,32 @@ st.markdown("""
         border: 1px solid rgba(255,255,255,0.2);
     }
     
-    .style-card {
-        background: rgba(255,255,255,0.1);
+    .image-gallery {
+        background: rgba(255,255,255,0.05);
         padding: 1rem;
         border-radius: 15px;
-        margin: 0.5rem 0;
-        border: 1px solid rgba(255,255,255,0.2);
-        transition: all 0.3s ease;
+        margin: 1rem 0;
+        border: 1px solid rgba(255,255,255,0.1);
     }
     
-    .style-card:hover {
+    .gallery-item {
+        background: rgba(255,255,255,0.1);
+        padding: 0.5rem;
+        border-radius: 10px;
+        margin: 0.5rem 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .gallery-item:hover {
         background: rgba(255,255,255,0.2);
         transform: translateY(-2px);
+    }
+    
+    .gallery-item.selected {
+        background: rgba(255,255,255,0.3);
+        border: 1px solid rgba(255,255,255,0.3);
     }
     
     .error-box {
@@ -189,6 +211,33 @@ st.markdown("""
         color: white;
         margin: 1rem 0;
     }
+    
+    .info-box {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        padding: 1rem;
+        border-radius: 15px;
+        color: white;
+        margin: 1rem 0;
+    }
+    
+    /* Hide Streamlit default elements that cause rerun */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        width: 100%;
+    }
+    
+    .stDownloadButton > button:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -205,7 +254,7 @@ try:
     gemini_api_key = st.secrets["gemini_api_key"]
     client = genai.Client(api_key=gemini_api_key)
 except Exception as e:
-    st.error("❌ API key configuration error. Please check your secrets.toml file.")
+    st.markdown('<div class="error-box">❌ API key configuration error. Please check your secrets.toml file.</div>', unsafe_allow_html=True)
     st.stop()
 
 # Comprehensive style categories
@@ -285,6 +334,33 @@ with st.sidebar:
         "Natural", "Dramatic", "Soft", "Studio", "Golden hour", 
         "Blue hour", "Neon", "Candlelight", "Harsh", "Backlit"
     ])
+    
+    st.markdown("---")
+    
+    # Image Gallery
+    if st.session_state.images:
+        st.markdown("### 🖼️ Your Gallery")
+        
+        # Clear gallery button
+        if st.button("🗑️ Clear Gallery", use_container_width=True):
+            st.session_state.images = []
+            st.session_state.current_image = None
+            st.rerun()
+        
+        # Display thumbnail gallery
+        for i, img_data in enumerate(st.session_state.images):
+            with st.container():
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    # Create thumbnail
+                    img = Image.open(BytesIO(img_data['image_data']))
+                    img.thumbnail((80, 80))
+                    st.image(img, use_column_width=True)
+                
+                with col2:
+                    if st.button(f"View #{i+1}", key=f"view_{i}", use_container_width=True):
+                        st.session_state.current_image = img_data
+                        st.rerun()
 
 # Main content area
 col1, col2 = st.columns([2, 1])
@@ -296,16 +372,17 @@ with col1:
         "Enter your creative prompt:",
         height=100,
         placeholder="A majestic dragon soaring through a crystal cave filled with glowing gems...",
-        help="Be descriptive! Include details about subjects, settings, mood, and style."
+        help="Be descriptive! Include details about subjects, settings, mood, and style.",
+        key="main_prompt"
     )
     
     # Prompt enhancement options
-    enhance_prompt = st.checkbox("🚀 Auto-enhance prompt with selected styles")
+    enhance_prompt = st.checkbox("🚀 Auto-enhance prompt with selected styles", key="enhance_check")
     
     # Generate button
     generate_col1, generate_col2, generate_col3 = st.columns([1, 2, 1])
     with generate_col2:
-        if st.button("✨ Generate Masterpiece", use_container_width=True):
+        if st.button("✨ Generate Masterpiece", key="generate_btn", use_container_width=True):
             if not prompt.strip():
                 st.markdown('<div class="error-box">❌ Please enter a prompt to begin your creative journey!</div>', unsafe_allow_html=True)
             else:
@@ -321,8 +398,10 @@ with col1:
                     st.code(enhanced_prompt, language=None)
                 
                 # Progress indicators
-                progress_bar = st.progress(0)
-                status_text = st.empty()
+                progress_container = st.container()
+                with progress_container:
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
                 
                 try:
                     # Simulate progress
@@ -364,35 +443,38 @@ with col1:
                             image_data = part.inline_data.data
                     
                     if image_data:
-                        # Store in session state for download options
-                        st.session_state.generated_image = image_data
-                        st.session_state.image_prompt = prompt
-                        st.session_state.enhanced_prompt = enhanced_prompt
-                        st.session_state.image_description = description
+                        # Create image metadata
+                        image_metadata = {
+                            'id': str(uuid.uuid4()),
+                            'image_data': image_data,
+                            'original_prompt': prompt,
+                            'enhanced_prompt': enhanced_prompt,
+                            'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                            'style_used': selected_style,
+                            'color_mood': color_mood,
+                            'lighting': lighting,
+                            'description': description,
+                            'aspect_ratio': aspect_ratio,
+                            'quality_level': quality_level
+                        }
+                        
+                        # Add to gallery and set as current
+                        st.session_state.images.append(image_metadata)
+                        st.session_state.current_image = image_metadata
                         
                         # Clear progress
-                        progress_bar.empty()
-                        status_text.empty()
+                        progress_container.empty()
                         
                         # Success message
                         st.markdown('<div class="success-box">🎉 Your masterpiece has been created!</div>', unsafe_allow_html=True)
                         
-                        # Display image
-                        img = Image.open(BytesIO(image_data))
-                        st.image(img, caption="✨ Generated Masterpiece", use_column_width=True)
-                        
-                        # Description if available
-                        if description:
-                            st.markdown("### 📝 AI Description")
-                            st.info(description)
+                        st.rerun()
                     else:
-                        progress_bar.empty()
-                        status_text.empty()
+                        progress_container.empty()
                         st.markdown('<div class="error-box">❌ No image was generated. Please try again with a different prompt.</div>', unsafe_allow_html=True)
                 
                 except Exception as e:
-                    progress_bar.empty()
-                    status_text.empty()
+                    progress_container.empty()
                     
                     # Detailed error handling
                     error_msg = str(e).lower()
@@ -418,6 +500,91 @@ with col1:
                         - **Prompt Issues**: Try simpler, more descriptive prompts
                         """)
 
+    # Display current image
+    if st.session_state.current_image:
+        st.markdown("---")
+        img_data = st.session_state.current_image
+        img = Image.open(BytesIO(img_data['image_data']))
+        
+        st.image(img, caption="✨ Generated Masterpiece", use_column_width=True)
+        
+        # Description if available
+        if img_data.get('description'):
+            st.markdown("### 📝 AI Description")
+            st.info(img_data['description'])
+        
+        # Download section
+        st.markdown("### 💾 Export Your Masterpiece")
+        
+        download_col1, download_col2, download_col3, download_col4 = st.columns(4)
+        
+        # PNG download
+        with download_col1:
+            png_buffer = BytesIO()
+            img.save(png_buffer, format="PNG", optimize=True)
+            st.download_button(
+                "📥 PNG",
+                data=png_buffer.getvalue(),
+                file_name=f"genai_masterpiece_{int(time.time())}.png",
+                mime="image/png",
+                key=f"png_{img_data['id']}",
+                use_container_width=True
+            )
+        
+        # JPEG download
+        with download_col2:
+            jpg_buffer = BytesIO()
+            if img.mode == 'RGBA':
+                jpg_img = Image.new('RGB', img.size, (255, 255, 255))
+                jpg_img.paste(img, mask=img.split()[-1])
+            else:
+                jpg_img = img
+            jpg_img.save(jpg_buffer, format="JPEG", quality=95, optimize=True)
+            st.download_button(
+                "📥 JPG",
+                data=jpg_buffer.getvalue(),
+                file_name=f"genai_masterpiece_{int(time.time())}.jpg",
+                mime="image/jpeg",
+                key=f"jpg_{img_data['id']}",
+                use_container_width=True
+            )
+        
+        # WebP download
+        with download_col3:
+            webp_buffer = BytesIO()
+            img.save(webp_buffer, format="WEBP", quality=90, optimize=True)
+            st.download_button(
+                "📥 WebP",
+                data=webp_buffer.getvalue(),
+                file_name=f"genai_masterpiece_{int(time.time())}.webp",
+                mime="image/webp",
+                key=f"webp_{img_data['id']}",
+                use_container_width=True
+            )
+        
+        # Metadata download
+        with download_col4:
+            metadata = {k: v for k, v in img_data.items() if k != 'image_data'}
+            st.download_button(
+                "📄 Info",
+                data=json.dumps(metadata, indent=2),
+                file_name=f"genai_metadata_{int(time.time())}.json",
+                mime="application/json",
+                key=f"json_{img_data['id']}",
+                use_container_width=True
+            )
+        
+        # Image info
+        st.markdown(f"""
+        <div class="download-container">
+        <strong>📊 Image Details:</strong><br>
+        • Size: {img.size[0]} × {img.size[1]} pixels<br>
+        • Format: {img.format}<br>
+        • Mode: {img.mode}<br>
+        • Generated: {img_data['generation_time']}
+        </div>
+        """, unsafe_allow_html=True)
+
 with col2:
     st.markdown("### 💡 Quick Tips")
     
@@ -440,88 +607,30 @@ with col2:
         - **Cinematic**: "Movie poster style, dramatic lighting, epic composition"
         - **Fantasy**: "Magic realism, ethereal glow, mythical atmosphere"
         """)
-
-# Download section (appears after generation)
-if 'generated_image' in st.session_state:
-    st.markdown("---")
-    st.markdown("### 💾 Export Your Masterpiece")
     
-    download_col1, download_col2, download_col3, download_col4 = st.columns(4)
-    
-    # Convert image data for different formats
-    img = Image.open(BytesIO(st.session_state.generated_image))
-    
-    # PNG download
-    with download_col1:
-        png_buffer = BytesIO()
-        img.save(png_buffer, format="PNG", optimize=True)
-        st.download_button(
-            "📥 Download PNG",
-            data=png_buffer.getvalue(),
-            file_name=f"genai_masterpiece_{int(time.time())}.png",
-            mime="image/png",
-            use_container_width=True
-        )
-    
-    # JPEG download
-    with download_col2:
-        jpg_buffer = BytesIO()
-        # Convert RGBA to RGB for JPEG
-        if img.mode == 'RGBA':
-            jpg_img = Image.new('RGB', img.size, (255, 255, 255))
-            jpg_img.paste(img, mask=img.split()[-1])
-        else:
-            jpg_img = img
-        jpg_img.save(jpg_buffer, format="JPEG", quality=95, optimize=True)
-        st.download_button(
-            "📥 Download JPG",
-            data=jpg_buffer.getvalue(),
-            file_name=f"genai_masterpiece_{int(time.time())}.jpg",
-            mime="image/jpeg",
-            use_container_width=True
-        )
-    
-    # WebP download
-    with download_col3:
-        webp_buffer = BytesIO()
-        img.save(webp_buffer, format="WEBP", quality=90, optimize=True)
-        st.download_button(
-            "📥 Download WebP",
-            data=webp_buffer.getvalue(),
-            file_name=f"genai_masterpiece_{int(time.time())}.webp",
-            mime="image/webp",
-            use_container_width=True
-        )
-    
-    # Metadata download
-    with download_col4:
-        metadata = {
-            "original_prompt": st.session_state.image_prompt,
-            "enhanced_prompt": st.session_state.enhanced_prompt,
-            "generation_time": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "style_used": selected_style,
-            "color_mood": color_mood,
-            "lighting": lighting,
-            "description": st.session_state.get('image_description', '')
-        }
-        st.download_button(
-            "📄 Download Info",
-            data=json.dumps(metadata, indent=2),
-            file_name=f"genai_metadata_{int(time.time())}.json",
-            mime="application/json",
-            use_container_width=True
-        )
-    
-    # Image info
-    st.markdown(f"""
-    <div class="download-container">
-    <strong>📊 Image Details:</strong><br>
-    • Size: {img.size[0]} × {img.size[1]} pixels<br>
-    • Format: {img.format}<br>
-    • Mode: {img.mode}<br>
-    • Generated: {time.strftime('%Y-%m-%d %H:%M:%S')}
-    </div>
-    """, unsafe_allow_html=True)
+    # Quick actions
+    if st.session_state.images:
+        st.markdown("### 🚀 Quick Actions")
+        
+        if st.button("🎲 Random Style", use_container_width=True):
+            import random
+            random_category = random.choice(list(STYLE_CATEGORIES.keys()))
+            random_style = random.choice(STYLE_CATEGORIES[random_category])
+            st.session_state.temp_style = f"{random_category}: {random_style}"
+            st.rerun()
+        
+        if hasattr(st.session_state, 'temp_style'):
+            st.markdown(f"**Suggested**: {st.session_state.temp_style}")
+        
+        if st.button("📊 Gallery Stats", use_container_width=True):
+            st.markdown(f"""
+            <div class="info-box">
+            <strong>📈 Your Stats:</strong><br>
+            • Images Generated: {len(st.session_state.images)}<br>
+            • Most Used Style: {selected_style}<br>
+            • Session Started: {time.strftime('%H:%M')}
+            </div>
+            """, unsafe_allow_html=True)
 
 # Footer
 st.markdown("---")
