@@ -248,30 +248,30 @@ st.markdown("""
 # Title with animated gradient
 st.markdown("""
 <div style="
-    background: linear-gradient(135deg, #1e1e2f, #2b2b40);
+    background: linear-gradient(135deg, #1f1f2e, #2c2c3c);
     padding: 2rem;
     border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(170, 199, 240, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     text-align: center;
     font-family: 'Segoe UI', sans-serif;
 ">
     <h1 style="
-        color: #ffffff;
-        font-size: 3rem;
+        color: #f2f4f8;
+        font-size: 2.8rem;
         margin-bottom: 0.5rem;
-        text-shadow: 0 0 10px #aac7f0, 0 0 20px #aac7f0;
+        font-weight: 600;
     ">🖼️ GenAI Studio</h1>
     <p style="
         color: #aac7f0;
-        font-size: 1.25rem;
+        font-size: 1.1rem;
         font-weight: 400;
         margin-top: 0;
-        text-shadow: 0 0 5px #aac7f0;
     ">
         Create stunning images with AI • Powered by Gemini Flash
     </p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
