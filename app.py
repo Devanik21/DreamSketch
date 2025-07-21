@@ -21,6 +21,7 @@ st.set_page_config(
 st.sidebar.image("k5.jpg", use_container_width=True)
 
 
+
 # Initialize session state
 if 'images' not in st.session_state:
     st.session_state.images = []
@@ -998,3 +999,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.image("k3.jpg", use_container_width=True)
+st.image("k1.jpg", use_container_width=True)
+st.image("k2.jpg", use_container_width=True)
+st.image("k6.jpg", use_container_width=True)
+st.image("k4.jpg", use_container_width=True)
