@@ -1849,10 +1849,13 @@ st.image("k7.jpg", use_container_width=True)
 st.image("k10.jpg", use_container_width=True)
 st.image("k8.jpg", use_container_width=True)
 st.sidebar.image("k4.jpg", use_container_width=True)
-st.sidebar.image("k15.jpg", use_container_width=True)
+
 st.image("k16.jpg", use_container_width=True)
 st.image("k13.jpg", use_container_width=True)
 st.image("k14.jpg", use_container_width=True)
+st.sidebar.image("k16.jpg", use_container_width=True)
+st.image("k17.jpg", use_container_width=True)
+
 
 st.markdown("---")
 st.markdown("""
