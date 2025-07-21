@@ -130,24 +130,27 @@ st.markdown("""
         color: #e2e8f0 !important;
     }
     
-    .stTextInput > div > div > input {
-        background: rgba(226, 232, 240, 0.08);
-        border: 1px solid rgba(226, 232, 240, 0.15);
-        border-radius: 15px;
-        color: #e2e8f0;
-        padding: 1rem;
-    }
-    
-    .stTextArea > div > div > textarea {
-        background: transparent !important;
-        border: 1px solid rgba(226, 232, 240, 0.15);
-        border-radius: 15px;
-        color: #e2e8f0;
-    }
-    
-    .stCheckbox > label {
-        color: #e2e8f0 !important;
-    }
+/* Make Streamlit text inputs and text areas fully transparent */
+.stTextInput > div > div > input {
+  background: transparent !important;
+  border: 1px solid rgba(226, 232, 240, 0.15);
+  border-radius: 15px;
+  color: #e2e8f0;
+  padding: 1rem;
+}
+
+.stTextArea > div > div > textarea {
+  background: transparent !important;
+  border: 1px solid rgba(226, 232, 240, 0.15);
+  border-radius: 15px;
+  color: #e2e8f0;
+  padding: 1rem;
+}
+
+.stCheckbox > label {
+  color: #e2e8f0 !important;
+}
+
     
     .stMarkdown h3 {
         color: #e2e8f0 !important;
