@@ -9,7 +9,7 @@ import time
 import uuid
 
 # Page config
-import streamlit as st
+
 
 # Page config
 st.set_page_config(
@@ -27,8 +27,7 @@ if 'current_image' not in st.session_state:
     st.session_state.current_image = None
 
 # Custom CSS for beautiful gradients and styling
-```python
-import streamlit as st
+
 
 # Cozy Coffee-Shop Night Mode Styles
 st.markdown("""
@@ -171,7 +170,7 @@ st.markdown("""
     <p class="subtitle">Create stunning images with AI • Powered by Gemini Flash</p>
 </div>
 """, unsafe_allow_html=True)
-```
+
 
 
 
