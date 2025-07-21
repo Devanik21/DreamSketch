@@ -265,11 +265,50 @@ st.markdown("""
 
 # Title with animated gradient
 st.markdown("""
+<style>
+@keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.title-container {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.title-text {
+    font-size: 3em;
+    font-weight: bold;
+    background: linear-gradient(
+        -45deg,
+        #ff6b6b,
+        #feca57,
+        #1dd1a1,
+        #54a0ff,
+        #5f27cd,
+        #ff9ff3,
+        #f368e0,
+        #00d2d3
+    );
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: rainbow 5s ease infinite;
+}
+
+.subtitle {
+    font-size: 1.2em;
+    color: rgba(255, 255, 255, 0.7);
+}
+</style>
+
 <div class="title-container">
     <h1 class="title-text">🖼️ GenAI Studio</h1>
     <p class="subtitle">Create stunning images with AI • Powered by Gemini Flash</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 # Load secrets with error handling
 try:
