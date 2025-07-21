@@ -16,6 +16,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+
+st.image("k1.jpg", caption="So dreamy~ 💫", use_column_width=True)
+
 # Initialize session state
 if 'images' not in st.session_state:
     st.session_state.images = []
