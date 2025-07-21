@@ -18,7 +18,7 @@ st.set_page_config(
 
 
 
-st.sidebar.image("k2.jpg", use_column_width=True)
+st.sidebar.image("k2.jpg", use_container_width=True)
 
 
 # Initialize session state
@@ -492,7 +492,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.image("k3.jpg", use_column_width=True)
+st.image("k3.jpg", use_container_width=True)
 
 # Load secrets with error handling
 try:
