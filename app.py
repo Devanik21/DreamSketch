@@ -213,7 +213,7 @@ st.markdown("""
     
     /* Ultra-beautiful title text */
     .title-text {
-        font-size: clamp(2.8rem, 6vw, 4.5rem);
+        font-size: clamp(1.8rem, 4vw, 2.8rem); /* Reduced from 2.8-4.5rem to 1.8-2.8rem */
         font-weight: 800;
         letter-spacing: -0.02em;
         line-height: 1.1;
