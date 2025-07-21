@@ -1003,7 +1003,7 @@ st.markdown("""
     font-weight: 700;
     padding: 1rem 0;
 ">
-📸 Glimpses from the Gallery – Crafted with love & AI magic 💖
+ Glimpses from the Gallery – Crafted with AI 
 </h3>
 """, unsafe_allow_html=True)
 
