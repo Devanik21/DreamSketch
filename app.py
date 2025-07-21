@@ -1075,7 +1075,7 @@ with col2:
     
     # Quick actions
     if st.session_state.images:
-        st.markdown("### 🚀 Quick Actions")
+        st.markdown("### 🦄 Quick Actions")
         
         if st.button("🎲 Random Style", use_container_width=True):
             import random
