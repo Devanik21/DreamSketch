@@ -9,12 +9,24 @@ import time
 import uuid
 
 # Page config
+import streamlit as st
+
+# Page config
 st.set_page_config(
     page_title="🖼️ GenAI Studio",
     page_icon="🎨",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Title section with custom color
+st.markdown("""
+<div class="title-container" style="color: #aac7f0;">
+    <h1 class="title-text">🖼️ GenAI Studio</h1>
+    <p class="subtitle">Create stunning images with AI • Powered by Gemini Flash</p>
+</div>
+""", unsafe_allow_html=True)
+
 
 # Initialize session state
 if 'images' not in st.session_state:
