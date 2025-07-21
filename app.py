@@ -28,149 +28,250 @@ if 'current_image' not in st.session_state:
 
 # Custom CSS for beautiful gradients and styling
 
-
-# Cozy Coffee-Shop Night Mode Styles
 st.markdown("""
 <style>
-    /* Main App Background */
     .main {
-        background: linear-gradient(135deg, #2c1b16 0%, #3a2e2a 100%);
-        color: #f4e1c1;
-        background-attachment: fixed;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
     }
-
-    /* Subtle Coffee Bean Pattern Overlay */
-    .main::before {
-        content: "";
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="4" fill="rgba(243,229,193,0.1)"/></svg>');
-        opacity: 0.05;
-        pointer-events: none;
-    }
-
-    /* Animated Gradients for App Container */
+    
     .stApp {
-        background: linear-gradient(135deg, #3a2e2a 0%, #5c4235 50%, #7d5a46 100%);
-        background-size: 300% 300%;
-        animation: coffeeWave 25s ease-in-out infinite;
-        position: relative;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
+        background-size: 400% 400%;
+        animation: backgroundFlow 25s ease infinite;
     }
-
-    @keyframes coffeeWave {
+    
+    @keyframes backgroundFlow {
+        0% { background-position: 0% 50%; }
+        25% { background-position: 100% 50%; }
+        50% { background-position: 100% 100%; }
+        75% { background-position: 0% 100%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    .title-container {
+        background: linear-gradient(135deg, #1e2a4a 0%, #2d4a6b 25%, #3a5f8c 50%, #4674ad 75%, #5289ce 100%);
+        background-size: 300% 300%;
+        animation: gradient 15s ease infinite;
+        padding: 2.5rem;
+        border-radius: 25px;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+    
+    @keyframes gradient {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
     }
-
-    /* Title Container with Coffee Stain Accent */
-    .title-container {
-        background: rgba(243,229,193,0.15);
-        padding: 3rem;
-        border-radius: 30px;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-        text-align: center;
-        position: relative;
-    }
-    .title-container::after {
-        content: "";
-        position: absolute;
-        width: 200px; height: 200px;
-        background: radial-gradient(circle at center, rgba(243,229,193,0.1), transparent 60%);
-        top: -50px; right: -50px;
-        transform: rotate(45deg);
-        pointer-events: none;
-    }
-
-    /* Title Text Styles */
+    
     .title-text {
-        font-size: 3.2rem;
-        font-weight: 900;
-        color: #f4e1c1;
+        font-size: 3rem;
+        font-weight: 800;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
         margin: 0;
-        text-shadow: 3px 3px 10px rgba(0,0,0,0.7);
+        background: linear-gradient(-45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff, #5f27cd);
+        background-size: 400% 400%;
+        -webkit-background-clip: text;
+        
+        background-clip: text;
+        animation: gradientShift 8s ease infinite;
     }
-
-    /* Subtitle with Soft Steam Effect */
+    
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        25% { background-position: 100% 50%; }
+        50% { background-position: 100% 100%; }
+        75% { background-position: 0% 100%; }
+        100% { background-position: 0% 50%; }
+    }
+    
     .subtitle {
         font-size: 1.2rem;
-        color: #e0c8a0;
+        color: #cbd5e1;
         margin-top: 0.5rem;
-        font-weight: 400;
-        position: relative;
+        text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
     }
-    .subtitle::before {
-        content: "☕";
-        margin-right: 0.5rem;
-        opacity: 0.8;
-        animation: steamRise 3s ease-in-out infinite;
-    }
-
-    @keyframes steamRise {
-        0% { transform: translateY(0) scale(1); opacity: 0.8; }
-        50% { transform: translateY(-10px) scale(1.1); opacity: 0.4; }
-        100% { transform: translateY(0) scale(1); opacity: 0.8; }
-    }
-
-    /* Button Styling – Espresso Shot */
+    
     .stButton > button {
-        background: linear-gradient(135deg, #5c4235, #7d5a46);
-        color: #f4e1c1;
+        background: linear-gradient(135deg, #475569, #64748b, #6b7280);
+        color: #f1f5f9;
         border: none;
-        padding: 0.8rem 2rem;
-        border-radius: 100px;
-        font-weight: 700;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
         font-size: 1.1rem;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.5);
         transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         width: 100%;
     }
+    
     .stButton > button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 30px rgba(0,0,0,0.7);
-        background: linear-gradient(135deg, #7d5a46, #5c4235);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.5);
+        background: linear-gradient(135deg, #64748b, #6b7280, #78716c);
     }
-
-    /* Sidebar Blend of Coffee Beans */
+    
     .stSidebar {
-        background: url('https://example.com/coffee-beans-texture.png') no-repeat center center;
-        background-size: cover;
-        opacity: 0.9;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
+        background-size: 400% 400%;
+        animation: backgroundFlow 25s ease infinite;
     }
+    
     .stSidebar > div {
-        background: rgba(44,30,26,0.8);
+        background: transparent;
     }
-
-    /* Input, Select, and Text Area – Creamy Coziness */
-    .stSelectbox > div > div,
-    .stTextInput > div > div > input,
-    .stTextArea > div > div > textarea {
-        background: rgba(243,229,193,0.2);
-        border: 1px solid rgba(243,229,193,0.3);
+    
+    .stSelectbox > div > div {
+        background: rgba(226, 232, 240, 0.08);
+        border: 1px solid rgba(226, 232, 240, 0.15);
         border-radius: 15px;
-        color: #2c1b16;
+    }
+    
+    .stSelectbox > div > div > div {
+        color: #e2e8f0 !important;
+    }
+    
+    .stTextInput > div > div > input {
+        background: rgba(226, 232, 240, 0.08);
+        border: 1px solid rgba(226, 232, 240, 0.15);
+        border-radius: 15px;
+        color: #e2e8f0;
         padding: 1rem;
     }
-    .stCheckbox > label, .stMarkdown h3 {
-        color: #e0c8a0 !important;
+    
+    .stTextArea > div > div > textarea {
+        background: transparent !important;
+        border: 1px solid rgba(226, 232, 240, 0.15);
+        border-radius: 15px;
+        color: #e2e8f0;
     }
-
-    /* Notification Boxes – Latte Art */
-    .error-box { background: #8d1b1b; color: #f4e1c1; }
-    .success-box { background: #3e752e; color: #f4e1c1; }
-    .info-box    { background: #5c4235; color: #f4e1c1; }
+    
+    .stCheckbox > label {
+        color: #e2e8f0 !important;
+    }
+    
+    .stMarkdown h3 {
+        color: #e2e8f0 !important;
+    }
+    
+    .stExpander > div > div > div > div {
+        background: rgba(226, 232, 240, 0.05);
+        border: 1px solid rgba(226, 232, 240, 0.1);
+        border-radius: 15px;
+    }
+    
+    .download-container {
+        background: rgba(255,255,255,0.1);
+        padding: 1.5rem;
+        border-radius: 20px;
+        margin-top: 1rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .image-gallery {
+        background: rgba(255,255,255,0.05);
+        padding: 1rem;
+        border-radius: 15px;
+        margin: 1rem 0;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .gallery-item {
+        background: rgba(255,255,255,0.1);
+        padding: 0.5rem;
+        border-radius: 10px;
+        margin: 0.5rem 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .gallery-item:hover {
+        background: rgba(255,255,255,0.2);
+        transform: translateY(-2px);
+    }
+    
+    .gallery-item.selected {
+        background: rgba(255,255,255,0.3);
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+    
+    .error-box {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        padding: 1rem;
+        border-radius: 15px;
+        color: white;
+        margin: 1rem 0;
+    }
+    
+    .success-box {
+        background: linear-gradient(135deg, #00d2d3, #54a0ff);
+        padding: 1rem;
+        border-radius: 15px;
+        color: white;
+        margin: 1rem 0;
+    }
+    
+    .info-box {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        padding: 1rem;
+        border-radius: 15px;
+        color: white;
+        margin: 1rem 0;
+    }
+    
+    /* Hide Streamlit default elements that cause rerun */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        width: 100%;
+    }
+    
+    .stDownloadButton > button:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Title Section
+# Title with animated gradient
 st.markdown("""
-<div class="title-container">
-    <h1 class="title-text">🖼️ GenAI Studio</h1>
-    <p class="subtitle">Create stunning images with AI • Powered by Gemini Flash</p>
+<div style="
+    background: linear-gradient(135deg, #1f1f2e, #2c2c3c);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    font-family: 'Segoe UI', sans-serif;
+">
+    <h1 style="
+        color: #f2f4f8;
+        font-size: 2.8rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    ">🖼️ GenAI Studio</h1>
+    <p style="
+        color: #aac7f0;
+        font-size: 1.1rem;
+        font-weight: 400;
+        margin-top: 0;
+    ">
+        Create stunning images with AI • Powered by Gemini Flash
+    </p>
 </div>
 """, unsafe_allow_html=True)
-
 
 
 
