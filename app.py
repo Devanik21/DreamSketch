@@ -293,9 +293,9 @@ st.markdown("""
     );
     background-size: 300% 300%;
     
-    -webkit-text-fill-color: transparent;
+    
 
-    animation: rainbow 20s ease infinite;
+    animation: rainbow 30s ease infinite;
 }
 
 .subtitle {
