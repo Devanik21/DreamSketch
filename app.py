@@ -487,11 +487,25 @@ st.markdown("""
 
 # Enhanced title with cosmic effect
 st.markdown("""
-<div class="title-container">
-    <h1 class="title-text">GenAI Studio</h1>
-    <p class="subtitle">🖼️  Create stunning images with AI  ✨</p>
-</div>
+<h1 style="
+    text-align: center;
+    font-size: 3rem;
+    background: linear-gradient(90deg, #f093fb, #f5576c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+">
+GenAI Studio
+</h1>
+<p style="
+    text-align: center;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+">
+🖼️  Create stunning images with AI ✨
+</p>
 """, unsafe_allow_html=True)
+
 
 
 
