@@ -22,294 +22,470 @@ if 'images' not in st.session_state:
 if 'current_image' not in st.session_state:
     st.session_state.current_image = None
 
-# Custom CSS for beautiful gradients and styling
+# Otherworldly CSS with cosmic aesthetics
 st.markdown("""
 <style>
-    .main {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    :root {
+        --cosmic-purple: #6366f1;
+        --cosmic-blue: #0ea5e9;
+        --cosmic-cyan: #06b6d4;
+        --cosmic-emerald: #10b981;
+        --cosmic-violet: #8b5cf6;
+        --cosmic-pink: #ec4899;
+        --deep-space: #0a0a0f;
+        --nebula-dark: #1a1a2e;
+        --star-dust: #16213e;
+        --aurora-glow: rgba(99, 102, 241, 0.15);
+        --text-primary: #e2e8f0;
+        --text-secondary: #cbd5e1;
+        --text-muted: #94a3b8;
     }
     
     .stApp {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
-        background-size: 400% 400%;
-        animation: backgroundFlow 25s ease infinite;
+        background: radial-gradient(ellipse at top, var(--nebula-dark) 0%, var(--deep-space) 70%);
+        background-attachment: fixed;
+        color: var(--text-primary);
+        min-height: 100vh;
+        position: relative;
     }
     
-    @keyframes backgroundFlow {
-        0% { background-position: 0% 50%; }
-        25% { background-position: 100% 50%; }
-        50% { background-position: 100% 100%; }
-        75% { background-position: 0% 100%; }
-        100% { background-position: 0% 50%; }
+    .stApp::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: -1;
+    }
+    
+    /* Floating particles effect */
+    .stApp::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(1px 1px at 20px 30px, rgba(255, 255, 255, 0.15), transparent),
+            radial-gradient(1px 1px at 40px 70px, rgba(99, 102, 241, 0.3), transparent),
+            radial-gradient(1px 1px at 90px 40px, rgba(236, 72, 153, 0.2), transparent),
+            radial-gradient(1px 1px at 130px 80px, rgba(6, 182, 212, 0.2), transparent),
+            radial-gradient(1px 1px at 160px 30px, rgba(255, 255, 255, 0.1), transparent);
+        background-repeat: repeat;
+        background-size: 200px 100px;
+        animation: twinkle 20s linear infinite;
+        pointer-events: none;
+        z-index: -1;
+        opacity: 0.6;
+    }
+    
+    @keyframes twinkle {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 0.8; }
     }
     
     .title-container {
         background: linear-gradient(
-  135deg,
-  rgba(30, 42, 74, 0) 0%,
-  rgba(45, 74, 107, 0.25) 25%,
-  rgba(58, 95, 140, 0.5) 50%,
-  rgba(70, 116, 173, 0.75) 75%,
-  rgba(82, 137, 206, 1) 100%
-);
-
-        background-size: 300% 300%;
-        animation: gradient 15s ease infinite;
-        padding: 2.5rem;
-        border-radius: 25px;
+            135deg,
+            rgba(99, 102, 241, 0.1) 0%,
+            rgba(236, 72, 153, 0.05) 35%,
+            rgba(6, 182, 212, 0.08) 70%,
+            rgba(139, 92, 246, 0.1) 100%
+        );
+        backdrop-filter: blur(24px);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 24px;
+        padding: 3rem 2rem;
+        margin: 2rem auto;
         text-align: center;
-        margin-bottom: 2rem;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.08);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 
+            0 24px 48px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
     
-    @keyframes gradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+    .title-container::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(
+            from 0deg,
+            transparent 0deg,
+            rgba(99, 102, 241, 0.15) 60deg,
+            transparent 120deg,
+            rgba(236, 72, 153, 0.1) 180deg,
+            transparent 240deg,
+            rgba(6, 182, 212, 0.15) 300deg,
+            transparent 360deg
+        );
+        animation: rotate 20s linear infinite;
+        z-index: -1;
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
     }
     
     .title-text {
-        font-size: 3rem;
+        font-size: clamp(2.5rem, 5vw, 4rem);
         font-weight: 800;
-        text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
-        margin: 0;
         background: linear-gradient(
-  -45deg,
-  rgba(255, 107, 107, 0),
-  rgba(78, 205, 196, 0.2),
-  rgba(69, 183, 209, 0.4),
-  rgba(150, 206, 180, 0.6),
-  rgba(254, 202, 87, 0.8),
-  rgba(255, 159, 243, 0.8),
-  rgba(84, 160, 255, 0.9),
-  rgba(95, 39, 205, 1)
-);
-
-        background-size: 400% 400%;
+            135deg,
+            #e2e8f0 0%,
+            #c084fc 25%,
+            #60a5fa 50%,
+            #34d399 75%,
+            #fbbf24 100%
+        );
+        background-size: 300% 300%;
         -webkit-background-clip: text;
-        
         background-clip: text;
-        animation: gradientShift 8s ease infinite;
+        -webkit-text-fill-color: transparent;
+        animation: gradientShift 8s ease-in-out infinite;
+        margin: 0;
+        text-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+        position: relative;
     }
     
     @keyframes gradientShift {
-        0% { background-position: 0% 50%; }
-        25% { background-position: 100% 50%; }
+        0%, 100% { background-position: 0% 50%; }
+        25% { background-position: 100% 0%; }
         50% { background-position: 100% 100%; }
         75% { background-position: 0% 100%; }
-        100% { background-position: 0% 50%; }
     }
     
     .subtitle {
-        font-size: 1.2rem;
-        color: #cbd5e1;
-        margin-top: 0.5rem;
-        text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        margin-top: 1rem;
+        font-weight: 400;
+        opacity: 0.9;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
     
+    /* Buttons with glass morphism */
     .stButton > button {
-        background: linear-gradient(135deg, #475569, #64748b, #6b7280);
-        color: #f1f5f9;
-        border: none;
-        padding: 0.75rem 2rem;
-        border-radius: 50px;
+        background: linear-gradient(
+            135deg,
+            rgba(99, 102, 241, 0.15) 0%,
+            rgba(139, 92, 246, 0.15) 100%
+        );
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        color: var(--text-primary);
+        padding: 0.875rem 2rem;
+        border-radius: 16px;
         font-weight: 600;
-        font-size: 1.1rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 
+            0 8px 32px rgba(99, 102, 241, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
         width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stButton > button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            transparent 100%
+        );
+        transition: left 0.5s ease;
     }
     
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 12px 25px rgba(0,0,0,0.5);
-        background: linear-gradient(135deg, #64748b, #6b7280, #78716c);
+        box-shadow: 
+            0 16px 48px rgba(99, 102, 241, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        border-color: rgba(99, 102, 241, 0.5);
+        background: linear-gradient(
+            135deg,
+            rgba(99, 102, 241, 0.25) 0%,
+            rgba(139, 92, 246, 0.25) 100%
+        );
     }
     
+    .stButton > button:hover::before {
+        left: 100%;
+    }
+    
+    /* Sidebar styling */
     .stSidebar {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
-        background-size: 400% 400%;
-        animation: backgroundFlow 25s ease infinite;
+        background: linear-gradient(
+            180deg,
+            rgba(26, 26, 46, 0.95) 0%,
+            rgba(10, 10, 15, 0.98) 100%
+        );
+        backdrop-filter: blur(24px);
+        border-right: 1px solid rgba(99, 102, 241, 0.2);
     }
     
     .stSidebar > div {
         background: transparent;
     }
     
+    /* Input fields with glass effect */
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea {
+        background: rgba(99, 102, 241, 0.05) !important;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        border-radius: 12px !important;
+        color: var(--text-primary) !important;
+        padding: 1rem !important;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stTextInput > div > div > input:focus,
+    .stTextArea > div > div > textarea:focus {
+        border-color: rgba(99, 102, 241, 0.5) !important;
+        box-shadow: 
+            0 0 0 3px rgba(99, 102, 241, 0.15),
+            0 8px 32px rgba(0, 0, 0, 0.2) !important;
+        outline: none !important;
+        background: rgba(99, 102, 241, 0.08) !important;
+    }
+    
+    /* Select boxes */
     .stSelectbox > div > div {
-        background: rgba(226, 232, 240, 0.08);
-        border: 1px solid rgba(226, 232, 240, 0.15);
-        border-radius: 15px;
+        background: rgba(99, 102, 241, 0.05) !important;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
     
     .stSelectbox > div > div > div {
-        color: #e2e8f0 !important;
+        color: var(--text-primary) !important;
+        padding: 0.75rem !important;
     }
     
-/* Make Streamlit text inputs and text areas fully transparent */
-.stTextInput > div > div > input {
-  background: transparent !important;
-  border: 1px solid rgba(226, 232, 240, 0.15);
-  border-radius: 15px;
-  color: #e2e8f0;
-  padding: 1rem;
-}
-
-.stTextArea > div > div > textarea {
-  background: transparent !important;
-  border: 1px solid rgba(226, 232, 240, 0.15);
-  border-radius: 15px;
-  color: #e2e8f0;
-  padding: 1rem;
-}
-
-.stCheckbox > label {
-  color: #e2e8f0 !important;
-}
-
+    /* Checkbox styling */
+    .stCheckbox > label {
+        color: var(--text-secondary) !important;
+        font-weight: 500;
+    }
+    
+    .stCheckbox > label > div > div {
+        background: rgba(99, 102, 241, 0.1) !important;
+        border: 1px solid rgba(99, 102, 241, 0.3) !important;
+        border-radius: 4px !important;
+    }
+    
+    /* Headers */
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 {
+        color: var(--text-primary) !important;
+        font-weight: 700;
+    }
     
     .stMarkdown h3 {
-        color: #e2e8f0 !important;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--cosmic-purple), var(--cosmic-cyan));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
     
+    /* Expandable sections */
     .stExpander > div > div > div > div {
-        background: rgba(226, 232, 240, 0.05);
-        border: 1px solid rgba(226, 232, 240, 0.1);
-        border-radius: 15px;
+        background: rgba(99, 102, 241, 0.05) !important;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.15) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
     
+    /* Custom containers */
     .download-container {
-        background: rgba(255,255,255,0.1);
+        background: linear-gradient(
+            135deg,
+            rgba(16, 185, 129, 0.1) 0%,
+            rgba(6, 182, 212, 0.1) 100%
+        );
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(16, 185, 129, 0.2);
         padding: 1.5rem;
         border-radius: 20px;
         margin-top: 1rem;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.2);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
     }
     
     .image-gallery {
-        background: rgba(255,255,255,0.05);
-        padding: 1rem;
-        border-radius: 15px;
+        background: rgba(99, 102, 241, 0.05);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        padding: 1.5rem;
+        border-radius: 20px;
         margin: 1rem 0;
-        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
     
     .gallery-item {
-        background: rgba(255,255,255,0.1);
-        padding: 0.5rem;
-        border-radius: 10px;
-        margin: 0.5rem 0;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        border-radius: 12px;
+        margin: 0.75rem 0;
         cursor: pointer;
-        transition: all 0.3s ease;
-        border: 1px solid rgba(255,255,255,0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
     
     .gallery-item:hover {
-        background: rgba(255,255,255,0.2);
-        transform: translateY(-2px);
+        background: rgba(99, 102, 241, 0.1);
+        border-color: rgba(99, 102, 241, 0.3);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(99, 102, 241, 0.15);
     }
     
     .gallery-item.selected {
-        background: rgba(255,255,255,0.3);
-        border: 1px solid rgba(255,255,255,0.3);
+        background: rgba(99, 102, 241, 0.15);
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
     }
     
+    /* Status boxes */
     .error-box {
-        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-        padding: 1rem;
-        border-radius: 15px;
-        color: white;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15));
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        padding: 1.25rem;
+        border-radius: 16px;
+        color: #fecaca;
         margin: 1rem 0;
+        box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15);
     }
     
     .success-box {
-        background: linear-gradient(135deg, #00d2d3, #54a0ff);
-        padding: 1rem;
-        border-radius: 15px;
-        color: white;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15));
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        padding: 1.25rem;
+        border-radius: 16px;
+        color: #a7f3d0;
         margin: 1rem 0;
+        box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15);
     }
     
     .info-box {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        padding: 1rem;
-        border-radius: 15px;
-        color: white;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        padding: 1.25rem;
+        border-radius: 16px;
+        color: #c7d2fe;
         margin: 1rem 0;
+        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
     }
     
-    /* Hide Streamlit default elements that cause rerun */
+    /* Download button */
     .stDownloadButton > button {
-        background: linear-gradient(135deg, #10b981, #059669);
-        color: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 10px;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2)) !important;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(16, 185, 129, 0.4) !important;
+        color: var(--text-primary) !important;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
         font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15);
         width: 100%;
     }
     
     .stDownloadButton > button:hover {
-        background: linear-gradient(135deg, #059669, #047857);
-        transform: translateY(-1px);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.3)) !important;
+        border-color: rgba(16, 185, 129, 0.6) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 48px rgba(16, 185, 129, 0.25);
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: rgba(99, 102, 241, 0.3);
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(99, 102, 241, 0.5);
+    }
+    
+    /* Loading animations */
+    @keyframes pulse {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 1; }
+    }
+    
+    .loading-pulse {
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .title-container {
+            padding: 2rem 1rem;
+            margin: 1rem;
+        }
+        
+        .title-text {
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Title with animated gradient
+# Enhanced title with cosmic effect
 st.markdown("""
-<style>
-@keyframes rainbow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-.title-container {
-    text-align: center;
-    margin-top: 30px;
-}
-
-.title-text {
-    font-size: 3em;
-    font-weight: bold;
-    background: linear-gradient(
-        -45deg,
-        #ff6b6b,
-        #feca57,
-        #1dd1a1,
-        #54a0ff,
-        #5f27cd,
-        #ff9ff3,
-        #f368e0,
-        #00d2d3
-    );
-    background-size: 300% 300%;
-    
-    
-
-    animation: rainbow 30s ease infinite;
-}
-
-.subtitle {
-    font-size: 1.2em;
-    color: rgba(255, 255, 255, 0.7);
-}
-</style>
-
 <div class="title-container">
-    <h1 class="title-text">🖼️ GenAI Studio</h1>
-    <p class="subtitle">Create stunning images with AI • Powered by Gemini Flash</p>
+    <h1 class="title-text">🌌 GenAI Studio</h1>
+    <p class="subtitle">Create stunning images with AI • Powered by Gemini Flash • ✨ Otherworldly Experience</p>
 </div>
 """, unsafe_allow_html=True)
-
 
 # Load secrets with error handling
 try:
