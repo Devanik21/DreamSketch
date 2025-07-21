@@ -292,6 +292,8 @@ st.markdown("""
         #00d2d3
     );
     background-size: 300% 300%;
+    
+    -webkit-text-fill-color: transparent;
 
     animation: rainbow 20s ease infinite;
 }
