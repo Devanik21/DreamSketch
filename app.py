@@ -27,6 +27,151 @@ if 'current_image' not in st.session_state:
     st.session_state.current_image = None
 
 # Custom CSS for beautiful gradients and styling
+```python
+import streamlit as st
+
+# Cozy Coffee-Shop Night Mode Styles
+st.markdown("""
+<style>
+    /* Main App Background */
+    .main {
+        background: linear-gradient(135deg, #2c1b16 0%, #3a2e2a 100%);
+        color: #f4e1c1;
+        background-attachment: fixed;
+    }
+
+    /* Subtle Coffee Bean Pattern Overlay */
+    .main::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="4" fill="rgba(243,229,193,0.1)"/></svg>');
+        opacity: 0.05;
+        pointer-events: none;
+    }
+
+    /* Animated Gradients for App Container */
+    .stApp {
+        background: linear-gradient(135deg, #3a2e2a 0%, #5c4235 50%, #7d5a46 100%);
+        background-size: 300% 300%;
+        animation: coffeeWave 25s ease-in-out infinite;
+        position: relative;
+    }
+
+    @keyframes coffeeWave {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Title Container with Coffee Stain Accent */
+    .title-container {
+        background: rgba(243,229,193,0.15);
+        padding: 3rem;
+        border-radius: 30px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+        text-align: center;
+        position: relative;
+    }
+    .title-container::after {
+        content: "";
+        position: absolute;
+        width: 200px; height: 200px;
+        background: radial-gradient(circle at center, rgba(243,229,193,0.1), transparent 60%);
+        top: -50px; right: -50px;
+        transform: rotate(45deg);
+        pointer-events: none;
+    }
+
+    /* Title Text Styles */
+    .title-text {
+        font-size: 3.2rem;
+        font-weight: 900;
+        color: #f4e1c1;
+        margin: 0;
+        text-shadow: 3px 3px 10px rgba(0,0,0,0.7);
+    }
+
+    /* Subtitle with Soft Steam Effect */
+    .subtitle {
+        font-size: 1.2rem;
+        color: #e0c8a0;
+        margin-top: 0.5rem;
+        font-weight: 400;
+        position: relative;
+    }
+    .subtitle::before {
+        content: "☕";
+        margin-right: 0.5rem;
+        opacity: 0.8;
+        animation: steamRise 3s ease-in-out infinite;
+    }
+
+    @keyframes steamRise {
+        0% { transform: translateY(0) scale(1); opacity: 0.8; }
+        50% { transform: translateY(-10px) scale(1.1); opacity: 0.4; }
+        100% { transform: translateY(0) scale(1); opacity: 0.8; }
+    }
+
+    /* Button Styling – Espresso Shot */
+    .stButton > button {
+        background: linear-gradient(135deg, #5c4235, #7d5a46);
+        color: #f4e1c1;
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 100px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    .stButton > button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.7);
+        background: linear-gradient(135deg, #7d5a46, #5c4235);
+    }
+
+    /* Sidebar Blend of Coffee Beans */
+    .stSidebar {
+        background: url('https://example.com/coffee-beans-texture.png') no-repeat center center;
+        background-size: cover;
+        opacity: 0.9;
+    }
+    .stSidebar > div {
+        background: rgba(44,30,26,0.8);
+    }
+
+    /* Input, Select, and Text Area – Creamy Coziness */
+    .stSelectbox > div > div,
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea {
+        background: rgba(243,229,193,0.2);
+        border: 1px solid rgba(243,229,193,0.3);
+        border-radius: 15px;
+        color: #2c1b16;
+        padding: 1rem;
+    }
+    .stCheckbox > label, .stMarkdown h3 {
+        color: #e0c8a0 !important;
+    }
+
+    /* Notification Boxes – Latte Art */
+    .error-box { background: #8d1b1b; color: #f4e1c1; }
+    .success-box { background: #3e752e; color: #f4e1c1; }
+    .info-box    { background: #5c4235; color: #f4e1c1; }
+</style>
+""", unsafe_allow_html=True)
+
+# Title Section
+st.markdown("""
+<div class="title-container">
+    <h1 class="title-text">🖼️ GenAI Studio</h1>
+    <p class="subtitle">Create stunning images with AI • Powered by Gemini Flash</p>
+</div>
+""", unsafe_allow_html=True)
+```
 
 
 
