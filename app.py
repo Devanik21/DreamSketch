@@ -495,7 +495,7 @@ st.markdown("""
 
 
 st.image("k11.jpg", use_container_width=True)
-st.image("k12.jpg", use_container_width=True)
+
 # Load secrets with error handling
 try:
     gemini_api_key = st.secrets["gemini_api_key"]
