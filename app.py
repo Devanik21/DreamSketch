@@ -990,7 +990,9 @@ with col2:
             """, unsafe_allow_html=True)
 
 # Footer
+st.markdown("---")
 
+# 📸 Glimpses from the Gallery – Crafted with love & AI magic 💖
 
 st.image("k3.jpg", use_container_width=True)
 st.image("k1.jpg", use_container_width=True)
