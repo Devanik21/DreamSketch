@@ -45,7 +45,15 @@ st.markdown("""
     }
     
     .title-container {
-        background: linear-gradient(135deg, #1e2a4a 0%, #2d4a6b 25%, #3a5f8c 50%, #4674ad 75%, #5289ce 100%);
+        background: linear-gradient(
+  135deg,
+  rgba(30, 42, 74, 0) 0%,
+  rgba(45, 74, 107, 0.25) 25%,
+  rgba(58, 95, 140, 0.5) 50%,
+  rgba(70, 116, 173, 0.75) 75%,
+  rgba(82, 137, 206, 1) 100%
+);
+
         background-size: 300% 300%;
         animation: gradient 15s ease infinite;
         padding: 2.5rem;
