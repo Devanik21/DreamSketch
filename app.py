@@ -486,53 +486,46 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+
+
 st.markdown("""
 <style>
-  /* --- keyframes for forward & reverse gradient shift --- */
-  @keyframes forwardShift {
-      0%   { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
-  }
-  @keyframes reverseShift {
-      0%   { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-  }
-
-  /* --- Title: GenAI Studio (rainbow moves forward) --- */
-  .rainbow-title {
-      font-size: 3rem;
-      font-weight: bold;
-      text-align: center;
-      background: linear-gradient(
-          90deg,
-          #ff6ec4 0%, #fcb69f 20%, #f6f078 40%,
-          #9dfaa6 60%, #9face6 80%, #ff6ec4 100%
-      );
-      background-size: 300% 300%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: forwardShift 20s ease infinite;
+  /* ——— Static full‑line rainbow ——— */
+  .pretty-title {
+    font-size: 3rem;
+    font-weight: bold;
+    text-align: center;
+    /* blue → teal → yellow → orange */
+    background: linear-gradient(
+      90deg,
+      #7fa4ff 0%,
+      #4cd9c0 33%,
+      #ffea5d 66%,
+      #ff8a65 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
-  /* --- Subtitle: Create stunning images with AI (rainbow moves reverse) --- */
-  .rainbow-sub {
-      font-size: 1.2rem;
-      text-align: center;
-      margin-top: -0.5rem;
-      background: linear-gradient(
-          90deg,
-          #ff6ec4 0%, #f87171 20%, #facc15 40%,
-          #4ade80 60%, #7873f5 80%, #ff6ec4 100%
-      );
-      background-size: 300% 300%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: reverseShift 20s ease infinite;
+  .pretty-subtitle {
+    font-size: 1.2rem;
+    text-align: center;
+    margin-top: -0.5rem;
+    /* reversed stops for contrast */
+    background: linear-gradient(
+      90deg,
+      #ff8a65 0%,
+      #ffea5d 33%,
+      #4cd9c0 66%,
+      #7fa4ff 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 </style>
 
-<h1 class="rainbow-title">GenAI Studio</h1>
-<p class="rainbow-sub">🖼️ Create stunning images with AI ✨</p>
+<h1 class="pretty-title">GenAI Studio</h1>
+<p class="pretty-subtitle">🖼️ Create stunning images with AI ✨</p>
 """, unsafe_allow_html=True)
 
 
