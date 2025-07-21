@@ -484,7 +484,6 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
 st.markdown("""
 <style>
 @keyframes gradientShift {
