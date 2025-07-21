@@ -16,156 +16,61 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Then add this CSS to make sidebar wider:
-st.markdown("""
-<style>
-.css-1d391kg {
-    width: 350px !important;  /* Make sidebar wider */
-}
-</style>
-""", unsafe_allow_html=True)
-
 # Initialize session state
 if 'images' not in st.session_state:
     st.session_state.images = []
 if 'current_image' not in st.session_state:
     st.session_state.current_image = None
 
-# Ultra-beautiful dark mode CSS - Masterpiece Edition
+# Otherworldly CSS with cosmic aesthetics
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     
     * {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-rendering: optimizeLegibility;
     }
     
     :root {
-        /* Ultra-soft color palette for maximum eye comfort */
-        --midnight-void: #0B0B0F;
-        --deep-space: #101014;
-        --nebula-mist: #1A1A1F;
-        --cosmic-dust: #2A2A30;
-        --starlight: #3A3A42;
-        
-        /* Ethereal accent colors - very soft and comfortable */
-        --aurora-purple: rgba(138, 143, 234, 0.8);
-        --aurora-cyan: rgba(103, 232, 249, 0.7);
-        --aurora-pink: rgba(244, 114, 182, 0.6);
-        --aurora-green: rgba(129, 230, 217, 0.7);
-        --aurora-orange: rgba(251, 191, 36, 0.6);
-        
-        /* Text colors optimized for dark mode comfort */
-        --text-primary: #E8EAF0;
-        --text-secondary: #C1C7D0;
-        --text-muted: #9CA3AF;
-        --text-ultra-soft: #6B7280;
-        
-        /* Glass effects */
-        --glass-ultra-light: rgba(255, 255, 255, 0.02);
-        --glass-light: rgba(255, 255, 255, 0.04);
-        --glass-medium: rgba(255, 255, 255, 0.08);
-        --glass-border: rgba(255, 255, 255, 0.06);
-        
-        /* Soft glows */
-        --glow-soft: rgba(138, 143, 234, 0.15);
-        --glow-medium: rgba(138, 143, 234, 0.25);
-        --glow-strong: rgba(138, 143, 234, 0.35);
+        --cosmic-purple: #6366f1;
+        --cosmic-blue: #0ea5e9;
+        --cosmic-cyan: #06b6d4;
+        --cosmic-emerald: #10b981;
+        --cosmic-violet: #8b5cf6;
+        --cosmic-pink: #ec4899;
+        --deep-space: #0a0a0f;
+        --nebula-dark: #1a1a2e;
+        --star-dust: #16213e;
+        --aurora-glow: rgba(99, 102, 241, 0.15);
+        --text-primary: #e2e8f0;
+        --text-secondary: #cbd5e1;
+        --text-muted: #94a3b8;
     }
-    /* Simple fix for dropdown text truncation */
-.stSelectbox {
-    width: 100% !important;
-}
-
-.stSelectbox > div {
-    width: 100% !important;
-}
-
-.stSelectbox > div > div {
-    width: 100% !important;
-    min-width: 200px !important;
-}
-
-.stSelectbox > div > div > div {
-    white-space: nowrap !important;
-    text-overflow: unset !important;
-    overflow: visible !important;
-    color: white !important;
-    font-size: 14px !important;
-    padding: 8px 12px !important;
-}
-
-/* Ensure dropdown options are also visible */
-div[data-baseweb="menu"] {
-    min-width: 200px !important;
-    background: #1a1a1f !important;
-}
-
-div[data-baseweb="menu"] li {
-    color: white !important;
-    white-space: nowrap !important;
-    padding: 8px 12px !important;
-}
-
-
-
-
-
-    /* Main app with ultra-smooth animated background */
+    
     .stApp {
-        background: 
-            radial-gradient(ellipse 150% 100% at 50% 0%, var(--nebula-mist) 0%, var(--midnight-void) 40%),
-            linear-gradient(135deg, var(--deep-space) 0%, var(--midnight-void) 100%);
+        background: radial-gradient(ellipse at top, var(--nebula-dark) 0%, var(--deep-space) 70%);
         background-attachment: fixed;
         color: var(--text-primary);
         min-height: 100vh;
         position: relative;
-        overflow-x: hidden;
     }
     
-    /* Subtle animated aurora in background */
     .stApp::before {
         content: '';
         position: fixed;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         background: 
-            radial-gradient(circle at 25% 25%, var(--aurora-purple) 0%, transparent 50%),
-            radial-gradient(circle at 75% 75%, var(--aurora-cyan) 0%, transparent 50%),
-            radial-gradient(circle at 75% 25%, var(--aurora-pink) 0%, transparent 45%),
-            radial-gradient(circle at 25% 75%, var(--aurora-green) 0%, transparent 45%);
-        opacity: 0.15;
-        animation: aurora 60s ease-in-out infinite;
+            radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
         pointer-events: none;
-        z-index: -2;
-        filter: blur(80px);
+        z-index: -1;
     }
     
-    @keyframes aurora {
-        0%, 100% { 
-            transform: rotate(0deg) scale(1);
-            opacity: 0.1;
-        }
-        25% { 
-            transform: rotate(90deg) scale(1.1);
-            opacity: 0.2;
-        }
-        50% { 
-            transform: rotate(180deg) scale(0.9);
-            opacity: 0.15;
-        }
-        75% { 
-            transform: rotate(270deg) scale(1.05);
-            opacity: 0.18;
-        }
-    }
-    
-    /* Ultra-soft floating particles */
+    /* Floating particles effect */
     .stApp::after {
         content: '';
         position: fixed;
@@ -174,162 +79,126 @@ div[data-baseweb="menu"] li {
         width: 100%;
         height: 100%;
         background-image: 
-            radial-gradient(1px 1px at 25px 35px, rgba(255, 255, 255, 0.03), transparent),
-            radial-gradient(0.5px 0.5px at 65px 85px, var(--aurora-cyan), transparent),
-            radial-gradient(0.5px 0.5px at 125px 45px, var(--aurora-purple), transparent),
-            radial-gradient(0.5px 0.5px at 185px 95px, var(--aurora-pink), transparent),
-            radial-gradient(1px 1px at 245px 15px, rgba(255, 255, 255, 0.02), transparent);
-        background-size: 300px 200px;
-        animation: gentleFloat 40s linear infinite;
+            radial-gradient(1px 1px at 20px 30px, rgba(255, 255, 255, 0.15), transparent),
+            radial-gradient(1px 1px at 40px 70px, rgba(99, 102, 241, 0.3), transparent),
+            radial-gradient(1px 1px at 90px 40px, rgba(236, 72, 153, 0.2), transparent),
+            radial-gradient(1px 1px at 130px 80px, rgba(6, 182, 212, 0.2), transparent),
+            radial-gradient(1px 1px at 160px 30px, rgba(255, 255, 255, 0.1), transparent);
+        background-repeat: repeat;
+        background-size: 200px 100px;
+        animation: twinkle 20s linear infinite;
         pointer-events: none;
         z-index: -1;
-        opacity: 0.4;
+        opacity: 0.6;
     }
     
-    @keyframes gentleFloat {
-        0% { transform: translateY(0px) translateX(0px); }
-        25% { transform: translateY(-20px) translateX(10px); }
-        50% { transform: translateY(0px) translateX(-5px); }
-        75% { transform: translateY(-15px) translateX(-10px); }
-        100% { transform: translateY(0px) translateX(0px); }
+    @keyframes twinkle {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 0.8; }
     }
     
-    /* Masterpiece title container */
     .title-container {
-        background: 
-            linear-gradient(135deg, 
-                var(--glass-ultra-light) 0%, 
-                var(--glass-light) 20%,
-                var(--glass-ultra-light) 40%,
-                var(--glass-light) 60%,
-                var(--glass-ultra-light) 80%,
-                var(--glass-light) 100%
-            );
-        backdrop-filter: blur(40px) saturate(180%);
-        -webkit-backdrop-filter: blur(40px) saturate(180%);
-        border: 1px solid var(--glass-border);
-        border-radius: 32px;
-        padding: 4rem 3rem;
-        margin: 3rem auto;
-        max-width: 90%;
+        background: linear-gradient(
+            135deg,
+            rgba(99, 102, 241, 0.1) 0%,
+            rgba(236, 72, 153, 0.05) 35%,
+            rgba(6, 182, 212, 0.08) 70%,
+            rgba(139, 92, 246, 0.1) 100%
+        );
+        backdrop-filter: blur(24px);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 24px;
+        padding: 3rem 2rem;
+        margin: 2rem auto;
         text-align: center;
         position: relative;
         overflow: hidden;
         box-shadow: 
-            0 32px 64px rgba(0, 0, 0, 0.4),
-            0 8px 32px rgba(0, 0, 0, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05),
-            inset 0 -1px 0 rgba(255, 255, 255, 0.02);
+            0 24px 48px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
     
-    /* Magical rotating border effect */
     .title-container::before {
         content: '';
         position: absolute;
-        inset: -2px;
-        padding: 2px;
-        background: 
-            conic-gradient(from 0deg,
-                transparent 0deg,
-                var(--aurora-purple) 30deg,
-                transparent 60deg,
-                var(--aurora-cyan) 90deg,
-                transparent 120deg,
-                var(--aurora-pink) 150deg,
-                transparent 180deg,
-                var(--aurora-green) 210deg,
-                transparent 240deg,
-                var(--aurora-orange) 270deg,
-                transparent 300deg,
-                var(--aurora-purple) 330deg,
-                transparent 360deg
-            );
-        border-radius: 34px;
-        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        animation: borderRotate 30s linear infinite;
-        opacity: 0.6;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(
+            from 0deg,
+            transparent 0deg,
+            rgba(99, 102, 241, 0.15) 60deg,
+            transparent 120deg,
+            rgba(236, 72, 153, 0.1) 180deg,
+            transparent 240deg,
+            rgba(6, 182, 212, 0.15) 300deg,
+            transparent 360deg
+        );
+        animation: rotate 20s linear infinite;
         z-index: -1;
     }
     
-    @keyframes borderRotate {
+    @keyframes rotate {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
     }
     
-    /* Ultra-beautiful title text */
     .title-text {
-        font-size: clamp(1.8rem, 4vw, 2.8rem); /* Reduced from 2.8-4.5rem to 1.8-2.8rem */
+        font-size: clamp(2.5rem, 5vw, 4rem);
         font-weight: 800;
-        letter-spacing: -0.02em;
-        line-height: 1.1;
-        background: 
-            linear-gradient(135deg,
-                #FFFFFF 0%,
-                var(--aurora-purple) 15%,
-                var(--aurora-cyan) 30%,
-                #FFFFFF 45%,
-                var(--aurora-pink) 60%,
-                var(--aurora-green) 75%,
-                var(--aurora-orange) 90%,
-                #FFFFFF 100%
-            );
-        background-size: 400% 400%;
+        background: linear-gradient(
+            135deg,
+            #e2e8f0 0%,
+            #c084fc 25%,
+            #60a5fa 50%,
+            #34d399 75%,
+            #fbbf24 100%
+        );
+        background-size: 300% 300%;
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
-        animation: dreamyGradient 12s ease-in-out infinite;
+        animation: gradientShift 8s ease-in-out infinite;
         margin: 0;
+        text-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
         position: relative;
-        filter: drop-shadow(0 0 20px rgba(138, 143, 234, 0.3));
     }
-
-    .stSidebar .stMarkdown p {
-    font-size: 0.2rem !important;
-}
     
-    @keyframes dreamyGradient {
+    @keyframes gradientShift {
         0%, 100% { background-position: 0% 50%; }
-        20% { background-position: 80% 20%; }
-        40% { background-position: 100% 80%; }
-        60% { background-position: 20% 100%; }
-        80% { background-position: 80% 30%; }
+        25% { background-position: 100% 0%; }
+        50% { background-position: 100% 100%; }
+        75% { background-position: 0% 100%; }
     }
     
     .subtitle {
-        font-size: 1.3rem;
-        font-weight: 400;
+        font-size: 1.25rem;
         color: var(--text-secondary);
-        margin-top: 1.5rem;
+        margin-top: 1rem;
+        font-weight: 400;
         opacity: 0.9;
-        line-height: 1.6;
-        letter-spacing: 0.01em;
-        filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
     
-    /* Ultra-smooth glass buttons */
+    /* Buttons with glass morphism */
     .stButton > button {
-        background: 
-            linear-gradient(135deg,
-                var(--glass-ultra-light) 0%,
-                var(--glass-light) 50%,
-                var(--glass-ultra-light) 100%
-            );
-        backdrop-filter: blur(24px) saturate(150%);
-        -webkit-backdrop-filter: blur(24px) saturate(150%);
-        border: 1px solid var(--glass-border);
+        background: linear-gradient(
+            135deg,
+            rgba(99, 102, 241, 0.15) 0%,
+            rgba(139, 92, 246, 0.15) 100%
+        );
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(99, 102, 241, 0.3);
         color: var(--text-primary);
-        padding: 1rem 2.5rem;
-        border-radius: 20px;
+        padding: 0.875rem 2rem;
+        border-radius: 16px;
         font-weight: 600;
         font-size: 1rem;
-        letter-spacing: 0.01em;
-        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 
-            0 12px 40px rgba(0, 0, 0, 0.15),
-            0 4px 12px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            0 8px 32px rgba(99, 102, 241, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
         width: 100%;
         position: relative;
         overflow: hidden;
@@ -342,435 +211,279 @@ div[data-baseweb="menu"] li {
         left: -100%;
         width: 100%;
         height: 100%;
-        background: 
-            linear-gradient(90deg,
-                transparent 0%,
-                rgba(255, 255, 255, 0.08) 50%,
-                transparent 100%
-            );
-        transition: left 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            transparent 100%
+        );
+        transition: left 0.5s ease;
     }
     
     .stButton > button:hover {
-        transform: translateY(-3px) scale(1.02);
+        transform: translateY(-2px);
         box-shadow: 
-            0 20px 60px rgba(138, 143, 234, 0.2),
-            0 8px 24px rgba(0, 0, 0, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        border-color: rgba(138, 143, 234, 0.3);
-        background: 
-            linear-gradient(135deg,
-                var(--glass-light) 0%,
-                var(--glass-medium) 50%,
-                var(--glass-light) 100%
-            );
+            0 16px 48px rgba(99, 102, 241, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        border-color: rgba(99, 102, 241, 0.5);
+        background: linear-gradient(
+            135deg,
+            rgba(99, 102, 241, 0.25) 0%,
+            rgba(139, 92, 246, 0.25) 100%
+        );
     }
     
     .stButton > button:hover::before {
         left: 100%;
     }
     
-    .stButton > button:active {
-        transform: translateY(-1px) scale(1.01);
-        transition: all 0.1s ease;
-    }
-    
-    /* Ethereal sidebar */
+    /* Sidebar styling */
     .stSidebar {
-        background: 
-            linear-gradient(180deg,
-                rgba(16, 16, 20, 0.95) 0%,
-                rgba(11, 11, 15, 0.98) 100%
-            );
-        backdrop-filter: blur(32px) saturate(180%);
-        -webkit-backdrop-filter: blur(32px) saturate(180%);
-        border-right: 1px solid var(--glass-border);
-        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+        background: linear-gradient(
+            180deg,
+            rgba(26, 26, 46, 0.95) 0%,
+            rgba(10, 10, 15, 0.98) 100%
+        );
+        backdrop-filter: blur(24px);
+        border-right: 1px solid rgba(99, 102, 241, 0.2);
     }
     
     .stSidebar > div {
         background: transparent;
     }
     
-/* Dark, ultra-comfortable input fields */
-.stTextInput > div > div > input,
-.stTextArea > div > div > textarea {
-    background: #1e1e2f !important;
-    border: 1px solid #2e2e3e !important;
-    border-radius: 16px !important;
-    color: #f0f0f5 !important;
-    padding: 1.25rem 1rem !important;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-    box-shadow: 
-        0 4px 20px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.02);
-}
-
-.stTextInput > div > div > input::placeholder,
-.stTextArea > div > div > textarea::placeholder {
-    color: #888ca0 !important;
-    opacity: 0.8;
-}
-
-.stTextInput > div > div > input:focus,
-.stTextArea > div > div > textarea:focus {
-    border-color: #8a8fea !important;
-    box-shadow: 
-        0 0 0 4px rgba(138, 143, 234, 0.12),
-        0 8px 32px rgba(138, 143, 234, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
-    outline: none !important;
-    background: #232336 !important;
-    transform: translateY(-1px);
-}
-
-    
-    /* Elegant select boxes */
-    .stSelectbox > div > div {
-        background: var(--glass-ultra-light) !important;
-        backdrop-filter: blur(20px) !important;
-        border: 1px solid var(--glass-border) !important;
-        border-radius: 16px !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    /* Input fields with glass effect */
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea {
+        background: rgba(99, 102, 241, 0.05) !important;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        border-radius: 12px !important;
+        color: var(--text-primary) !important;
+        padding: 1rem !important;
+        font-size: 0.95rem;
         transition: all 0.3s ease;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
     
-    .stSelectbox > div > div:hover {
-        border-color: rgba(138, 143, 234, 0.3) !important;
-        box-shadow: 0 8px 32px rgba(138, 143, 234, 0.1);
+    .stTextInput > div > div > input:focus,
+    .stTextArea > div > div > textarea:focus {
+        border-color: rgba(99, 102, 241, 0.5) !important;
+        box-shadow: 
+            0 0 0 3px rgba(99, 102, 241, 0.15),
+            0 8px 32px rgba(0, 0, 0, 0.2) !important;
+        outline: none !important;
+        background: rgba(99, 102, 241, 0.08) !important;
+    }
+    
+    /* Select boxes */
+    .stSelectbox > div > div {
+        background: rgba(99, 102, 241, 0.05) !important;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
     
     .stSelectbox > div > div > div {
         color: var(--text-primary) !important;
-        padding: 1rem !important;
-        font-size: 0.95rem;
+        padding: 0.75rem !important;
     }
     
-    /* Beautiful checkboxes */
+    /* Checkbox styling */
     .stCheckbox > label {
         color: var(--text-secondary) !important;
         font-weight: 500;
-        transition: color 0.3s ease;
-    }
-    
-    .stCheckbox:hover > label {
-        color: var(--text-primary) !important;
     }
     
     .stCheckbox > label > div > div {
-        background: var(--glass-ultra-light) !important;
-        border: 1px solid var(--glass-border) !important;
-        border-radius: 6px !important;
-        transition: all 0.3s ease;
+        background: rgba(99, 102, 241, 0.1) !important;
+        border: 1px solid rgba(99, 102, 241, 0.3) !important;
+        border-radius: 4px !important;
     }
     
-    .stCheckbox > label > div > div:hover {
-        border-color: rgba(138, 143, 234, 0.4) !important;
-        background: var(--glass-light) !important;
-    }
-    
-    /* Sophisticated headers */
+    /* Headers */
     .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 {
         color: var(--text-primary) !important;
         font-weight: 700;
-        letter-spacing: -0.01em;
     }
     
     .stMarkdown h3 {
-        font-size: 1.6rem;
-        margin-bottom: 1.5rem;
-        background: 
-            linear-gradient(135deg,
-                var(--aurora-purple) 0%,
-                var(--aurora-cyan) 50%,
-                var(--aurora-pink) 100%
-            );
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--cosmic-purple), var(--cosmic-cyan));
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
-        filter: drop-shadow(0 2px 8px rgba(138, 143, 234, 0.2));
     }
     
-    /* Dreamy expandable sections */
+    /* Expandable sections */
     .stExpander > div > div > div > div {
-        background: var(--glass-ultra-light) !important;
-        backdrop-filter: blur(24px) !important;
-        border: 1px solid var(--glass-border) !important;
-        border-radius: 20px !important;
-        box-shadow: 
-            0 12px 40px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.03);
-        transition: all 0.3s ease;
+        background: rgba(99, 102, 241, 0.05) !important;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.15) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
     
-    .stExpander:hover > div > div > div > div {
-        background: var(--glass-light) !important;
-        box-shadow: 
-            0 16px 48px rgba(0, 0, 0, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    }
-    
-    /* Magical containers */
+    /* Custom containers */
     .download-container {
-        background: 
-            linear-gradient(135deg,
-                rgba(129, 230, 217, 0.08) 0%,
-                rgba(103, 232, 249, 0.06) 100%
-            );
-        backdrop-filter: blur(24px);
-        border: 1px solid rgba(129, 230, 217, 0.2);
-        padding: 2rem;
-        border-radius: 24px;
-        margin-top: 1.5rem;
-        box-shadow: 
-            0 16px 48px rgba(129, 230, 217, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        transition: all 0.3s ease;
-    }
-    
-    .download-container:hover {
-        transform: translateY(-2px);
-        box-shadow: 
-            0 24px 64px rgba(129, 230, 217, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        background: linear-gradient(
+            135deg,
+            rgba(16, 185, 129, 0.1) 0%,
+            rgba(6, 182, 212, 0.1) 100%
+        );
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        padding: 1.5rem;
+        border-radius: 20px;
+        margin-top: 1rem;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
     }
     
     .image-gallery {
-        background: var(--glass-ultra-light);
-        backdrop-filter: blur(24px);
-        border: 1px solid var(--glass-border);
-        padding: 2rem;
-        border-radius: 24px;
-        margin: 1.5rem 0;
-        box-shadow: 
-            0 16px 48px rgba(0, 0, 0, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        background: rgba(99, 102, 241, 0.05);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        padding: 1.5rem;
+        border-radius: 20px;
+        margin: 1rem 0;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
     
     .gallery-item {
-        background: var(--glass-ultra-light);
-        backdrop-filter: blur(16px);
-        border: 1px solid var(--glass-border);
-        padding: 1.25rem;
-        border-radius: 16px;
-        margin: 1rem 0;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        border-radius: 12px;
+        margin: 0.75rem 0;
         cursor: pointer;
-        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
     
     .gallery-item:hover {
-        background: var(--glass-light);
-        border-color: rgba(138, 143, 234, 0.3);
-        transform: translateY(-4px) scale(1.02);
-        box-shadow: 
-            0 20px 60px rgba(138, 143, 234, 0.15),
-            0 8px 32px rgba(0, 0, 0, 0.1);
+        background: rgba(99, 102, 241, 0.1);
+        border-color: rgba(99, 102, 241, 0.3);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(99, 102, 241, 0.15);
     }
     
     .gallery-item.selected {
-        background: var(--glass-medium);
-        border-color: rgba(138, 143, 234, 0.5);
-        box-shadow: 
-            0 16px 48px rgba(138, 143, 234, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        background: rgba(99, 102, 241, 0.15);
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
     }
     
-    /* Ultra-soft status boxes */
+    /* Status boxes */
     .error-box {
-        background: 
-            linear-gradient(135deg,
-                rgba(244, 114, 182, 0.08) 0%,
-                rgba(239, 68, 68, 0.06) 100%
-            );
-        backdrop-filter: blur(24px);
-        border: 1px solid rgba(244, 114, 182, 0.2);
-        padding: 1.5rem;
-        border-radius: 20px;
-        color: #FECACA;
-        margin: 1.5rem 0;
-        box-shadow: 0 12px 40px rgba(244, 114, 182, 0.1);
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15));
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        padding: 1.25rem;
+        border-radius: 16px;
+        color: #fecaca;
+        margin: 1rem 0;
+        box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15);
     }
     
     .success-box {
-        background: 
-            linear-gradient(135deg,
-                rgba(129, 230, 217, 0.08) 0%,
-                rgba(16, 185, 129, 0.06) 100%
-            );
-        backdrop-filter: blur(24px);
-        border: 1px solid rgba(129, 230, 217, 0.2);
-        padding: 1.5rem;
-        border-radius: 20px;
-        color: #A7F3D0;
-        margin: 1.5rem 0;
-        box-shadow: 0 12px 40px rgba(129, 230, 217, 0.1);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15));
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        padding: 1.25rem;
+        border-radius: 16px;
+        color: #a7f3d0;
+        margin: 1rem 0;
+        box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15);
     }
     
     .info-box {
-        background: 
-            linear-gradient(135deg,
-                rgba(138, 143, 234, 0.08) 0%,
-                rgba(103, 232, 249, 0.06) 100%
-            );
-        backdrop-filter: blur(24px);
-        border: 1px solid rgba(138, 143, 234, 0.2);
-        padding: 1.5rem;
-        border-radius: 20px;
-        color: #C7D2FE;
-        margin: 1.5rem 0;
-        box-shadow: 0 12px 40px rgba(138, 143, 234, 0.1);
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        padding: 1.25rem;
+        border-radius: 16px;
+        color: #c7d2fe;
+        margin: 1rem 0;
+        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
     }
     
-    /* Perfect download button */
+    /* Download button */
     .stDownloadButton > button {
-        background: 
-            linear-gradient(135deg,
-                rgba(129, 230, 217, 0.12) 0%,
-                rgba(16, 185, 129, 0.08) 100%
-            ) !important;
-        backdrop-filter: blur(24px);
-        border: 1px solid rgba(129, 230, 217, 0.3) !important;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2)) !important;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(16, 185, 129, 0.4) !important;
         color: var(--text-primary) !important;
-        padding: 1rem 2rem;
-        border-radius: 16px;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
         font-weight: 600;
-        font-size: 0.95rem;
-        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-        box-shadow: 
-            0 12px 40px rgba(129, 230, 217, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15);
         width: 100%;
     }
     
     .stDownloadButton > button:hover {
-        background: 
-            linear-gradient(135deg,
-                rgba(129, 230, 217, 0.2) 0%,
-                rgba(16, 185, 129, 0.15) 100%
-            ) !important;
-        border-color: rgba(129, 230, 217, 0.5) !important;
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 
-            0 20px 60px rgba(129, 230, 217, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.3)) !important;
+        border-color: rgba(16, 185, 129, 0.6) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 48px rgba(16, 185, 129, 0.25);
     }
     
-    /* Ultra-smooth scrollbar */
+    /* Scrollbar styling */
     ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+        width: 8px;
     }
     
     ::-webkit-scrollbar-track {
-        background: var(--glass-ultra-light);
-        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
     }
     
     ::-webkit-scrollbar-thumb {
-        background: 
-            linear-gradient(135deg,
-                var(--aurora-purple) 0%,
-                var(--aurora-cyan) 100%
-            );
-        border-radius: 10px;
+        background: rgba(99, 102, 241, 0.3);
+        border-radius: 4px;
         transition: all 0.3s ease;
     }
     
     ::-webkit-scrollbar-thumb:hover {
-        background: 
-            linear-gradient(135deg,
-                rgba(138, 143, 234, 0.8) 0%,
-                rgba(103, 232, 249, 0.8) 100%
-            );
+        background: rgba(99, 102, 241, 0.5);
     }
     
-    /* Breathing animation for loading states */
-    @keyframes breathe {
-        0%, 100% { 
-            opacity: 0.6;
-            transform: scale(1);
-        }
-        50% { 
-            opacity: 1;
-            transform: scale(1.02);
-        }
+    /* Loading animations */
+    @keyframes pulse {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 1; }
     }
     
-    .loading-breathe {
-        animation: breathe 3s ease-in-out infinite;
+    .loading-pulse {
+        animation: pulse 2s ease-in-out infinite;
     }
     
-    /* Ultra-responsive design */
+    /* Responsive adjustments */
     @media (max-width: 768px) {
         .title-container {
-            padding: 2.5rem 1.5rem;
-            margin: 2rem 1rem;
-            border-radius: 24px;
-        }
-        
-        .title-text {
-            font-size: 2.2rem;
-        }
-        
-        .subtitle {
-            font-size: 1.1rem;
-            margin-top: 1rem;
-        }
-        
-        .stButton > button {
-            padding: 0.875rem 2rem;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .title-container {
             padding: 2rem 1rem;
+            margin: 1rem;
         }
         
         .title-text {
-            font-size: 1.8rem;
+            font-size: 2.5rem;
         }
         
         .subtitle {
             font-size: 1rem;
         }
     }
-    
-    /* Smooth page transitions */
-    .stApp > div {
-        animation: fadeInUp 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-    }
-    
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    /* Perfect focus states for accessibility */
-    .stButton > button:focus-visible,
-    .stTextInput > div > div > input:focus-visible,
-    .stTextArea > div > div > textarea:focus-visible,
-    .stSelectbox > div > div:focus-visible {
-        outline: 2px solid var(--aurora-purple) !important;
-        outline-offset: 2px !important;
-    }
 </style>
 """, unsafe_allow_html=True)
 
-# Ultra-beautiful title with enhanced cosmic effects
+# Enhanced title with cosmic effect
 st.markdown("""
 <div class="title-container">
-    <h1 class="title-text">✨ GenAI Studio</h1>
-    <p class="subtitle">Create breathtaking images with AI • Powered by Gemini Flash<br>🌙 Ultra-Beautiful Dark Mode Experience</p>
+    <h1 class="title-text">🌌 GenAI Studio</h1>
+    <p class="subtitle">Create stunning images with AI • Powered by Gemini Flash • ✨ Otherworldly Experience</p>
 </div>
 """, unsafe_allow_html=True)
 
