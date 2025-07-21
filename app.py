@@ -345,41 +345,40 @@ st.markdown("""
         background: transparent;
     }
     
-    /* Ultra-comfortable input fields */
-    .stTextInput > div > div > input,
-    .stTextArea > div > div > textarea {
-        background: var(--glass-ultra-light) !important;
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
-        border: 1px solid var(--glass-border) !important;
-        border-radius: 16px !important;
-        color: var(--text-primary) !important;
-        padding: 1.25rem 1rem !important;
-        font-size: 0.95rem;
-        line-height: 1.5;
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-        box-shadow: 
-            0 4px 20px rgba(0, 0, 0, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 0.02);
-    }
-    
-    .stTextInput > div > div > input::placeholder,
-    .stTextArea > div > div > textarea::placeholder {
-        color: var(--text-ultra-soft) !important;
-        opacity: 0.7;
-    }
-    
-    .stTextInput > div > div > input:focus,
-    .stTextArea > div > div > textarea:focus {
-        border-color: rgba(138, 143, 234, 0.4) !important;
-        box-shadow: 
-            0 0 0 4px rgba(138, 143, 234, 0.08),
-            0 8px 32px rgba(138, 143, 234, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
-        outline: none !important;
-        background: var(--glass-light) !important;
-        transform: translateY(-1px);
-    }
+/* Dark, ultra-comfortable input fields */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea {
+    background: #1e1e2f !important;
+    border: 1px solid #2e2e3e !important;
+    border-radius: 16px !important;
+    color: #f0f0f5 !important;
+    padding: 1.25rem 1rem !important;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.stTextInput > div > div > input::placeholder,
+.stTextArea > div > div > textarea::placeholder {
+    color: #888ca0 !important;
+    opacity: 0.8;
+}
+
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus {
+    border-color: #8a8fea !important;
+    box-shadow: 
+        0 0 0 4px rgba(138, 143, 234, 0.12),
+        0 8px 32px rgba(138, 143, 234, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    outline: none !important;
+    background: #232336 !important;
+    transform: translateY(-1px);
+}
+
     
     /* Elegant select boxes */
     .stSelectbox > div > div {
