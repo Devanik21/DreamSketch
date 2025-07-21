@@ -293,7 +293,7 @@ st.markdown("""
     );
     background-size: 300% 300%;
 
-    animation: rainbow 5s ease infinite;
+    animation: rainbow 20s ease infinite;
 }
 
 .subtitle {
