@@ -130,26 +130,31 @@ st.markdown("""
         color: #e2e8f0 !important;
     }
     
-/* Make Streamlit text inputs and text areas fully transparent */
-.stTextInput > div > div > input {
-  background: transparent !important;
-  border: 1px solid rgba(226, 232, 240, 0.15);
-  border-radius: 15px;
-  color: #e2e8f0;
-  padding: 1rem;
+/* Page background gradient */
+body {
+  background: linear-gradient(135deg, #1e2a4a 0%, #2d4a6b 25%, #3a5f8c 50%, #4674ad 75%, #5289ce 100%);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
+/* Glassmorphism effect for inputs and text areas */
+.stTextInput > div > div > input,
 .stTextArea > div > div > textarea {
-  background: transparent !important;
-  border: 1px solid rgba(226, 232, 240, 0.15);
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 15px;
   color: #e2e8f0;
   padding: 1rem;
 }
 
+/* Checkbox label styling */
 .stCheckbox > label {
   color: #e2e8f0 !important;
 }
+
 
     
     .stMarkdown h3 {
