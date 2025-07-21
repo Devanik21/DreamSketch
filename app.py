@@ -16,6 +16,15 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Then add this CSS to make sidebar wider:
+st.markdown("""
+<style>
+.css-1d391kg {
+    width: 350px !important;  /* Make sidebar wider */
+}
+</style>
+""", unsafe_allow_html=True)
+
 # Initialize session state
 if 'images' not in st.session_state:
     st.session_state.images = []
