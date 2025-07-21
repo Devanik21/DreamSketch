@@ -17,8 +17,8 @@ st.set_page_config(
 )
 
 
-st.image("k2.jpg", use_column_width=True)
-st.sidebar.image("k3.jpg", use_column_width=True)
+st.image("k3.jpg", use_column_width=True)
+st.sidebar.image("k2.jpg", use_column_width=True)
 
 
 # Initialize session state
