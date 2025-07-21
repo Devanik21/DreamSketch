@@ -76,7 +76,18 @@ st.markdown("""
         font-weight: 800;
         text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
         margin: 0;
-        background: linear-gradient(-45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff, #5f27cd);
+        background: linear-gradient(
+  -45deg,
+  rgba(255, 107, 107, 0),
+  rgba(78, 205, 196, 0.2),
+  rgba(69, 183, 209, 0.4),
+  rgba(150, 206, 180, 0.6),
+  rgba(254, 202, 87, 0.8),
+  rgba(255, 159, 243, 0.8),
+  rgba(84, 160, 255, 0.9),
+  rgba(95, 39, 205, 1)
+);
+
         background-size: 400% 400%;
         -webkit-background-clip: text;
         
