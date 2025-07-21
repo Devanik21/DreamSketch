@@ -10,7 +10,7 @@ import uuid
 
 # Page config
 st.set_page_config(
-    page_title="✨ GenAI Studio",
+    page_title="🖼️ GenAI Studio",
     page_icon="🎨",
     layout="wide",
     initial_sidebar_state="expanded"
