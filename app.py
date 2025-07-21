@@ -17,7 +17,9 @@ st.set_page_config(
 )
 
 
-st.image("k2.jpg", caption="So dreamy~ 💫", use_column_width=True)
+st.image("k2.jpg", use_column_width=True)
+st.sidebar.image("k1.jpg", caption="✨ In the dreamy sidebar ✨", use_column_width=True)
+
 
 # Initialize session state
 if 'images' not in st.session_state:
