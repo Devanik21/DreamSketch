@@ -990,6 +990,14 @@ with col2:
             """, unsafe_allow_html=True)
 
 # Footer
+
+
+st.image("k3.jpg", use_container_width=True)
+st.image("k1.jpg", use_container_width=True)
+st.sidebar.image("k2.jpg", use_container_width=True)
+st.image("k6.jpg", use_container_width=True)
+st.image("k4.jpg", use_container_width=True)
+
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.7);">
@@ -997,9 +1005,3 @@ st.markdown("""
     <p style="font-size: 0.8rem;">Transform your imagination into reality with AI-powered artistry</p>
 </div>
 """, unsafe_allow_html=True)
-
-st.image("k3.jpg", use_container_width=True)
-st.image("k1.jpg", use_container_width=True)
-st.sidebar.image("k2.jpg", use_container_width=True)
-st.image("k6.jpg", use_container_width=True)
-st.image("k4.jpg", use_container_width=True)
