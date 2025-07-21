@@ -16,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-
+st.image("k11.jpg", use_container_width=True)
 
 st.sidebar.image("k5.jpg", use_container_width=True)
 
@@ -494,7 +494,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-st.image("k11.jpg", use_container_width=True)
+
 
 # Load secrets with error handling
 try:
