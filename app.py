@@ -994,6 +994,20 @@ st.markdown("---")
 
 # 📸 Glimpses from the Gallery – Crafted with love & AI magic 💖
 
+st.markdown("""
+<h3 style="
+    text-align: center;
+    background-image: linear-gradient(90deg, #ff6ec4, #7873f5, #4ade80, #facc15, #f87171, #ff6ec4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    padding: 1rem 0;
+">
+📸 Glimpses from the Gallery – Crafted with love & AI magic 💖
+</h3>
+""", unsafe_allow_html=True)
+
+
 st.image("k3.jpg", use_container_width=True)
 st.image("k1.jpg", use_container_width=True)
 st.sidebar.image("k2.jpg", use_container_width=True)
