@@ -524,7 +524,7 @@ st.markdown("""
   }
 </style>
 
-<h1 class="pretty-title">DreamCanvas </h1>
+<h1 class="pretty-title">DreamCanvas - Powered by Creative Intelligence</h1>
 """, unsafe_allow_html=True)
 
 
