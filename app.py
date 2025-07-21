@@ -239,7 +239,7 @@ st.markdown("""
     }
 
     .stSidebar .stMarkdown p {
-    font-size: 0.8rem !important;
+    font-size: 0.2rem !important;
 }
     
     @keyframes dreamyGradient {
