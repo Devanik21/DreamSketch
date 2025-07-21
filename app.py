@@ -243,11 +243,12 @@ st.markdown("""
 
 # Title with animated gradient
 st.markdown("""
-<div class="title-container">
+<div class="title-container" style="color: #aac7f0;">
     <h1 class="title-text">🖼️ GenAI Studio</h1>
     <p class="subtitle">Create stunning images with AI • Powered by Gemini Flash</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 # Load secrets with error handling
 try:
