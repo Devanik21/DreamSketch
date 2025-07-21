@@ -66,7 +66,40 @@ st.markdown("""
         --glow-medium: rgba(138, 143, 234, 0.25);
         --glow-strong: rgba(138, 143, 234, 0.35);
     }
-    
+
+
+    /* Simple dropdown fix */
+.stSelectbox {
+    color: white !important;
+}
+
+.stSelectbox > div > div > div {
+    color: white !important;
+    background-color: rgba(42, 42, 48, 0.8) !important;
+    font-size: 14px !important;
+    padding: 8px 12px !important;
+}
+
+.stSelectbox div[data-baseweb="select"] {
+    background-color: rgba(42, 42, 48, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Fix the dropdown options menu */
+div[data-baseweb="menu"] {
+    background-color: rgba(16, 16, 20, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+}
+
+div[data-baseweb="menu"] li {
+    color: white !important;
+    background-color: transparent !important;
+}
+
+div[data-baseweb="menu"] li:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
     /* Main app with ultra-smooth animated background */
     .stApp {
         background: 
