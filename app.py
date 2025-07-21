@@ -482,8 +482,8 @@ st.markdown("""
 # Enhanced title with cosmic effect
 st.markdown("""
 <div class="title-container">
-    <h1 class="title-text">🌌 GenAI Studio</h1>
-    <p class="subtitle">Create stunning images with AI • Powered by Gemini Flash • ✨ Otherworldly Experience</p>
+    <h1 class="title-text">GenAI Studio</h1>
+    <p class="subtitle">🖼️Create stunning images with AI ✨</p>
 </div>
 """, unsafe_allow_html=True)
 
