@@ -10,7 +10,7 @@ import uuid
 
 # Page config
 st.set_page_config(
-    page_title="🖼️ GenAI Studio",
+    page_title="🖼️  Studio",
     page_icon="🎨",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -492,7 +492,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.image("k3.jpg", use_container_width=True)
+
 
 # Load secrets with error handling
 try:
@@ -997,3 +997,4 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+st.image("k3.jpg", use_container_width=True)
