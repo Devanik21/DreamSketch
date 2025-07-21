@@ -9,16 +9,12 @@ import time
 import uuid
 
 # Page config
-
-
-# Page config
 st.set_page_config(
     page_title="🖼️ GenAI Studio",
     page_icon="🎨",
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
 
 # Initialize session state
 if 'images' not in st.session_state:
@@ -27,7 +23,6 @@ if 'current_image' not in st.session_state:
     st.session_state.current_image = None
 
 # Custom CSS for beautiful gradients and styling
-
 st.markdown("""
 <style>
     .main {
@@ -248,34 +243,11 @@ st.markdown("""
 
 # Title with animated gradient
 st.markdown("""
-<div style="
-    background: linear-gradient(135deg, #1f1f2e, #2c2c3c);
-    padding: 2rem;
-    border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    text-align: center;
-    font-family: 'Segoe UI', sans-serif;
-">
-    <h1 style="
-        color: #f2f4f8;
-        font-size: 2.8rem;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-    ">🖼️ GenAI Studio</h1>
-    <p style="
-        color: #aac7f0;
-        font-size: 1.1rem;
-        font-weight: 400;
-        margin-top: 0;
-    ">
-        Create stunning images with AI • Powered by Gemini Flash
-    </p>
+<div class="title-container">
+    <h1 class="title-text">🖼️ GenAI Studio</h1>
+    <p class="subtitle">Create stunning images with AI • Powered by Gemini Flash</p>
 </div>
 """, unsafe_allow_html=True)
-
-
-
-
 
 # Load secrets with error handling
 try:
