@@ -237,6 +237,10 @@ st.markdown("""
         position: relative;
         filter: drop-shadow(0 0 20px rgba(138, 143, 234, 0.3));
     }
+
+    .stSidebar .stMarkdown p {
+    font-size: 0.8rem !important;
+}
     
     @keyframes dreamyGradient {
         0%, 100% { background-position: 0% 50%; }
