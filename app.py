@@ -524,8 +524,7 @@ st.markdown("""
   }
 </style>
 
-<h1 class="pretty-title">GenAI Studio</h1>
-<p class="pretty-subtitle">🖼️ Create stunning images with AI ✨</p>
+<h1 class="pretty-title">DreamCanvas </h1>
 """, unsafe_allow_html=True)
 
 
