@@ -18,7 +18,7 @@ st.set_page_config(
 
 
 st.image("k2.jpg", use_column_width=True)
-st.sidebar.image("k1.jpg", caption="✨ In the dreamy sidebar ✨", use_column_width=True)
+st.sidebar.image("k3.jpg", use_column_width=True)
 
 
 # Initialize session state
