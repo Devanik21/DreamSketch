@@ -726,12 +726,78 @@ with st.sidebar:
     ])
     
     # Lighting
+# Lighting
     lighting = st.selectbox("💡 Lighting", [
         "Natural", "Dramatic", "Soft", "Studio", "Golden hour", 
         "Blue hour", "Neon", "Candlelight", "Harsh", "Backlit"
     ])
     
+    # Mood presets - INSERT THIS SECTION HERE
+    mood_preset = st.selectbox("🌙 Mood Presets", [
+        "Custom", "Dreamy", "Ethereal", "Mystical", "Serene", 
+        "Nostalgic", "Romantic", "Melancholic", "Whimsical", "Surreal"
+    ])
+    
+    # Mood preset configurations
+    MOOD_PRESETS = {
+        "Dreamy": {
+            "styles": ["Dream Imagery", "Sfumato", "Impressionism", "Symbolism"],
+            "color_mood": "Pastel",
+            "lighting": "Soft",
+            "enhancement": "soft focus, ethereal glow, floating elements, misty atmosphere"
+        },
+        "Ethereal": {
+            "styles": ["Visionary Art", "Magic Realism", "Symbolism"],
+            "color_mood": "Cool tones", 
+            "lighting": "Blue hour",
+            "enhancement": "translucent, ghostly, luminous, otherworldly atmosphere"
+        },
+        "Mystical": {
+            "styles": ["High Fantasy", "Sacred Geometry", "Mandala"],
+            "color_mood": "Warm tones",
+            "lighting": "Golden hour", 
+            "enhancement": "magical aura, ancient symbols, mystical energy, enchanted"
+        },
+        "Serene": {
+            "styles": ["Japanese Minimalism", "Sumi-e", "Impressionism"],
+            "color_mood": "Natural",
+            "lighting": "Natural",
+            "enhancement": "peaceful, calm waters, gentle breeze, tranquil setting"
+        },
+        "Nostalgic": {
+            "styles": ["Vintage", "Sepia", "Film Photography"],
+            "color_mood": "Vintage",
+            "lighting": "Golden hour",
+            "enhancement": "faded memories, old photographs, sepia tones, nostalgic warmth"
+        },
+        "Romantic": {
+            "styles": ["Rococo", "Impressionism", "Art Nouveau"],
+            "color_mood": "Pastel",
+            "lighting": "Candlelight",
+            "enhancement": "soft roses, gentle breeze, romantic sunset, tender moments"
+        },
+        "Surreal": {
+            "styles": ["Surrealism", "Dream Imagery", "Magic Realism"],
+            "color_mood": "Vibrant",
+            "lighting": "Dramatic",
+            "enhancement": "impossible geometry, floating objects, dream logic, surreal landscapes"
+        }
+    }
+    
+    # Apply preset button
+    if mood_preset != "Custom" and mood_preset in MOOD_PRESETS:
+        if st.button(f"✨ Apply {mood_preset} Preset", use_container_width=True):
+            st.session_state.preset_applied = MOOD_PRESETS[mood_preset]
+            st.session_state.preset_applied["mood"] = mood_preset
+            st.success(f"{mood_preset} preset applied!")
+            st.rerun()
+    
+    # Show applied preset info
+    if hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied:
+        st.info(f"🎭 Using: {st.session_state.preset_applied['mood']} preset")
+    
     st.markdown("---")
+
     
     # Image Gallery
     if st.session_state.images:
@@ -760,7 +826,6 @@ with st.sidebar:
 
 # Main content area
 col1, col2 = st.columns([2, 1])
-
 with col1:
     # Enhanced prompt input
     st.markdown("### 🖋️ Describe Your Vision")
@@ -782,14 +847,18 @@ with col1:
             if not prompt.strip():
                 st.markdown('<div class="error-box">❌ Please enter a prompt to begin your creative journey!</div>', unsafe_allow_html=True)
             else:
-                # Enhance prompt if requested
-                if enhance_prompt:
-                    enhanced_prompt = f"{prompt}, {selected_style} style, {color_mood} color palette, {lighting} lighting, {quality_level} quality"
+                # Enhance prompt if requested or preset applied
+                if enhance_prompt or (hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied):
+                    if hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied:
+                        preset = st.session_state.preset_applied
+                        enhanced_prompt = f"{prompt}, {preset['styles'][0]} style, {preset['color_mood']} color palette, {preset['lighting']} lighting, {preset['enhancement']}, {quality_level} quality"
+                    else:
+                        enhanced_prompt = f"{prompt}, {selected_style} style, {color_mood} color palette, {lighting} lighting, {quality_level} quality"
                 else:
                     enhanced_prompt = prompt
                 
                 # Show enhanced prompt
-                if enhance_prompt:
+                if enhance_prompt or (hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied):
                     st.markdown("**Enhanced Prompt:**")
                     st.code(enhanced_prompt, language=None)
                 
