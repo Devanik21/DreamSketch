@@ -17,7 +17,7 @@ st.set_page_config(
 )
 
 
-st.image("k3.jpg", use_column_width=True)
+
 st.sidebar.image("k2.jpg", use_column_width=True)
 
 
@@ -491,6 +491,8 @@ st.markdown("""
     <p class="subtitle">🖼️  Create stunning images with AI  ✨</p>
 </div>
 """, unsafe_allow_html=True)
+
+st.image("k3.jpg", use_column_width=True)
 
 # Load secrets with error handling
 try:
