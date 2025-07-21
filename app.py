@@ -487,24 +487,43 @@ st.markdown("""
 
 # Enhanced title with cosmic effect
 st.markdown("""
-<h1 style="
-    text-align: center;
+<style>
+@keyframes rainbowText {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+@keyframes reverseRainbow {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.rainbow-title {
     font-size: 3rem;
-    background: linear-gradient(90deg, #f093fb, #f5576c);
+    text-align: center;
+    font-weight: bold;
+    background: linear-gradient(270deg, #ff6ec4, #7873f5, #4ade80, #facc15, #f87171, #ff6ec4);
+    background-size: 400% 400%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    font-weight: bold;
-">
-GenAI Studio
-</h1>
-<p style="
-    text-align: center;
+    animation: rainbowText 20s ease infinite;
+}
+
+.rainbow-subtitle {
     font-size: 1.2rem;
-    color: rgba(255, 255, 255, 0.7);
-">
-🖼️  Create stunning images with AI ✨
-</p>
+    text-align: center;
+    background: linear-gradient(270deg, #ff6ec4, #f87171, #facc15, #4ade80, #7873f5, #ff6ec4);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: reverseRainbow 20s ease infinite;
+}
+</style>
+
+<h1 class="rainbow-title">GenAI Studio</h1>
+<p class="rainbow-subtitle">🖼️ Create stunning images with AI ✨</p>
 """, unsafe_allow_html=True)
+
 
 
 
