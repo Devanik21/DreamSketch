@@ -733,951 +733,704 @@ with st.sidebar:
     ])
     
     # Mood presets - INSERT THIS SECTION HERE
-    mood_preset = st.selectbox("🌙 Mood Presets", [
-        "Custom", "Dreamy", "Ethereal", "Mystical", "Serene", 
-        "Nostalgic", "Romantic", "Melancholic", "Whimsical", "Surreal"
-    ])
-    
+    # Mood presets - Extended with 100+ options
+mood_preset = st.selectbox("🌙 Mood Presets", [
+    "Custom", "Dreamy", "Ethereal", "Mystical", "Serene", "Nostalgic", "Romantic", 
+    "Melancholic", "Whimsical", "Surreal", "Cyberpunk", "Steampunk", "Gothic", 
+    "Vintage", "Retro", "Futuristic", "Post-Apocalyptic", "Tropical", "Arctic", 
+    "Desert", "Forest", "Ocean", "Mountain", "Urban", "Rural", "Industrial", 
+    "Botanical", "Cosmic", "Celestial", "Lunar", "Solar", "Storm", "Peaceful", 
+    "Chaotic", "Minimalist", "Maximalist", "Neon", "Pastel", "Monochrome", 
+    "Sepia", "Vibrant", "Muted", "Dark Academia", "Light Academia", "Cottagecore", 
+    "Fairycore", "Dark Fantasy", "High Fantasy", "Sci-Fi", "Horror", "Thriller", 
+    "Adventure", "Western", "Film Noir", "Art Deco", "Art Nouveau", "Baroque", 
+    "Renaissance", "Medieval", "Ancient", "Tribal", "Zen", "Bohemian", "Punk", 
+    "Grunge", "Glam", "Pop Art", "Abstract", "Geometric", "Organic", "Crystalline", 
+    "Fluid", "Textured", "Smooth", "Rough", "Delicate", "Bold", "Subtle", 
+    "Intense", "Calm", "Energetic", "Lazy", "Fresh", "Aged", "Clean", "Dirty", 
+    "Luxurious", "Rustic", "Elegant", "Casual", "Formal", "Playful", "Serious", 
+    "Mysterious", "Transparent", "Opaque", "Glossy", "Matte", "Metallic", "Wooden", 
+    "Stone", "Glass", "Fabric", "Paper", "Digital", "Analog", "Retro-Future", 
+    "Biopunk", "Solarpunk", "Dieselpunk", "Atompunk", "Clockpunk", "Nanopunk"
+])
 
-# --- Expanded Mood Preset Configurations ---
-# This dictionary contains over 200 detailed presets for generating creative visuals.
-# Each preset includes suggested art styles, color moods, lighting conditions, and specific enhancements.
-
+# Extended mood preset configurations
 MOOD_PRESETS = {
-    # --- Ethereal & Mystical ---
     "Dreamy": {
-        "styles": ["Dream Imagery", "Sfumato", "Impressionism"],
+        "styles": ["Dream Imagery", "Sfumato", "Impressionism", "Symbolism"],
         "color_mood": "Pastel",
         "lighting": "Soft",
         "enhancement": "soft focus, ethereal glow, floating elements, misty atmosphere"
     },
     "Ethereal": {
         "styles": ["Visionary Art", "Magic Realism", "Symbolism"],
-        "color_mood": "Cool tones",
+        "color_mood": "Cool tones", 
         "lighting": "Blue hour",
         "enhancement": "translucent, ghostly, luminous, otherworldly atmosphere"
     },
     "Mystical": {
         "styles": ["High Fantasy", "Sacred Geometry", "Mandala"],
-        "color_mood": "Deep Jewels",
-        "lighting": "Golden hour",
-        "enhancement": "magical aura, ancient symbols, mystical energy, enchanted glow"
+        "color_mood": "Warm tones",
+        "lighting": "Golden hour", 
+        "enhancement": "magical aura, ancient symbols, mystical energy, enchanted"
     },
-    "Surreal": {
-        "styles": ["Surrealism", "Dream Imagery", "Metaphysical Art"],
-        "color_mood": "Vibrant",
-        "lighting": "Dramatic",
-        "enhancement": "impossible geometry, floating objects, dream logic, melting forms"
-    },
-    "Whimsical": {
-        "styles": ["Children's Book Illustration", "Naive Art", "Folk Art"],
-        "color_mood": "Vibrant",
-        "lighting": "Natural",
-        "enhancement": "playful characters, impossible physics, childlike wonder, charming details"
-    },
-    "Magical": {
-        "styles": ["Magic Realism", "Fantasy", "Enchanted"],
-        "color_mood": "Iridescent",
-        "lighting": "Golden hour",
-        "enhancement": "sparkles, magical auras, impossible wonders, shimmering particles"
-    },
-    "Enchanted": {
-        "styles": ["Fairy Tale", "Magic Realism", "Romanticism"],
-        "color_mood": "Pastel",
-        "lighting": "Twilight",
-        "enhancement": "fairy tale atmosphere, magical transformation, glowing flora"
-    },
-    "Fairytale": {
-        "styles": ["Fairy Tale", "Children's Book", "Whimsical"],
-        "color_mood": "Storybook Pastels",
-        "lighting": "Soft",
-        "enhancement": "storybook characters, magical kingdoms, happy endings, talking animals"
-    },
-    "Cosmic": {
-        "styles": ["Space Art", "Nebula Painting", "Abstract"],
-        "color_mood": "Cosmic Blues & Purples",
-        "lighting": "Starlight",
-        "enhancement": "galaxies, nebulae, constellations, celestial bodies, cosmic dust"
-    },
-    "Quantum": {
-        "styles": ["Abstract", "Generative Art", "Fractal Art"],
-        "color_mood": "Digital Neon",
-        "lighting": "Pulsing",
-        "enhancement": "subatomic particles, energy fields, probability clouds, interconnected webs"
-    },
-
-    # --- Dark & Foreboding ---
-    "Dark": {
-        "styles": ["Gothic", "Dark Fantasy", "Noir"],
-        "color_mood": "Monochrome",
-        "lighting": "Low Key",
-        "enhancement": "deep shadows, darkness, mysterious atmosphere, foreboding mood"
-    },
-    "Gothic": {
-        "styles": ["Gothic Art", "Medieval", "Romanticism"],
-        "color_mood": "Monochrome with Red Accent",
-        "lighting": "Candlelight",
-        "enhancement": "cathedral architecture, gargoyles, stained glass, dramatic arches"
-    },
-    "Horror": {
-        "styles": ["Horror", "Body Horror", "Gothic"],
-        "color_mood": "Desaturated Reds",
-        "lighting": "Harsh",
-        "enhancement": "terrifying, nightmarish, grotesque, unsettling atmosphere, jump scares"
-    },
-    "Creepy": {
-        "styles": ["Horror", "Surrealism", "Found Footage"],
-        "color_mood": "Sickly Greens",
-        "lighting": "Flickering",
-        "enhancement": "uncanny valley, disturbing details, eerie silence, things that are 'off'"
-    },
-    "Spooky": {
-        "styles": ["Gothic", "Halloween", "Dark Fantasy"],
-        "color_mood": "High contrast Orange & Black",
-        "lighting": "Moonlight",
-        "enhancement": "haunted house, ghosts, cobwebs, spooky atmosphere, jack-o-lanterns"
-    },
-    "Eerie": {
-        "styles": ["Surrealism", "Liminal Space", "Film Noir"],
-        "color_mood": "Cool tones",
-        "lighting": "Foggy",
-        "enhancement": "unsettling calm, empty spaces, strange silence, liminal feeling"
-    },
-    "Haunting": {
-        "styles": ["Gothic", "Romanticism", "Symbolism"],
-        "color_mood": "Monochrome",
-        "lighting": "Blue hour",
-        "enhancement": "ghost stories, abandoned places, melancholic beauty, lingering spirits"
-    },
-    "Dystopian": {
-        "styles": ["Cyberpunk", "Brutalism", "Industrial"],
-        "color_mood": "Gritty & Muted",
-        "lighting": "Harsh Neon",
-        "enhancement": "oppressive government, environmental disaster, loss of individuality"
-    },
-    "Apocalyptic": {
-        "styles": ["Post-Apocalyptic", "Wasteland", "Survivalist"],
-        "color_mood": "Dusty & Burnt",
-        "lighting": "Overcast",
-        "enhancement": "ruined cities, overgrown nature, survival gear, desolate landscapes"
-    },
-    "Chaotic": {
-        "styles": ["Abstract Expressionism", "Glitch Art", "Dadaism"],
-        "color_mood": "Clashing Colors",
-        "lighting": "Strobe",
-        "enhancement": "chaotic energy, random patterns, spontaneous creation, visual noise"
-    },
-
-    # --- Calm & Serene ---
     "Serene": {
         "styles": ["Japanese Minimalism", "Sumi-e", "Impressionism"],
         "color_mood": "Natural",
-        "lighting": "Morning Light",
-        "enhancement": "peaceful, calm waters, gentle breeze, tranquil setting, sense of stillness"
-    },
-    "Peaceful": {
-        "styles": ["Impressionism", "Landscape Photography", "Zen"],
-        "color_mood": "Soft Greens & Blues",
-        "lighting": "Soft",
-        "enhancement": "harmony, balance, gentle movements, inner peace, quiet contemplation"
-    },
-    "Tranquil": {
-        "styles": ["Japanese Minimalism", "Zen", "Watercolor"],
-        "color_mood": "Cool tones",
         "lighting": "Natural",
-        "enhancement": "still water, meditation, quiet moments, absolute serenity"
+        "enhancement": "peaceful, calm waters, gentle breeze, tranquil setting"
     },
-    "Calm": {
-        "styles": ["Minimalism", "Zen", "Pastoral"],
-        "color_mood": "Pastel",
-        "lighting": "Soft",
-        "enhancement": "gentle breeze, calm seas, peaceful meadows, soothing repetition"
-    },
-    "Relaxing": {
-        "styles": ["Impressionism", "Pastoral", "Zen"],
-        "color_mood": "Warm tones",
-        "lighting": "Golden hour",
-        "enhancement": "comfortable spaces, soft textures, soothing colors, cozy nooks"
-    },
-    "Soothing": {
-        "styles": ["Watercolor", "Pastel", "Soft Focus"],
-        "color_mood": "Muted Pastels",
-        "lighting": "Diffused",
-        "enhancement": "gentle gradients, soft edges, comforting warmth, healing light"
-    },
-    "Zen": {
-        "styles": ["Japanese Minimalism", "Sumi-e", "Enso"],
-        "color_mood": "Monochrome",
-        "lighting": "Natural",
-        "enhancement": "simplicity, balance, mindfulness, empty space (Ma), rock gardens"
-    },
-    "Meditative": {
-        "styles": ["Mandala", "Sacred Geometry", "Abstract"],
-        "color_mood": "Earthy Tones",
-        "lighting": "Natural",
-        "enhancement": "sacred patterns, inner reflection, spiritual journey, hypnotic repetition"
-    },
-    "Spiritual": {
-        "styles": ["Sacred Geometry", "Mandala", "Visionary Art"],
-        "color_mood": "Gold & White",
-        "lighting": "Divine Light",
-        "enhancement": "divine light, sacred symbols, transcendent experience, aura"
-    },
-    "Harmony": {
-        "styles": ["Harmonious", "Unified", "Peaceful"],
-        "color_mood": "Analogous Colors",
-        "lighting": "Soft",
-        "enhancement": "perfect harmony, unified composition, peaceful unity, visual balance"
-    },
-
-    # --- Sentimental & Emotional ---
     "Nostalgic": {
-        "styles": ["Vintage Photography", "Sepia", "Retro"],
-        "color_mood": "Faded Vintage",
+        "styles": ["Vintage", "Sepia", "Film Photography"],
+        "color_mood": "Vintage",
         "lighting": "Golden hour",
-        "enhancement": "faded memories, old photographs, film grain, light leaks, sepia tones"
+        "enhancement": "faded memories, old photographs, sepia tones, nostalgic warmth"
     },
     "Romantic": {
         "styles": ["Rococo", "Impressionism", "Art Nouveau"],
-        "color_mood": "Rose & Gold",
+        "color_mood": "Pastel",
         "lighting": "Candlelight",
-        "enhancement": "soft roses, gentle breeze, romantic sunset, tender moments, lace"
+        "enhancement": "soft roses, gentle breeze, romantic sunset, tender moments"
     },
     "Melancholic": {
-        "styles": ["Romanticism", "Symbolism", "Blue Period"],
-        "color_mood": "Cool tones",
-        "lighting": "Rainy Day",
-        "enhancement": "solitude, rain on windowpane, autumn leaves, bittersweet emotions"
+        "styles": ["Expressionism", "Dark Art", "Gothic"],
+        "color_mood": "Muted",
+        "lighting": "Overcast",
+        "enhancement": "rain drops, autumn leaves, solitary figures, wistful mood"
     },
-    "Sad": {
-        "styles": ["Melancholic", "Blue Period", "Sorrowful"],
-        "color_mood": "Desaturated Blues",
-        "lighting": "Blue hour",
-        "enhancement": "deep sadness, sorrowful mood, tears, melancholic beauty, heartbreak"
+    "Whimsical": {
+        "styles": ["Cartoon", "Children's Book", "Fantasy"],
+        "color_mood": "Bright",
+        "lighting": "Playful",
+        "enhancement": "colorful creatures, magical elements, playful proportions, joy"
     },
-    "Lonely": {
-        "styles": ["Solitude", "Isolated", "Melancholic"],
-        "color_mood": "Cool Grays",
-        "lighting": "Single Light Source",
-        "enhancement": "profound loneliness, solitary figure, vast empty spaces, isolation"
-    },
-    "Hopeful": {
-        "styles": ["Impressionism", "Luminism", "Contemporary"],
-        "color_mood": "Sunrise Pinks & Oranges",
-        "lighting": "Sunrise",
-        "enhancement": "first light, new beginnings, looking towards the horizon, sense of optimism"
-    },
-    "Joyful": {
-        "styles": ["Pop Art", "Fauvism", "Celebration"],
-        "color_mood": "Bright & Vibrant",
-        "lighting": "Sunny Day",
-        "enhancement": "overflowing joy, radiant happiness, celebration, laughter, confetti"
-    },
-    "Happy": {
-        "styles": ["Happy", "Cheerful", "Bright"],
-        "color_mood": "Sunny Yellows",
-        "lighting": "Natural",
-        "enhancement": "genuine happiness, cheerful disposition, bright smile, sun-drenched scenes"
-    },
-    "Triumphant": {
-        "styles": ["Heroic Realism", "Epic", "Monumental"],
-        "color_mood": "Gold & Royal Blue",
-        "lighting": "Spotlight",
-        "enhancement": "victory pose, raising a flag, overcoming obstacles, heroic glory"
-    },
-    "Anxious": {
-        "styles": ["Expressionism", "Surrealism", "Glitch Art"],
-        "color_mood": "Jarring & Dissonant",
-        "lighting": "Harsh & Unstable",
-        "enhancement": "sense of dread, shaky lines, distorted reality, claustrophobia"
-    },
-
-    # --- Energetic & Dynamic ---
-    "Energetic": {
-        "styles": ["Abstract Expressionism", "Action Painting", "Futurism"],
-        "color_mood": "Vibrant",
-        "lighting": "Dynamic",
-        "enhancement": "dynamic movement, explosive energy, kinetic force, motion lines"
-    },
-    "Dynamic": {
-        "styles": ["Futurism", "Cubo-Futurism", "Motion Graphics"],
-        "color_mood": "High contrast",
-        "lighting": "Dramatic",
-        "enhancement": "speed lines, motion blur, powerful forces, sense of velocity"
-    },
-    "Vibrant": {
-        "styles": ["Pop Art", "Fauvism", "Street Art"],
-        "color_mood": "Saturated & Vibrant",
-        "lighting": "Bright",
-        "enhancement": "saturated colors, bold contrasts, lively atmosphere, full of life"
-    },
-    "Bold": {
-        "styles": ["Abstract Expressionism", "Pop Art", "Graffiti"],
-        "color_mood": "High contrast",
-        "lighting": "Dramatic",
-        "enhancement": "strong statements, powerful imagery, confident strokes, unapologetic"
-    },
-    "Powerful": {
-        "styles": ["Epic", "Heroic", "Monumental"],
-        "color_mood": "High contrast",
-        "lighting": "God Rays",
-        "enhancement": "overwhelming scale, mighty forces, awe-inspiring presence, raw power"
-    },
-    "Intense": {
-        "styles": ["Expressionism", "Baroque", "Dramatic"],
-        "color_mood": "Deep Reds & Blacks",
-        "lighting": "Harsh",
-        "enhancement": "extreme emotions, raw energy, overwhelming presence, high tension"
-    },
-    "Dramatic": {
-        "styles": ["Baroque", "Romanticism", "Chiaroscuro"],
-        "color_mood": "High contrast",
-        "lighting": "Dramatic",
-        "enhancement": "theatrical lighting, emotional tension, grand gestures, heightened reality"
-    },
-    "Epic": {
-        "styles": ["Historical Painting", "Heroic", "Cinematic"],
-        "color_mood": "Cinematic",
-        "lighting": "Dramatic",
-        "enhancement": "legendary scale, heroic proportions, mythical grandeur, vast landscapes"
-    },
-    "Explosive": {
-        "styles": ["Action Painting", "Abstract", "High-Speed Photography"],
-        "color_mood": "Fiery Oranges & Yellows",
-        "lighting": "Flash",
-        "enhancement": "detonation, shrapnel, shockwaves, bursting energy, debris"
-    },
-    "Frenzied": {
-        "styles": ["Action Painting", "Tachisme", "Abstract Expressionism"],
-        "color_mood": "Chaotic Mix",
-        "lighting": "Strobe",
-        "enhancement": "frantic brushstrokes, chaotic movement, loss of control, high-speed action"
-    },
-
-    # --- Minimalist & Modern ---
-    "Minimalist": {
-        "styles": ["Minimalism", "Modern", "Clean"],
-        "color_mood": "Monochrome",
-        "lighting": "Natural",
-        "enhancement": "clean lines, empty space, essential elements only, simplicity"
-    },
-    "Clean": {
-        "styles": ["Modern", "Minimalist", "Scandinavian Design"],
-        "color_mood": "White & Light Wood",
-        "lighting": "Bright & Airy",
-        "enhancement": "crisp edges, pure forms, uncluttered composition, immaculate"
-    },
-    "Simple": {
-        "styles": ["Minimalism", "Zen", "Modern"],
-        "color_mood": "Natural",
-        "lighting": "Soft",
-        "enhancement": "basic shapes, clear purpose, effortless beauty, fundamental forms"
-    },
-    "Modern": {
-        "styles": ["Mid-Century Modern", "Bauhaus", "Contemporary"],
-        "color_mood": "Neutral with a Pop of Color",
-        "lighting": "Architectural",
-        "enhancement": "sleek design, geometric forms, contemporary style, functional"
-    },
-    "Structured": {
-        "styles": ["De Stijl", "Constructivism", "Geometric"],
-        "color_mood": "Primary Colors",
-        "lighting": "Flat",
-        "enhancement": "organized composition, systematic arrangement, grid layout, architectural"
-    },
-    "Geometric": {
-        "styles": ["Geometric Abstraction", "Cubism", "Suprematism"],
-        "color_mood": "High contrast",
-        "lighting": "Studio",
-        "enhancement": "geometric shapes, mathematical precision, structured patterns, symmetry"
-    },
-    "Symmetrical": {
-        "styles": ["Symmetrical", "Balanced", "Formalism"],
-        "color_mood": "Natural",
-        "lighting": "Even",
-        "enhancement": "perfect symmetry, mirror images, balanced composition, classical order"
-    },
-    "Asymmetrical": {
-        "styles": ["Asymmetrical", "Unbalanced", "Dynamic"],
+    "Surreal": {
+        "styles": ["Surrealism", "Dream Imagery", "Magic Realism"],
         "color_mood": "Vibrant",
         "lighting": "Dramatic",
-        "enhancement": "asymmetric composition, dynamic balance, visual tension, off-kilter"
-    },
-    "Balanced": {
-        "styles": ["Balanced", "Harmonious", "Classical"],
-        "color_mood": "Natural",
-        "lighting": "Natural",
-        "enhancement": "perfect balance, harmonious proportions, stability, visual equilibrium"
-    },
-    "Ordered": {
-        "styles": ["Ordered", "Systematic", "Grid-based"],
-        "color_mood": "Monochromatic",
-        "lighting": "Flat",
-        "enhancement": "perfect order, systematic arrangement, precise alignment, logical flow"
-    },
-
-    # --- Tech & Sci-Fi ---
-    "Futuristic": {
-        "styles": ["Cyberpunk", "Sci-Fi Concept Art", "Digital Art"],
-        "color_mood": "Neon",
-        "lighting": "Holographic",
-        "enhancement": "advanced technology, holographic displays, sleek surfaces, flying vehicles"
+        "enhancement": "impossible geometry, floating objects, dream logic, surreal landscapes"
     },
     "Cyberpunk": {
-        "styles": ["Cyberpunk", "Neon Noir", "Biopunk"],
-        "color_mood": "Neon Pinks & Blues",
+        "styles": ["Neon Art", "Digital Art", "Futurism"],
+        "color_mood": "Neon",
         "lighting": "Neon",
-        "enhancement": "neon lights, rain-soaked streets, high-tech low-life, cybernetics"
+        "enhancement": "holographic displays, rain-soaked streets, chrome details, urban decay"
     },
     "Steampunk": {
-        "styles": ["Steampunk", "Victorian Futurism", "Mechanical"],
-        "color_mood": "Brass & Sepia",
-        "lighting": "Gaslight",
-        "enhancement": "brass gears, steam pipes, Victorian aesthetics, clockwork mechanisms"
+        "styles": ["Victorian", "Industrial", "Retro-Future"],
+        "color_mood": "Bronze",
+        "lighting": "Steam",
+        "enhancement": "brass gears, steam pipes, Victorian elegance, mechanical details"
     },
-    "Technological": {
-        "styles": ["Tech", "Digital", "Futuristic"],
-        "color_mood": "Cool Blues & Silvers",
-        "lighting": "LED",
-        "enhancement": "circuits, data streams, technological interfaces, glowing lines"
-    },
-    "Digital": {
-        "styles": ["Digital Art", "Pixel Art", "Glitch Art"],
-        "color_mood": "RGB",
-        "lighting": "Screen Glow",
-        "enhancement": "pixels, digital artifacts, computer-generated imagery, glitches"
-    },
-    "Neon": {
-        "styles": ["Neon", "Cyberpunk", "Electric"],
-        "color_mood": "Electric Neon",
-        "lighting": "Neon",
-        "enhancement": "glowing neon signs, electric colors, night scenes, vibrant reflections"
-    },
-    "Mechanical": {
-        "styles": ["Mechanical", "Technical Drawing", "Industrial"],
-        "color_mood": "Monochrome",
-        "lighting": "Studio",
-        "enhancement": "precise mechanisms, technical blueprints, engineered parts, gears and pistons"
-    },
-    "Industrial": {
-        "styles": ["Industrial", "Brutalism", "Utilitarian"],
-        "color_mood": "Grays & Rust",
-        "lighting": "Harsh",
-        "enhancement": "machinery, metal textures, functional design, exposed pipes, concrete"
-    },
-    "Holographic": {
-        "styles": ["Futuristic", "Digital Art", "Sci-Fi"],
-        "color_mood": "Iridescent & Translucent",
-        "lighting": "Holographic",
-        "enhancement": "translucent projections, light-based interfaces, shimmering data"
-    },
-    "Biomechanical": {
-        "styles": ["Biopunk", "H.R. Giger", "Surrealism"],
-        "color_mood": "Organic & Metallic",
-        "lighting": "Organic Glow",
-        "enhancement": "fusion of flesh and machine, organic technology, alien-like structures"
-    },
-
-    # --- Vintage & Retro ---
-    "Retro": {
-        "styles": ["Retro Futurism", "Mid-Century Modern", "Pop Art"],
-        "color_mood": "70s Oranges & Browns",
-        "lighting": "Natural",
-        "enhancement": "nostalgic colors, classic design, period styling, distinct era feel"
+    "Gothic": {
+        "styles": ["Gothic Art", "Dark Romance", "Medieval"],
+        "color_mood": "Dark",
+        "lighting": "Dramatic shadows",
+        "enhancement": "stone gargoyles, stained glass, dramatic arches, mysterious shadows"
     },
     "Vintage": {
-        "styles": ["Vintage Photography", "Antique", "Classic"],
-        "color_mood": "Faded Sepia",
-        "lighting": "Golden hour",
-        "enhancement": "aged patina, classic elegance, timeless beauty, worn textures"
+        "styles": ["Retro", "Pin-up", "Art Deco"],
+        "color_mood": "Sepia",
+        "lighting": "Warm vintage",
+        "enhancement": "aged paper texture, classic typography, faded colors, timeless elegance"
     },
-    "Sepia": {
-        "styles": ["Sepia", "Vintage", "Antique"],
-        "color_mood": "Sepia Tones",
-        "lighting": "Soft",
-        "enhancement": "sepia tones, aged photographs, nostalgic warmth, old-timey feel"
+    "Retro": {
+        "styles": ["80s Aesthetic", "Synthwave", "Pop Art"],
+        "color_mood": "Neon pink",
+        "lighting": "Synthwave",
+        "enhancement": "geometric patterns, chrome text, retro futurism, nostalgic vibes"
     },
-    "Film_Noir": {
-        "styles": ["Film Noir", "Chiaroscuro", "Hardboiled"],
-        "color_mood": "High-Contrast Monochrome",
-        "lighting": "Low Key",
-        "enhancement": "femme fatale, Venetian blinds shadows, smoke, mystery, cynical mood"
+    "Futuristic": {
+        "styles": ["Sci-Fi", "Minimalism", "Digital Art"],
+        "color_mood": "Cool metallic",
+        "lighting": "LED",
+        "enhancement": "sleek surfaces, holographic elements, clean lines, advanced technology"
     },
-    "Art_Deco": {
-        "styles": ["Art Deco", "Roaring Twenties", "Geometric"],
-        "color_mood": "Gold, Black, & Silver",
-        "lighting": "Theatrical",
-        "enhancement": "streamlined forms, geometric patterns, luxury materials, symmetrical designs"
+    "Post-Apocalyptic": {
+        "styles": ["Dystopian", "Industrial", "Weathered"],
+        "color_mood": "Rust and dust",
+        "lighting": "Harsh sunlight",
+        "enhancement": "rusted metal, cracked earth, abandoned structures, survival aesthetic"
     },
-    "Mid_Century_Modern": {
-        "styles": ["Mid-Century Modern", "Googie Architecture", "Retro"],
-        "color_mood": "Teal, Orange, & Walnut",
-        "lighting": "Natural",
-        "enhancement": "clean lines, organic shapes, minimalist decoration, large windows"
-    },
-    "Atomic_Age": {
-        "styles": ["Atomic Age", "Googie", "Retro Futurism"],
-        "color_mood": "Pastel & Primary",
-        "lighting": "Bright",
-        "enhancement": "starbursts, boomerangs, atomic models, space-age optimism"
-    },
-    "Psychedelic": {
-        "styles": ["Psychedelic Art", "Op Art", "Surrealism"],
-        "color_mood": "Kaleidoscopic",
-        "lighting": "Pulsating",
-        "enhancement": "swirling patterns, vibrant colors, distorted visuals, melting objects"
-    },
-    "Victorian": {
-        "styles": ["Victorian", "Gothic Revival", "Steampunk"],
-        "color_mood": "Rich & Dark",
-        "lighting": "Gaslight",
-        "enhancement": "ornate details, complex patterns, dark woods, intricate metalwork"
-    },
-    "Baroque": {
-        "styles": ["Baroque", "Rococo", "Dramatic"],
-        "color_mood": "Rich Golds & Reds",
-        "lighting": "Chiaroscuro",
-        "enhancement": "drama, exuberance, grandeur, intricate detail, dynamic movement"
-    },
-
-    # --- Natural & Organic ---
-    "Nature": {
-        "styles": ["Landscape Painting", "Botanical Illustration", "Organic"],
-        "color_mood": "Earth tones",
-        "lighting": "Natural",
-        "enhancement": "natural textures, organic forms, living ecosystems, flora and fauna"
-    },
-    "Organic": {
-        "styles": ["Organic", "Natural", "Flowing"],
-        "color_mood": "Earth tones",
-        "lighting": "Natural",
-        "enhancement": "curved lines, natural patterns, growing forms, non-geometric"
-    },
-    "Earthy": {
-        "styles": ["Earth Art", "Natural", "Rustic"],
-        "color_mood": "Browns, Greens, & Ochres",
-        "lighting": "Natural",
-        "enhancement": "soil, stone, wood textures, natural materials, grounded feeling"
-    },
-    "Forest": {
-        "styles": ["Landscape", "Nature", "Green"],
-        "color_mood": "Shades of Green",
-        "lighting": "Dappled Sunlight",
-        "enhancement": "dense foliage, ancient trees, woodland atmosphere, moss and ferns"
-    },
-    "Ocean": {
-        "styles": ["Seascape", "Marine Art", "Underwater Photography"],
-        "color_mood": "Ocean Blues & Greens",
-        "lighting": "Underwater",
-        "enhancement": "crashing waves, marine life, vast horizons, oceanic depths, coral reefs"
-    },
-    "Mountain": {
-        "styles": ["Landscape", "Alpine", "Majestic"],
-        "color_mood": "Cool Grays & Blues",
-        "lighting": "Alpenglow",
-        "enhancement": "towering peaks, rocky terrain, alpine atmosphere, vast vistas"
-    },
-    "Desert": {
-        "styles": ["Desert Landscape", "Arid", "Minimalist"],
-        "color_mood": "Warm Oranges & Yellows",
-        "lighting": "Harsh Sun",
-        "enhancement": "sand dunes, cacti, sparse vegetation, heat haze, cracked earth"
-    },
-    "Jungle": {
-        "styles": ["Tropical", "Dense", "Lush"],
-        "color_mood": "Lush Greens & Vibrant Flowers",
-        "lighting": "Canopy Light",
-        "enhancement": "thick vegetation, exotic wildlife, humid atmosphere, hanging vines"
+    "Tropical": {
+        "styles": ["Paradise", "Lush", "Vibrant Nature"],
+        "color_mood": "Tropical bright",
+        "lighting": "Tropical sun",
+        "enhancement": "palm trees, crystal waters, exotic flowers, island paradise"
     },
     "Arctic": {
-        "styles": ["Arctic Landscape", "Minimalist", "Cold"],
-        "color_mood": "Icy Blues & Whites",
-        "lighting": "Blue hour",
-        "enhancement": "ice formations, glaciers, snow, polar wildlife, aurora borealis"
+        "styles": ["Minimalist", "Ice Sculpture", "Nordic"],
+        "color_mood": "Ice blue",
+        "lighting": "Aurora",
+        "enhancement": "ice crystals, northern lights, pristine snow, frozen landscapes"
     },
-    "Volcanic": {
-        "styles": ["Volcanic", "Primordial", "Dramatic"],
-        "color_mood": "Fiery Reds & Blacks",
-        "lighting": "Lava Glow",
-        "enhancement": "lava flows, volcanic smoke, obsidian rock, primordial landscape"
+    "Desert": {
+        "styles": ["Southwestern", "Minimalist", "Earth Tones"],
+        "color_mood": "Sand and terra cotta",
+        "lighting": "Desert sun",
+        "enhancement": "sand dunes, cacti, vast horizons, heat shimmer"
     },
-    "Swamp": {
-        "styles": ["Swamp", "Bayou", "Mysterious"],
-        "color_mood": "Murky Greens & Browns",
-        "lighting": "Foggy",
-        "enhancement": "cypress trees, spanish moss, murky water, mysterious atmosphere"
+    "Forest": {
+        "styles": ["Nature Art", "Organic", "Green"],
+        "color_mood": "Forest green",
+        "lighting": "Dappled sunlight",
+        "enhancement": "moss-covered trees, forest floor, filtered light, natural harmony"
     },
-    "Crystalline": {
-        "styles": ["Geode Art", "Crystal", "Abstract"],
-        "color_mood": "Iridescent",
-        "lighting": "Refractive",
-        "enhancement": "crystal formations, geometric facets, translucent materials, glowing gems"
+    "Ocean": {
+        "styles": ["Marine", "Fluid", "Abstract"],
+        "color_mood": "Ocean blue",
+        "lighting": "Underwater",
+        "enhancement": "waves, sea foam, coral reefs, marine life, flowing water"
     },
-
-    # --- Growth & Life ---
-    "Healing": {
-        "styles": ["Healing Art", "Soft Focus", "Abstract"],
-        "color_mood": "Warm Pastels",
-        "lighting": "Golden Hour",
-        "enhancement": "healing process, recovery journey, mending light, gentle growth"
+    "Mountain": {
+        "styles": ["Landscape", "Majestic", "Rocky"],
+        "color_mood": "Stone and sky",
+        "lighting": "Mountain light",
+        "enhancement": "peaks and valleys, crisp air, rugged terrain, scenic vistas"
     },
-    "Growing": {
-        "styles": ["Time-lapse", "Botanical", "Development"],
-        "color_mood": "Spring Greens",
-        "lighting": "Natural",
-        "enhancement": "sprouts, vines, unfurling leaves, sense of progress and development"
+    "Urban": {
+        "styles": ["Street Art", "Architecture", "Modern"],
+        "color_mood": "Concrete gray",
+        "lighting": "Street lights",
+        "enhancement": "city skylines, street scenes, urban energy, architectural details"
     },
-    "Blooming": {
-        "styles": ["Botanical Illustration", "Macro Photography", "Impressionism"],
-        "color_mood": "Vibrant Floral",
-        "lighting": "Morning Light",
-        "enhancement": "flowers in full bloom, petals opening, vibrant colors, flourishing life"
+    "Rural": {
+        "styles": ["Country", "Pastoral", "Folk Art"],
+        "color_mood": "Earth tones",
+        "lighting": "Country sun",
+        "enhancement": "farmlands, country roads, simple life, rustic charm"
     },
-    "Flourishing": {
-        "styles": ["Lush", "Abundant", "Vibrant"],
-        "color_mood": "Rich & Saturated",
-        "lighting": "Bright",
-        "enhancement": "thriving ecosystems, abundance of life, lush landscapes, peak vitality"
+    "Industrial": {
+        "styles": ["Brutalist", "Metal", "Raw"],
+        "color_mood": "Steel gray",
+        "lighting": "Factory lights",
+        "enhancement": "metal structures, pipes, machinery, raw materials"
     },
-    "Thriving": {
-        "styles": ["Vibrant", "Healthy", "Strong"],
-        "color_mood": "Strong & Healthy Tones",
-        "lighting": "Full Sun",
-        "enhancement": "peak condition, vibrant health, strong growth, resilience"
+    "Botanical": {
+        "styles": ["Scientific Illustration", "Nature", "Detailed"],
+        "color_mood": "Natural green",
+        "lighting": "Natural light",
+        "enhancement": "detailed plant structures, scientific accuracy, natural beauty"
     },
-    "Living": {
-        "styles": ["Documentary", "Candid", "Natural"],
-        "color_mood": "Natural",
-        "lighting": "Natural",
-        "enhancement": "breathing, moving, interacting, full of life and activity"
+    "Cosmic": {
+        "styles": ["Space Art", "Abstract", "Nebula"],
+        "color_mood": "Deep space",
+        "lighting": "Starlight",
+        "enhancement": "galaxies, nebulae, cosmic phenomena, infinite space"
     },
-    "Breathing": {
-        "styles": ["Meditative", "Calm", "Flowing"],
-        "color_mood": "Soft & Airy",
-        "lighting": "Soft",
-        "enhancement": "rhythmic movement, gentle expansion and contraction, life-giving breath"
+    "Celestial": {
+        "styles": ["Astronomical", "Mystical", "Sacred"],
+        "color_mood": "Celestial gold",
+        "lighting": "Divine light",
+        "enhancement": "constellations, celestial bodies, divine imagery, cosmic harmony"
     },
-    "Pulsing": {
-        "styles": ["Abstract", "Generative Art", "Dynamic"],
-        "color_mood": "Rhythmic Colors",
-        "lighting": "Pulsing",
-        "enhancement": "rhythmic glow, energy waves, heartbeat, vibrant life force"
+    "Lunar": {
+        "styles": ["Monochromatic", "Minimal", "Ethereal"],
+        "color_mood": "Silver and black",
+        "lighting": "Moonlight",
+        "enhancement": "moon phases, night scenes, silver light, nocturnal beauty"
     },
-    "Rebirth": {
-        "styles": ["Symbolism", "Visionary", "Mythological"],
-        "color_mood": "Gold & White",
-        "lighting": "Sunrise",
-        "enhancement": "emerging from darkness, phoenix rising, new beginnings, transformation"
+    "Solar": {
+        "styles": ["Radiant", "Warm", "Energy"],
+        "color_mood": "Golden yellow",
+        "lighting": "Sunlight",
+        "enhancement": "sun rays, solar energy, warm radiance, life-giving light"
     },
-    "Genesis": {
-        "styles": ["Primordial", "Abstract", "Cosmic"],
-        "color_mood": "Elemental",
-        "lighting": "Creative Spark",
-        "enhancement": "creation of worlds, forming elements, the very beginning, divine creation"
+    "Storm": {
+        "styles": ["Dynamic", "Dramatic", "Weather"],
+        "color_mood": "Storm gray",
+        "lighting": "Lightning",
+        "enhancement": "storm clouds, lightning bolts, wind, dramatic weather"
     },
-
-    # --- Color & Light Focused ---
-    "Colorful": {
-        "styles": ["Pop Art", "Vibrant", "Rainbow"],
-        "color_mood": "Full Spectrum",
-        "lighting": "Bright",
-        "enhancement": "rainbow spectrum, saturated hues, color explosion, playful palette"
+    "Peaceful": {
+        "styles": ["Zen", "Minimalist", "Calm"],
+        "color_mood": "Soft neutrals",
+        "lighting": "Gentle",
+        "enhancement": "still water, meditation, balance, inner peace"
     },
-    "Rainbow": {
-        "styles": ["Rainbow", "Spectrum", "Prismatic"],
-        "color_mood": "Vibrant",
-        "lighting": "Prismatic",
-        "enhancement": "full spectrum, prismatic effects, color gradients, light refraction"
+    "Chaotic": {
+        "styles": ["Abstract Expressionism", "Dynamic", "Energetic"],
+        "color_mood": "Clashing colors",
+        "lighting": "Strobe",
+        "enhancement": "dynamic motion, explosive energy, disorder, intense action"
+    },
+    "Minimalist": {
+        "styles": ["Modern", "Clean", "Simple"],
+        "color_mood": "Monochrome",
+        "lighting": "Clean",
+        "enhancement": "negative space, clean lines, simplicity, less is more"
+    },
+    "Maximalist": {
+        "styles": ["Ornate", "Decorative", "Abundant"],
+        "color_mood": "Rich and varied",
+        "lighting": "Ornate",
+        "enhancement": "intricate details, layered textures, abundant decoration, more is more"
+    },
+    "Neon": {
+        "styles": ["Electric", "Bright", "Synthetic"],
+        "color_mood": "Electric bright",
+        "lighting": "Neon glow",
+        "enhancement": "glowing tubes, electric colors, night club atmosphere, artificial light"
     },
     "Pastel": {
-        "styles": ["Pastel", "Soft", "Shabby Chic"],
-        "color_mood": "Soft Pastels",
-        "lighting": "Soft",
-        "enhancement": "soft pastels, gentle hues, delicate tones, dreamy quality"
+        "styles": ["Soft", "Delicate", "Sweet"],
+        "color_mood": "Soft pastels",
+        "lighting": "Soft diffused",
+        "enhancement": "gentle colors, soft textures, delicate beauty, innocent charm"
     },
     "Monochrome": {
-        "styles": ["Monochrome", "Black and White", "Grayscale"],
-        "color_mood": "Monochrome",
-        "lighting": "Dramatic",
-        "enhancement": "single color palette, tonal variations, focus on form and texture"
+        "styles": ["Black and White", "Classic", "Timeless"],
+        "color_mood": "Grayscale",
+        "lighting": "Dramatic contrast",
+        "enhancement": "high contrast, tonal variation, classic elegance, timeless appeal"
     },
-    "Black_White": {
-        "styles": ["Black and White Photography", "Film Noir", "Classic"],
-        "color_mood": "High-Contrast Monochrome",
-        "lighting": "Dramatic",
-        "enhancement": "high contrast, dramatic shadows, classic photography, timeless feel"
+    "Sepia": {
+        "styles": ["Vintage Photography", "Historical", "Warm"],
+        "color_mood": "Brown tones",
+        "lighting": "Warm sepia",
+        "enhancement": "aged photographs, historical feel, warm brown tones, nostalgic mood"
     },
-    "Warm": {
-        "styles": ["Warm", "Cozy", "Inviting"],
-        "color_mood": "Warm tones (Reds, Oranges, Yellows)",
-        "lighting": "Golden hour",
-        "enhancement": "warm colors, cozy atmosphere, inviting glow, comfortable feeling"
+    "Vibrant": {
+        "styles": ["Pop Art", "Energetic", "Bright"],
+        "color_mood": "Saturated",
+        "lighting": "Bright and colorful",
+        "enhancement": "saturated colors, high energy, bold contrasts, eye-catching"
     },
-    "Cool": {
-        "styles": ["Cool", "Fresh", "Calm"],
-        "color_mood": "Cool tones (Blues, Greens, Purples)",
-        "lighting": "Blue hour",
-        "enhancement": "cool colors, fresh atmosphere, calming blues, crisp feeling"
+    "Muted": {
+        "styles": ["Subtle", "Sophisticated", "Understated"],
+        "color_mood": "Desaturated",
+        "lighting": "Soft muted",
+        "enhancement": "subtle colors, sophisticated palette, understated elegance"
     },
-    "Bright": {
-        "styles": ["Bright", "Sunny", "Cheerful"],
-        "color_mood": "Vibrant",
-        "lighting": "High Key",
-        "enhancement": "brilliant illumination, sunny disposition, radiant light, minimal shadows"
+    "Dark Academia": {
+        "styles": ["Gothic Revival", "Classical", "Scholarly"],
+        "color_mood": "Dark browns",
+        "lighting": "Library lamplight",
+        "enhancement": "old books, gothic architecture, scholarly atmosphere, intellectual pursuits"
     },
-    "Light": {
-        "styles": ["Light", "Airy", "Ethereal"],
-        "color_mood": "Pastel",
-        "lighting": "Soft",
-        "enhancement": "weightless, luminous, filled with light, delicate and airy"
+    "Light Academia": {
+        "styles": ["Classical", "Bright", "Scholarly"],
+        "color_mood": "Cream and gold",
+        "lighting": "Natural study light",
+        "enhancement": "sunlit libraries, classical learning, bright scholarly spaces, academic excellence"
     },
-    "Shadow": {
-        "styles": ["Chiaroscuro", "Tenebrism", "Dramatic"],
-        "color_mood": "Monochrome",
-        "lighting": "Low Key",
-        "enhancement": "dramatic shadows, silhouettes, shadow play, mystery and depth"
+    "Cottagecore": {
+        "styles": ["Rustic", "Country", "Homey"],
+        "color_mood": "Earth and florals",
+        "lighting": "Cozy home",
+        "enhancement": "cottage gardens, homemade crafts, rural simplicity, cozy domesticity"
     },
-    "Contrast": {
-        "styles": ["High Contrast", "Bold", "Graphic"],
-        "color_mood": "Complementary Colors",
-        "lighting": "Dramatic",
-        "enhancement": "stark contrasts, opposing elements, visual tension, graphic impact"
+    "Fairycore": {
+        "styles": ["Whimsical", "Magical", "Nature"],
+        "color_mood": "Magical pastels",
+        "lighting": "Fairy lights",
+        "enhancement": "fairy wings, mushroom circles, magical forests, enchanted nature"
     },
-    "Iridescent": {
-        "styles": ["Iridescent", "Holographic", "Prismatic"],
-        "color_mood": "Shifting Rainbow",
-        "lighting": "Multi-directional",
-        "enhancement": "mother of pearl effect, shifting colors, oil slick, shimmering surfaces"
+    "Dark Fantasy": {
+        "styles": ["Gothic Fantasy", "Horror", "Supernatural"],
+        "color_mood": "Dark mystical",
+        "lighting": "Supernatural glow",
+        "enhancement": "dark magic, supernatural beings, gothic castles, ominous atmosphere"
     },
-    "Fluorescent": {
-        "styles": ["Fluorescent", "UV Art", "Psychedelic"],
-        "color_mood": "Glowing Neon",
-        "lighting": "Blacklight",
-        "enhancement": "glowing under UV light, vibrant and electric, otherworldly colors"
+    "High Fantasy": {
+        "styles": ["Epic Fantasy", "Heroic", "Magical"],
+        "color_mood": "Rich fantasy",
+        "lighting": "Epic lighting",
+        "enhancement": "epic quests, magical realms, heroic adventures, fantasy creatures"
     },
-
-    # --- Textural & Abstract ---
-    "Soft": {
-        "styles": ["Soft Focus", "Sfumato", "Impressionism"],
-        "color_mood": "Pastel",
-        "lighting": "Diffused",
-        "enhancement": "soft textures, gentle transitions, tender touch, blurred edges"
+    "Sci-Fi": {
+        "styles": ["Science Fiction", "Technological", "Futuristic"],
+        "color_mood": "Metallic blue",
+        "lighting": "Sci-fi glow",
+        "enhancement": "space technology, alien worlds, futuristic cities, advanced science"
     },
-    "Hard": {
-        "styles": ["Hard Edge Painting", "Brutalism", "Geometric"],
+    "Horror": {
+        "styles": ["Dark", "Frightening", "Suspenseful"],
+        "color_mood": "Blood and shadow",
+        "lighting": "Eerie",
+        "enhancement": "shadows and fog, creepy atmosphere, frightening elements, suspenseful mood"
+    },
+    "Thriller": {
+        "styles": ["Suspenseful", "Noir", "Intense"],
         "color_mood": "High contrast",
-        "lighting": "Harsh",
-        "enhancement": "hard surfaces, sharp angles, rigid structures, defined lines"
+        "lighting": "Dramatic noir",
+        "enhancement": "dramatic shadows, suspenseful atmosphere, intense mood, mystery"
     },
-    "Sharp": {
-        "styles": ["Hyperrealism", "Sharp Focus", "Crisp"],
-        "color_mood": "High contrast",
-        "lighting": "Studio",
-        "enhancement": "razor-sharp details, precise edges, crystal clear focus, high definition"
-    },
-    "Blurred": {
-        "styles": ["Soft Focus", "Motion Blur", "Bokeh"],
-        "color_mood": "Pastel",
-        "lighting": "Soft",
-        "enhancement": "out of focus, motion blur, dreamy atmosphere, indistinct forms"
-    },
-    "Abstract": {
-        "styles": ["Abstract", "Non-representational", "Conceptual"],
-        "color_mood": "Vibrant",
-        "lighting": "Natural",
-        "enhancement": "abstract forms, conceptual ideas, non-literal representation, focus on color/shape"
-    },
-    "Flowing": {
-        "styles": ["Fluid Art", "Action Painting", "Organic"],
-        "color_mood": "Cool tones",
-        "lighting": "Natural",
-        "enhancement": "flowing movement, liquid dynamics, graceful curves, sense of motion"
-    },
-    "Angular": {
-        "styles": ["Cubism", "Deconstructivism", "Geometric"],
-        "color_mood": "High contrast",
-        "lighting": "Dramatic",
-        "enhancement": "sharp angles, angular forms, geometric precision, jarring lines"
-    },
-    "Curved": {
-        "styles": ["Art Nouveau", "Organic", "Soft"],
-        "color_mood": "Warm tones",
-        "lighting": "Soft",
-        "enhancement": "curved lines, organic shapes, soft transitions, flowing forms"
-    },
-    "Gritty": {
-        "styles": ["Industrial", "Street Photography", "Grunge"],
-        "color_mood": "Muted & Dirty",
-        "lighting": "Harsh",
-        "enhancement": "urban decay, rough textures, film grain, imperfections, raw feel"
-    },
-    "Glossy": {
-        "styles": ["Hyperrealism", "Pop Art", "Modern"],
-        "color_mood": "Vibrant",
-        "lighting": "Studio",
-        "enhancement": "shiny surfaces, reflections, high gloss finish, sleek and modern"
-    },
-
-    # --- Playful & Innocent ---
-    "Childlike": {
-        "styles": ["Children's Art", "Naive Art", "Innocent"],
-        "color_mood": "Primary Colors",
-        "lighting": "Natural",
-        "enhancement": "childlike wonder, innocent perspective, simple joy, crayon drawings"
-    },
-    "Innocent": {
-        "styles": ["Innocent", "Pure", "Clean"],
-        "color_mood": "White & Pastels",
-        "lighting": "Soft",
-        "enhancement": "pure innocence, untainted beauty, pristine quality, gentle spirit"
-    },
-    "Playful": {
-        "styles": ["Playful", "Fun", "Whimsical"],
-        "color_mood": "Vibrant",
-        "lighting": "Bright",
-        "enhancement": "playful energy, fun atmosphere, lighthearted joy, sense of games"
-    },
-    "Fun": {
-        "styles": ["Fun", "Joyful", "Cartoon"],
-        "color_mood": "Bright & Cheerful",
-        "lighting": "Natural",
-        "enhancement": "pure fun, joyful celebration, infectious happiness, comedic"
-    },
-    "Celebratory": {
-        "styles": ["Celebratory", "Festive", "Party"],
-        "color_mood": "Vibrant & Gold",
-        "lighting": "Festive Lights",
-        "enhancement": "festive atmosphere, celebration, party mood, confetti and streamers"
-    },
-    "Festive": {
-        "styles": ["Festive", "Holiday", "Celebration"],
-        "color_mood": "Traditional Holiday Colors",
-        "lighting": "Twinkling Lights",
-        "enhancement": "festive decorations, holiday spirit, celebration, seasonal cheer"
-    },
-    "Cartoonish": {
-        "styles": ["Cartoon", "Toon", "Animation"],
-        "color_mood": "Bright & Saturated",
-        "lighting": "Flat",
-        "enhancement": "bold outlines, simplified shapes, exaggerated features, funny"
-    },
-    "Cute": {
-        "styles": ["Kawaii", "Chibi", "Children's Illustration"],
-        "color_mood": "Pastel Pinks & Blues",
-        "lighting": "Soft",
-        "enhancement": "big eyes, rounded shapes, adorable characters, sweet and charming"
-    },
-
-    # --- Damaged & Decayed ---
-    "Abandoned": {
-        "styles": ["Urban Exploration", "Decay", "Ruins"],
-        "color_mood": "Desaturated & Dusty",
-        "lighting": "Crepuscular Rays",
-        "enhancement": "abandoned buildings, decay, forgotten places, dust and cobwebs"
-    },
-    "Forgotten": {
-        "styles": ["Forgotten", "Lost", "Antique"],
-        "color_mood": "Faded Vintage",
-        "lighting": "Soft",
-        "enhancement": "forgotten memories, lost civilizations, time's passage, overgrown ruins"
-    },
-    "Lost": {
-        "styles": ["Lost", "Confused", "Searching"],
-        "color_mood": "Foggy & Muted",
-        "lighting": "Blue hour",
-        "enhancement": "lost in wilderness, searching for direction, confusion, disoriented"
-    },
-    "Broken": {
-        "styles": ["Kintsugi", "Deconstruction", "Fragmented"],
-        "color_mood": "Monochrome with Gold",
-        "lighting": "Dramatic",
-        "enhancement": "broken pieces, shattered fragments, mended with gold, visible damage"
-    },
-    "Damaged": {
-        "styles": ["Damaged", "Weathered", "Worn"],
-        "color_mood": "Vintage",
-        "lighting": "Natural",
-        "enhancement": "visible damage, weathered surfaces, worn textures, scratched and torn"
-    },
-    "Decaying": {
-        "styles": ["Decay", "Grunge", "Organic"],
-        "color_mood": "Earthy & Moldy",
-        "lighting": "Low Light",
-        "enhancement": "rotting wood, peeling paint, rust, organic decay process"
-    },
-    "Withered": {
-        "styles": ["Melancholic", "Symbolism", "Nature"],
-        "color_mood": "Desaturated Browns",
-        "lighting": "Harsh",
-        "enhancement": "dried flowers, withered leaves, end of a life cycle, fragile beauty"
-    },
-    "Glitching": {
-        "styles": ["Glitch Art", "Digital", "Abstract"],
-        "color_mood": "RGB Split",
-        "lighting": "Screen Flicker",
-        "enhancement": "digital errors, pixel sorting, databending, visual corruption"
-    },
-    "Fragmented": {
-        "styles": ["Cubism", "Deconstruction", "Collage"],
-        "color_mood": "High Contrast",
-        "lighting": "Multiple Sources",
-        "enhancement": "shattered view, multiple perspectives, broken pieces reassembled"
-    },
-
-    # --- Adventure & Exploration ---
     "Adventure": {
-        "styles": ["Adventure", "Action", "Exploration"],
-        "color_mood": "Vibrant Naturals",
-        "lighting": "Natural",
-        "enhancement": "exploration, discovery, thrilling journeys, treasure maps, ancient ruins"
+        "styles": ["Action", "Exciting", "Dynamic"],
+        "color_mood": "Bold and bright",
+        "lighting": "Adventure lighting",
+        "enhancement": "action scenes, exciting journeys, dynamic movement, adventurous spirit"
     },
-    "Quest": {
-        "styles": ["Epic Fantasy", "Adventure", "Heroic"],
-        "color_mood": "Warm tones",
-        "lighting": "Golden hour",
-        "enhancement": "heroic journey, noble purpose, legendary quest, facing a great challenge"
+    "Western": {
+        "styles": ["Frontier", "Rustic", "Historical"],
+        "color_mood": "Desert earth",
+        "lighting": "Desert sun",
+        "enhancement": "cowboy aesthetic, frontier towns, desert landscapes, old west atmosphere"
     },
-    "Journey": {
-        "styles": ["Landscape", "Adventure", "Travel"],
-        "color_mood": "Natural",
-        "lighting": "Changing Times of Day",
-        "enhancement": "winding paths, distant horizons, travel stories, long roads"
+    "Film Noir": {
+        "styles": ["Classic Cinema", "Dramatic", "Shadowy"],
+        "color_mood": "Black and white",
+        "lighting": "Dramatic film",
+        "enhancement": "venetian blind shadows, cigarette smoke, urban night, classic cinema"
     },
-    "Discovery": {
-        "styles": ["Exploration", "Scientific Illustration", "Wonder"],
-        "color_mood": "Bright & Clear",
-        "lighting": "Natural",
-        "enhancement": "new worlds, scientific wonder, breakthrough moments, charting the unknown"
+    "Art Deco": {
+        "styles": ["Geometric", "Luxurious", "1920s"],
+        "color_mood": "Gold and black",
+        "lighting": "Glamorous",
+        "enhancement": "geometric patterns, luxury materials, 1920s glamour, elegant design"
     },
-    "Mythical": {
-        "styles": ["Mythological", "Fantasy", "Classical Art"],
-        "color_mood": "Gold & Marble",
-        "lighting": "Divine",
-        "enhancement": "mythological creatures, legendary heroes, gods and goddesses, ancient myths"
+    "Art Nouveau": {
+        "styles": ["Organic", "Decorative", "Natural"],
+        "color_mood": "Natural curves",
+        "lighting": "Organic light",
+        "enhancement": "flowing lines, natural motifs, decorative elements, organic beauty"
     },
-    "Legendary": {
-        "styles": ["Epic", "Heroic", "Mythical"],
-        "color_mood": "Cinematic",
-        "lighting": "Dramatic",
-        "enhancement": "stories told through generations, legendary figures, epic scale"
+    "Baroque": {
+        "styles": ["Ornate", "Dramatic", "Classical"],
+        "color_mood": "Rich gold",
+        "lighting": "Dramatic classical",
+        "enhancement": "ornate decoration, dramatic contrasts, classical grandeur, luxurious detail"
     },
-    "Tribal": {
-        "styles": ["Tribal Art", "Primitivism", "Ethnic"],
-        "color_mood": "Earthy & Natural Pigments",
-        "lighting": "Firelight",
-        "enhancement": "tribal patterns, masks, body paint, ancient rituals, community"
+    "Renaissance": {
+        "styles": ["Classical", "Humanistic", "Refined"],
+        "color_mood": "Classical tones",
+        "lighting": "Renaissance",
+        "enhancement": "classical proportions, humanistic ideals, refined technique, cultural rebirth"
+    },
+    "Medieval": {
+        "styles": ["Gothic", "Historical", "Religious"],
+        "color_mood": "Medieval earth",
+        "lighting": "Cathedral",
+        "enhancement": "stone castles, illuminated manuscripts, medieval crafts, historical atmosphere"
     },
     "Ancient": {
-        "styles": ["Ancient History", "Archaeology", "Hieroglyphics"],
-        "color_mood": "Stone & Sand",
-        "lighting": "Torchlight",
-        "enhancement": "ancient ruins, historical artifacts, long-lost civilizations, sense of history"
+        "styles": ["Historical", "Archaeological", "Timeless"],
+        "color_mood": "Stone and bronze",
+        "lighting": "Ancient",
+        "enhancement": "archaeological artifacts, ancient wisdom, historical depth, timeless beauty"
     },
+    "Tribal": {
+        "styles": ["Primitive", "Cultural", "Symbolic"],
+        "color_mood": "Earth pigments",
+        "lighting": "Fire light",
+        "enhancement": "tribal patterns, cultural symbols, primitive art, ancestral wisdom"
+    },
+    "Zen": {
+        "styles": ["Minimalist", "Meditative", "Balanced"],
+        "color_mood": "Natural zen",
+        "lighting": "Meditative",
+        "enhancement": "rock gardens, bamboo, meditation, inner peace, natural balance"
+    },
+    "Bohemian": {
+        "styles": ["Eclectic", "Artistic", "Free-spirited"],
+        "color_mood": "Rich bohemian",
+        "lighting": "Artistic",
+        "enhancement": "artistic freedom, eclectic mix, cultural fusion, creative expression"
+    },
+    "Punk": {
+        "styles": ["Rebellious", "Raw", "Aggressive"],
+        "color_mood": "Stark contrast",
+        "lighting": "Harsh",
+        "enhancement": "rebellious attitude, DIY aesthetic, aggressive energy, anti-establishment"
+    },
+    "Grunge": {
+        "styles": ["Distressed", "Raw", "Alternative"],
+        "color_mood": "Muted grunge",
+        "lighting": "Dim alternative",
+        "enhancement": "distressed textures, alternative culture, raw emotion, authentic expression"
+    },
+    "Glam": {
+        "styles": ["Glamorous", "Sparkly", "Luxurious"],
+        "color_mood": "Glittery gold",
+        "lighting": "Spotlight",
+        "enhancement": "glitter and shine, luxury materials, glamorous lifestyle, star quality"
+    },
+    "Pop Art": {
+        "styles": ["Commercial", "Bold", "Colorful"],
+        "color_mood": "Pop colors",
+        "lighting": "Pop art",
+        "enhancement": "commercial imagery, bold graphics, popular culture, mass media aesthetic"
+    },
+    "Abstract": {
+        "styles": ["Non-representational", "Expressive", "Conceptual"],
+        "color_mood": "Abstract palette",
+        "lighting": "Conceptual",
+        "enhancement": "non-representational forms, expressive colors, conceptual ideas, pure art"
+    },
+    "Geometric": {
+        "styles": ["Mathematical", "Precise", "Structured"],
+        "color_mood": "Geometric primary",
+        "lighting": "Precise",
+        "enhancement": "mathematical precision, geometric shapes, structured composition, ordered beauty"
+    },
+    "Organic": {
+        "styles": ["Natural", "Flowing", "Biomorphic"],
+        "color_mood": "Natural organic",
+        "lighting": "Natural flow",
+        "enhancement": "natural forms, flowing lines, biomorphic shapes, organic growth"
+    },
+    "Crystalline": {
+        "styles": ["Geometric Nature", "Prismatic", "Clear"],
+        "color_mood": "Crystal clear",
+        "lighting": "Prismatic",
+        "enhancement": "crystal formations, prismatic light, geometric nature, clear structure"
+    },
+    "Fluid": {
+        "styles": ["Flowing", "Dynamic", "Liquid"],
+        "color_mood": "Flowing tones",
+        "lighting": "Fluid",
+        "enhancement": "liquid motion, flowing forms, dynamic movement, fluid dynamics"
+    },
+    "Textured": {
+        "styles": ["Tactile", "Dimensional", "Rough"],
+        "color_mood": "Textural",
+        "lighting": "Textural",
+        "enhancement": "tactile surfaces, dimensional depth, textural variety, physical presence"
+    },
+    "Smooth": {
+        "styles": ["Sleek", "Polished", "Refined"],
+        "color_mood": "Smooth gradients",
+        "lighting": "Polished",
+        "enhancement": "sleek surfaces, polished finish, smooth transitions, refined elegance"
+    },
+    "Rough": {
+        "styles": ["Raw", "Unfinished", "Authentic"],
+        "color_mood": "Raw earth",
+        "lighting": "Unfinished",
+        "enhancement": "rough textures, unfinished surfaces, raw materials, authentic character"
+    },
+    "Delicate": {
+        "styles": ["Fragile", "Subtle", "Refined"],
+        "color_mood": "Delicate pastels",
+        "lighting": "Gentle delicate",
+        "enhancement": "fragile beauty, subtle details, delicate craftsmanship, refined sensitivity"
+    },
+    "Bold": {
+        "styles": ["Strong", "Confident", "Assertive"],
+        "color_mood": "Bold primary",
+        "lighting": "Strong bold",
+        "enhancement": "strong presence, confident expression, assertive design, bold statements"
+    },
+    "Subtle": {
+        "styles": ["Understated", "Nuanced", "Sophisticated"],
+        "color_mood": "Subtle nuanced",
+        "lighting": "Understated",
+        "enhancement": "understated elegance, nuanced details, sophisticated restraint, quiet confidence"
+    },
+    "Intense": {
+        "styles": ["Powerful", "Dramatic", "Concentrated"],
+        "color_mood": "Intense saturation",
+        "lighting": "Intense dramatic",
+        "enhancement": "powerful impact, dramatic intensity, concentrated energy, emotional depth"
+    },
+    "Calm": {
+        "styles": ["Peaceful", "Tranquil", "Soothing"],
+        "color_mood": "Calming blues",
+        "lighting": "Peaceful calm",
+        "enhancement": "peaceful atmosphere, tranquil setting, soothing presence, mental calm"
+    },
+    "Energetic": {
+        "styles": ["Dynamic", "Vibrant", "Active"],
+        "color_mood": "High energy",
+        "lighting": "Dynamic energy",
+        "enhancement": "dynamic movement, vibrant energy, active composition, kinetic force"
+    },
+    "Lazy": {
+        "styles": ["Relaxed", "Leisurely", "Casual"],
+        "color_mood": "Lazy afternoon",
+        "lighting": "Lazy sunlight",
+        "enhancement": "relaxed atmosphere, leisurely pace, casual comfort, unhurried mood"
+    },
+    "Fresh": {
+        "styles": ["Clean", "New", "Crisp"],
+        "color_mood": "Fresh spring",
+        "lighting": "Fresh morning",
+        "enhancement": "clean appearance, new beginning, crisp details, fresh perspective"
+    },
+    "Aged": {
+        "styles": ["Weathered", "Patinated", "Time-worn"],
+        "color_mood": "Aged patina",
+        "lighting": "Weathered",
+        "enhancement": "weathered surfaces, patinated metals, time-worn character, aged wisdom"
+    },
+    "Clean": {
+        "styles": ["Pure", "Sanitized", "Minimal"],
+        "color_mood": "Pure white",
+        "lighting": "Clean bright",
+        "enhancement": "pure surfaces, sanitized environment, minimal clutter, clean aesthetics"
+    },
+    "Dirty": {
+        "styles": ["Gritty", "Realistic", "Authentic"],
+        "color_mood": "Dirty earth",
+        "lighting": "Gritty realistic",
+        "enhancement": "gritty textures, realistic wear, authentic aging, lived-in character"
+    },
+    "Luxurious": {
+        "styles": ["Opulent", "Premium", "Exclusive"],
+        "color_mood": "Luxury gold",
+        "lighting": "Opulent",
+        "enhancement": "opulent materials, premium quality, exclusive design, luxury lifestyle"
+    },
+    "Rustic": {
+        "styles": ["Country", "Handmade", "Natural"],
+        "color_mood": "Rustic wood",
+        "lighting": "Country rustic",
+        "enhancement": "country charm, handmade quality, natural materials, rustic simplicity"
+    },
+    "Elegant": {
+        "styles": ["Sophisticated", "Graceful", "Refined"],
+        "color_mood": "Elegant neutrals",
+        "lighting": "Sophisticated",
+        "enhancement": "sophisticated design, graceful lines, refined taste, elegant simplicity"
+    },
+    "Casual": {
+        "styles": ["Informal", "Relaxed", "Everyday"],
+        "color_mood": "Casual comfort",
+        "lighting": "Relaxed casual",
+        "enhancement": "informal atmosphere, relaxed setting, everyday comfort, approachable style"
+    },
+    "Formal": {
+        "styles": ["Professional", "Traditional", "Ceremonial"],
+        "color_mood": "Formal traditional",
+        "lighting": "Professional",
+        "enhancement": "professional appearance, traditional values, ceremonial importance, formal elegance"
+    },
+    "Playful": {
+        "styles": ["Fun", "Cheerful", "Whimsical"],
+        "color_mood": "Playful bright",
+        "lighting": "Fun playful",
+        "enhancement": "fun elements, cheerful mood, whimsical details, playful interaction"
+    },
+    "Serious": {
+        "styles": ["Professional", "Dignified", "Formal"],
+        "color_mood": "Serious tones",
+        "lighting": "Professional serious",
+        "enhancement": "professional demeanor, dignified presence, formal approach, serious intent"
+    },
+    "Mysterious": {
+        "styles": ["Enigmatic", "Hidden", "Secretive"],
+        "color_mood": "Mystery shadow",
+        "lighting": "Mysterious shadow",
+        "enhancement": "enigmatic atmosphere, hidden meanings, secretive mood, mysterious allure"
+    },
+    "Transparent": {
+        "styles": ["Clear", "See-through", "Honest"],
+        "color_mood": "Crystal clear",
+        "lighting": "Clear transparent",
+        "enhancement": "clear materials, see-through effects, honest expression, transparent communication"
+    },
+    "Opaque": {
+        "styles": ["Solid", "Dense", "Impenetrable"],
+        "color_mood": "Solid opaque",
+        "lighting": "Dense opaque",
+        "enhancement": "solid materials, dense composition, impenetrable surface, opaque mystery"
+    },
+    "Glossy": {
+        "styles": ["Shiny", "Polished", "Reflective"],
+        "color_mood": "Glossy reflection",
+        "lighting": "Shiny gloss",
+        "enhancement": "shiny surfaces, polished finish, reflective quality, glossy appeal"
+    },
+    "Matte": {
+        "styles": ["Non-reflective", "Subtle", "Understated"],
+        "color_mood": "Matte finish",
+        "lighting": "Subtle matte",
+        "enhancement": "non-reflective surface, subtle finish, understated elegance, matte texture"
+    },
+    "Metallic": {
+        "styles": ["Industrial", "Shiny", "Modern"],
+        "color_mood": "Metallic shine",
+        "lighting": "Metallic gleam",
+        "enhancement": "metal surfaces, industrial feel, shiny finish, modern materials"
+    },
+    "Wooden": {
+        "styles": ["Natural", "Warm", "Organic"],
+        "color_mood": "Wood grain",
+        "lighting": "Natural wood",
+        "enhancement": "wood grain, natural warmth, organic texture, handcrafted quality"
+    },
+    "Stone": {
+        "styles": ["Solid", "Ancient", "Natural"],
+        "color_mood": "Stone gray",
+        "lighting": "Stone natural",
+        "enhancement": "stone texture, solid construction, ancient materials, natural formation"
+    },
+    "Glass": {
+        "styles": ["Transparent", "Fragile", "Modern"],
+        "color_mood": "Glass clear",
+        "lighting": "Glass refraction",
+        "enhancement": "glass transparency, fragile beauty, modern materials, light refraction"
+    },
+    "Fabric": {
+        "styles": ["Textile", "Soft", "Woven"],
+        "color_mood": "Fabric texture",
+        "lighting": "Textile soft",
+        "enhancement": "textile patterns, soft texture, woven materials, fabric draping"
+    },
+    "Paper": {
+        "styles": ["Flat", "Matte", "Traditional"],
+        "color_mood": "Paper white",
+        "lighting": "Paper flat",
+        "enhancement": "paper texture, flat surface, traditional medium, written communication"
+    },
+    "Digital": {
+        "styles": ["Electronic", "Pixel", "Virtual"],
+        "color_mood": "Digital blue",
+        "lighting": "Screen glow",
+        "enhancement": "pixel art, electronic display, virtual reality, digital interface"
+    },
+    "Analog": {
+        "styles": ["Traditional", "Physical", "Mechanical"],
+        "color_mood": "Analog warm",
+        "lighting": "Physical analog",
+        "enhancement": "traditional methods, physical materials, mechanical processes, analog warmth"
+    },
+    "Retro-Future": {
+        "styles": ["Vintage Sci-Fi", "Atomic Age", "Mid-Century"],
+        "color_mood": "Atomic age",
+        "lighting": "Retro futuristic",
+        "enhancement": "vintage sci-fi, atomic age design, mid-century modern, retro futurism"
+    },
+    "Biopunk": {
+        "styles": ["Organic Tech", "Bio-Engineering", "Living Machines"],
+        "color_mood": "Bio-organic",
+        "lighting": "Bioluminescent",
+        "enhancement": "living technology, bio-engineered organisms, organic machinery, genetic modification"
+    },
+    "Solarpunk": {
+        "styles": ["Eco-Futurism", "Green Tech", "Sustainable"],
+        "color_mood": "Solar green",
+        "lighting": "Solar powered",
+        "enhancement": "sustainable technology, green cities, renewable energy, ecological harmony"
+    },
+    "Dieselpunk": {
+        "styles": ["Industrial", "Art Deco", "Mechanical"],
+        "color_mood": "Diesel bronze",
+        "lighting": "Industrial diesel",
+        "enhancement": "diesel engines, industrial machinery, art deco styling, mechanical power"
+    },
+    "Atompunk": {
+        "styles": ["Nuclear Age", "1950s Futurism", "Atomic"],
+        "color_mood": "Atomic glow",
+        "lighting": "Nuclear",
+        "enhancement": "atomic energy, nuclear age optimism, 1950s futurism, space age design"
+    },
+    "Clockpunk": {
+        "styles": ["Renaissance Tech", "Clockwork", "Mechanical"],
+        "color_mood": "Brass clockwork",
+        "lighting": "Clockwork precision",
+        "enhancement": "clockwork mechanisms, renaissance technology, precise machinery, mechanical arts"
+    },
+    "Nanopunk": {
+        "styles": ["Molecular", "Microscopic", "Precision Tech"],
+        "color_mood": "Nano-scale",
+        "lighting": "Microscopic",
+        "enhancement": "nanotechnology, molecular engineering, microscopic worlds, precision manufacturing"
+    }
 }
+    
 
-# This line dynamically creates the list for the selectbox from the dictionary keys.
-# This is a more robust way to manage the options.
-mood_preset = st.selectbox("🌙 Mood Presets", ["Custom"] + list(MOOD_PRESETS.keys()))
 
     
     # Apply preset button
