@@ -485,44 +485,28 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Enhanced title with cosmic effect
 st.markdown("""
 <style>
-@keyframes rainbowText {
+@keyframes gradientShift {
     0% { background-position: 0% 50%; }
     100% { background-position: 100% 50%; }
 }
 
-@keyframes reverseRainbow {
-    0% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-.rainbow-title {
-    font-size: 3rem;
+.rainbow-glow-text {
+    font-size: 1.5rem;
+    font-weight: 700;
     text-align: center;
-    font-weight: bold;
-    background: linear-gradient(270deg, #ff6ec4, #7873f5, #4ade80, #facc15, #f87171, #ff6ec4);
-    background-size: 400% 400%;
+    background: linear-gradient(90deg, #ff6ec4, #fcb69f, #f6f078, #9dfaa6, #9face6, #ff6ec4);
+    background-size: 300% 300%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: rainbowText 20s ease infinite;
-}
-
-.rainbow-subtitle {
-    font-size: 1.2rem;
-    text-align: center;
-    background: linear-gradient(270deg, #ff6ec4, #f87171, #facc15, #4ade80, #7873f5, #ff6ec4);
-    background-size: 400% 400%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: reverseRainbow 20s ease infinite;
+    animation: gradientShift 12s ease infinite;
 }
 </style>
 
-<h1 class="rainbow-title">GenAI Studio</h1>
-<p class="rainbow-subtitle">🖼️ Create stunning images with AI ✨</p>
+<p class="rainbow-glow-text">📸 Glimpses from the Gallery – Crafted with AI 💖</p>
 """, unsafe_allow_html=True)
+
 
 
 
