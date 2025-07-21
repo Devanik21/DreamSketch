@@ -66,40 +66,110 @@ st.markdown("""
         --glow-medium: rgba(138, 143, 234, 0.25);
         --glow-strong: rgba(138, 143, 234, 0.35);
     }
-
-
-    /* Simple dropdown fix */
-.stSelectbox {
-    color: white !important;
-}
-
+    /* Fix dropdown visibility and styling */
 .stSelectbox > div > div > div {
-    color: white !important;
-    background-color: rgba(42, 42, 48, 0.8) !important;
-    font-size: 14px !important;
-    padding: 8px 12px !important;
+    color: var(--text-primary) !important;
+    background: var(--glass-ultra-light) !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.9rem !important;
+    min-height: auto !important;
+    line-height: 1.4 !important;
 }
 
-.stSelectbox div[data-baseweb="select"] {
-    background-color: rgba(42, 42, 48, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+/* Fix dropdown arrow and container */
+.stSelectbox > div > div {
+    background: var(--glass-ultra-light) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+    min-height: 44px !important;
 }
 
-/* Fix the dropdown options menu */
-div[data-baseweb="menu"] {
-    background-color: rgba(16, 16, 20, 0.95) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    color: white !important;
+/* Fix dropdown options when opened */
+.stSelectbox div[data-baseweb="select"] > div {
+    background: var(--deep-space) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 12px !important;
+    backdrop-filter: blur(24px) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    color: var(--text-primary) !important;
+    font-size: 0.9rem !important;
+    z-index: 999 !important;
 }
 
-div[data-baseweb="menu"] li {
-    color: white !important;
-    background-color: transparent !important;
+/* Style individual dropdown options */
+.stSelectbox div[role="option"] {
+    background: transparent !important;
+    color: var(--text-primary) !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.9rem !important;
+    border-radius: 8px !important;
+    margin: 0.25rem !important;
+    transition: all 0.2s ease !important;
 }
 
-div[data-baseweb="menu"] li:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+.stSelectbox div[role="option"]:hover {
+    background: var(--glass-light) !important;
+    color: var(--aurora-purple) !important;
 }
+
+/* Fix selected option display */
+.stSelectbox div[data-baseweb="select"] div[role="combobox"] {
+    color: var(--text-primary) !important;
+    font-size: 0.9rem !important;
+    padding: 0.75rem 1rem !important;
+    min-height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Ensure text doesn't get cut off */
+.stSelectbox div[data-baseweb="select"] div[role="combobox"] > div {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    width: auto !important;
+    flex: 1 !important;
+}
+
+/* Fix dropdown arrow icon */
+.stSelectbox svg {
+    fill: var(--text-secondary) !important;
+    width: 16px !important;
+    height: 16px !important;
+}
+
+/* Additional fixes for text visibility */
+.stSelectbox * {
+    color: var(--text-primary) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Fix for Creative Controls section header */
+.stSidebar h3 {
+    color: var(--aurora-cyan) !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Fix sidebar labels */
+.stSidebar label {
+    color: var(--text-secondary) !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Ensure sidebar content is visible */
+.stSidebar .stMarkdown p {
+    color: var(--text-primary) !important;
+    font-size: 0.9rem !important;
+    margin: 0.5rem 0 !important;
+}
+
+
     /* Main app with ultra-smooth animated background */
     .stApp {
         background: 
