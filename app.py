@@ -28,6 +28,11 @@ if 'images' not in st.session_state:
     st.session_state.images = []
 if 'current_image' not in st.session_state:
     st.session_state.current_image = None
+# ... after initializing 'current_image'
+if 'prompt_history' not in st.session_state:
+    st.session_state.prompt_history = []
+if 'favorites' not in st.session_state:
+    st.session_state.favorites = []
 
 # Otherworldly CSS with cosmic aesthetics
 st.markdown("""
