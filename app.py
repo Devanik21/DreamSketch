@@ -1832,51 +1832,29 @@ with col2:
     if st.session_state.images:
         st.markdown("### 🦄 Quick Actions")
 
-        # ... after st.markdown("### 🦄 Quick Actions")
+try:
+							# Open the uploaded file as a PIL Image object
+							pil_image = Image.open(uploaded_image)
 
-    # --- START: IMAGE-TO-PROMPT FEATURE ---
-    with st.expander("📸 Image to Prompt ✨", expanded=True):
-        uploaded_image = st.file_uploader(
-            "Upload an image to have AI create a prompt from it.",
-            type=["png", "jpg", "jpeg", "webp"],
-            label_visibility="collapsed"
-        )
+							prompt_text = (
+								"Analyze this image and create a detailed, "
+								"vivid, and artistic prompt for an AI image generator. "
+								"Focus on subject, setting, style, colors, lighting, and composition. "
+								"The prompt should be a single, fluid paragraph."
+							)
 
-        # This will hold the generated prompt in the session
-        if 'generated_prompt' not in st.session_state:
-            st.session_state.generated_prompt = None
+							# Pass the text and the PIL Image object directly to the model
+							response = client.models.generate_content(
+								model="gemini-2.0-flash",
+								contents=[prompt_text, pil_image]
+							)
+							
+							# Store the result in the session state
+							st.session_state.generated_prompt = response.text
 
-        if uploaded_image:
-            # Display a smaller thumbnail of the uploaded image
-            st.image(uploaded_image, caption="Your Upload", width=120)
-
-            if st.button("✍️ Describe this Image", use_container_width=True):
-                with st.spinner("🧠 Gemini is analyzing the image..."):
-                    try:
-                        # Prepare the image and prompt for the multimodal API call
-                        image_part = {
-                            "mime_type": uploaded_image.type,
-                            "data": uploaded_image.getvalue()
-                        }
-                        prompt_text = (
-                            "Analyze this image and create a detailed, "
-                            "vivid, and artistic prompt for an AI image generator. "
-                            "Focus on subject, setting, style, colors, lighting, and composition. "
-                            "The prompt should be a single, fluid paragraph."
-                        )
-
-                        # Use a vision-capable model for this task
-                        response = client.models.generate_content(
-                            model="gemini-pro-vision",
-                            contents=[prompt_text, image_part]
-                        )
-                        
-                        # Store the result in the session state
-                        st.session_state.generated_prompt = response.text
-
-                    except Exception as e:
-                        st.error(f"Error analyzing image: {str(e)}")
-                        st.session_state.generated_prompt = None # Clear on error
+						except Exception as e:
+							st.error(f"Error analyzing image: {str(e)}")
+							st.session_state.generated_prompt = None # Clear on error
         
         # Display the result if it exists in the session state
         if st.session_state.generated_prompt:
