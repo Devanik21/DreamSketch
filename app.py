@@ -1779,7 +1779,7 @@ with col1:
 with col2:
     st.markdown("### 💡 Quick Tips")
     
-    with st.expander("✨ Prompt Writing Guide", expanded=True):
+    with st.expander("✨ Prompt Writing Guide", expanded=False):
         st.markdown("""
         **Structure your prompt:**
         1. **Subject**: What/who is the main focus?
