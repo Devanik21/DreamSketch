@@ -1867,7 +1867,7 @@ with col2:
 
                         # Use a vision-capable model for this task
                         response = client.models.generate_content(
-                            model="gemini-pro-vision",
+                            model="gemini-2.5-flash-lite-preview-06-17",
                             contents=[prompt_text, image_part]
                         )
                         
