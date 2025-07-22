@@ -1591,6 +1591,10 @@ with col1:
             if not prompt.strip():
                 st.markdown('<div class="error-box">❌ Please enter a prompt to begin your creative journey!</div>', unsafe_allow_html=True)
             else:
+                # Clear any previously displayed variations for a clean slate
+                if 'newly_generated_variations' in st.session_state:
+                    st.session_state.newly_generated_variations = None
+                
                 # Enhance prompt if requested or preset applied
                 if enhance_prompt or (hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied):
                     if hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied:
@@ -1600,6 +1604,11 @@ with col1:
                         enhanced_prompt = f"{prompt}, {selected_style} style, {color_mood} color palette, {lighting} lighting, {quality_level} quality"
                 else:
                     enhanced_prompt = prompt
+                
+                # --- ADDED: Step 2 - Add the new prompt to history ---
+                if enhanced_prompt not in st.session_state.prompt_history:
+                    st.session_state.prompt_history.insert(0, enhanced_prompt)
+                # ---
                 
                 # Show enhanced prompt
                 if enhance_prompt or (hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied):
@@ -1633,6 +1642,7 @@ with col1:
                             response_modalities=["text", "image"]
                         )
                     )
+                    # ... The rest of your try...except block continues from here ...
                     
                     progress_bar.progress(80)
                     status_text.text("🎭 Adding final touches...")
@@ -1908,6 +1918,47 @@ with col2:
     # Quick actions
     if st.session_state.images:
         st.markdown("### 🦄 Quick Actions")
+
+
+        # --- START: PROMPT HISTORY & FAVORITES FEATURE ---
+
+        # 1. Prompt History
+        with st.expander("📜 Prompt History"):
+            if not st.session_state.prompt_history:
+                st.info("Your recent prompts will appear here.")
+            else:
+                def apply_historical_prompt(prompt_text):
+                    st.session_state.main_prompt = prompt_text
+                
+                for i, prompt in enumerate(st.session_state.prompt_history[:10]): # Show last 10
+                    with st.container(border=True):
+                        st.markdown(f"<small>{prompt[:100]}...</small>", unsafe_allow_html=True)
+                        st.button("✍️ Use", key=f"hist_{i}", on_click=apply_historical_prompt, args=(prompt,), use_container_width=True)
+                
+                if st.button("Clear History", use_container_width=True):
+                    st.session_state.prompt_history = []
+                    st.rerun()
+
+        # 2. Favorites
+        with st.expander("⭐ Favorites"):
+            if not st.session_state.favorites:
+                st.info("Your favorite images will appear here. Click the ☆ icon on an image to save it.")
+            else:
+                favorited_images = [img for img in st.session_state.images if img['id'] in st.session_state.favorites]
+                
+                # Create a grid for thumbnails
+                cols = st.columns(3)
+                for i, fav_img_data in enumerate(favorited_images):
+                    with cols[i % 3]:
+                        thumb = Image.open(BytesIO(fav_img_data['image_data']))
+                        thumb.thumbnail((100, 100))
+                        
+                        if st.button(f"View Fav #{i+1}", key=f"fav_btn_{i}", use_container_width=True):
+                            st.session_state.current_image = fav_img_data
+                            st.rerun()
+                        st.image(thumb, use_container_width=True)
+
+        # --- END: PROMPT HISTORY & FAVORITES FEATURE ---
 
 
 
