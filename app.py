@@ -1832,7 +1832,9 @@ with col2:
     if st.session_state.images:
         st.markdown("### 🦄 Quick Actions")
 
-try:
+
+
+	    try:
 							# Open the uploaded file as a PIL Image object
 							pil_image = Image.open(uploaded_image)
 
@@ -1845,7 +1847,7 @@ try:
 
 							# Pass the text and the PIL Image object directly to the model
 							response = client.models.generate_content(
-								model="gemini-2.0-flash",
+								model="gemini-pro-vision",
 								contents=[prompt_text, pil_image]
 							)
 							
@@ -1855,6 +1857,8 @@ try:
 						except Exception as e:
 							st.error(f"Error analyzing image: {str(e)}")
 							st.session_state.generated_prompt = None # Clear on error
+
+
         
         # Display the result if it exists in the session state
         if st.session_state.generated_prompt:
