@@ -1859,8 +1859,7 @@ with col1:
                  st.session_state.newly_generated_variations = None
                  st.rerun()
         # --- END: DISPLAY NEW VARIATION ---
-
-        
+        st.markdown("---")
         # Description if available
         if img_data.get('description'):
             st.markdown("### 📝 AI Description")
