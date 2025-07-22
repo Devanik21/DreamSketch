@@ -1867,9 +1867,7 @@ with col1:
                  st.rerun()
         # --- END: DISPLAY NEW VARIATION ---
 
-            if st.button("Clear Variation Display", use_container_width=True):
-                 st.session_state.newly_generated_variations = None
-                 st.rerun()
+
         # --- END: DISPLAY NEW VARIATION ---
         st.markdown("---")
         # Description if available
