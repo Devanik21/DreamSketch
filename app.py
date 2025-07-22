@@ -2031,6 +2031,44 @@ with col2:
             random_style = random.choice(STYLE_CATEGORIES[random_category])
             st.session_state.temp_style = f"{random_category}: {random_style}"
             st.rerun()
+
+
+        # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
+        with st.container(border=True):
+            st.markdown("##### ✨ Feeling Lucky?")
+
+            def generate_random_prompt():
+                # Define components for building a creative prompt
+                subjects = [
+                    "A majestic dragon", "A futuristic city skyline", "A hidden waterfall oasis", 
+                    "An ancient tree spirit", "A celestial fox", "A forgotten library in the clouds", 
+                    "A steampunk airship navigating a storm", "A robot gardener tending to glowing plants", 
+                    "A knight in ethereal armor", "An alien marketplace"
+                ]
+                details = [
+                    "with cinematic lighting", "with an ethereal glow", "in vibrant, rich colors",
+                    "exuding a sense of wonder", "with a dramatic atmosphere", "filled with intricate patterns",
+                    "rendered in Unreal Engine 5", "in a hyperrealistic style", "as a piece of concept art",
+                    "with a soft, dreamy focus"
+                ]
+                
+                # Select a random style from your existing categories
+                random_category = random.choice(list(STYLE_CATEGORIES.keys()))
+                random_style = random.choice(STYLE_CATEGORIES[random_category])
+
+                # Combine the parts into a full prompt
+                full_prompt = f"{random.choice(subjects)}, in the style of {random_style}, {random.choice(details)}"
+                
+                # Apply the generated prompt to the main text area
+                st.session_state.main_prompt = full_prompt
+
+            st.button(
+                "🎲 Surprise Me!", 
+                on_click=generate_random_prompt, 
+                use_container_width=True,
+                help="Generate a random, creative prompt to get you started."
+            )
+        # --- END: SURPRISE ME - RANDOM PROMPT GENERATOR ---
         
         if hasattr(st.session_state, 'temp_style'):
             st.markdown(f"**Suggested**: {st.session_state.temp_style}")
@@ -2044,6 +2082,8 @@ with col2:
             • Session Started: {time.strftime('%H:%M')}
             </div>
             """, unsafe_allow_html=True)
+
+
 
 # Footer
 st.markdown("---")
