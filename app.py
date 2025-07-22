@@ -1711,6 +1711,80 @@ with col1:
         img = Image.open(BytesIO(img_data['image_data']))
         
         st.image(img, caption="✨ Generated Masterpiece", use_container_width=True)
+
+
+        # vvvvv  ADD THE VARIATIONS CODE BLOCK EXACTLY HERE  vvvvv
+        # --- START: GENERATE VARIATIONS FEATURE ---
+        with st.container(border=True):
+            st.markdown("##### 🎨 Create Variations")
+            variation_cols = st.columns([2, 1])
+            
+            with variation_cols[0]:
+                num_variations = st.slider(
+                    "Number of variations to create:", 
+                    min_value=1, 
+                    max_value=4, 
+                    value=2,
+                    help="How many new versions of this image would you like to generate?"
+                )
+
+            with variation_cols[1]:
+                if st.button(f"Generate {num_variations} {'Variation' if num_variations == 1 else 'Variations'}", use_container_width=True, type="primary"):
+                    with st.spinner(f" summoning {num_variations} new masterpiece{'s' if num_variations > 1 else ''}..."):
+                        try:
+                            # Prepare the original image and prompt for the new generation
+                            original_image_pil = Image.open(BytesIO(img_data['image_data']))
+                            original_prompt_text = img_data.get('enhanced_prompt', img_data.get('original_prompt', ''))
+                            
+                            variation_prompt = (
+                                f"Generate a new, unique variation of the provided image. The original concept was: '{original_prompt_text}'. "
+                                "Maintain the core subject and theme, but creatively alter the composition, lighting, or details to offer a fresh perspective."
+                            )
+
+                            for i in range(num_variations):
+                                # Call the API to generate one variation
+                                response = client.models.generate_content(
+                                    model="gemini-2.0-flash-exp-image-generation",
+                                    contents=[variation_prompt, original_image_pil],
+                                    config=types.GenerateContentConfig(
+                                        response_modalities=["text", "image"]
+                                    )
+                                )
+
+                                new_image_data = None
+                                new_description = ""
+                                for part in response.candidates[0].content.parts:
+                                    if part.text:
+                                        new_description = part.text
+                                    elif part.inline_data:
+                                        new_image_data = part.inline_data.data
+                                
+                                if new_image_data:
+                                    # Create a new metadata entry for the variation
+                                    new_image_metadata = {
+                                        'id': str(uuid.uuid4()),
+                                        'image_data': new_image_data,
+                                        'original_prompt': f"Variation of: {img_data['original_prompt']}",
+                                        'enhanced_prompt': variation_prompt,
+                                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                                        'style_used': img_data.get('style_used'),
+                                        'color_mood': img_data.get('color_mood'),
+                                        'lighting': img_data.get('lighting'),
+                                        'description': new_description,
+                                        'aspect_ratio': img_data.get('aspect_ratio'),
+                                        'quality_level': img_data.get('quality_level')
+                                    }
+                                    st.session_state.images.append(new_image_metadata)
+                            
+                            st.success(f"Successfully created {num_variations} new variations! They are now in your gallery.")
+                            time.sleep(2) # Give the user a moment to read the success message
+                            st.rerun()
+
+                        except Exception as e:
+                            st.error(f"Failed to generate variations: {e}")
+        # --- END: GENERATE VARIATIONS FEATURE ---
+        # ^^^^^  END OF THE NEW CODE BLOCK  ^^^^^
+
         
         # Description if available
         if img_data.get('description'):
