@@ -1713,13 +1713,6 @@ with col1:
         st.image(img, caption="✨ Generated Masterpiece", use_container_width=True)
 
 
-        # Display current image
-    if st.session_state.current_image:
-        st.markdown("---")
-        img_data = st.session_state.current_image
-        img = Image.open(BytesIO(img_data['image_data']))
-        
-        st.image(img, caption="✨ Generated Masterpiece", use_container_width=True)
         
         # --- START: GENERATE VARIATION FEATURE (SINGLE) ---
         with st.container(border=True):
