@@ -1853,30 +1853,28 @@ with col2:
             if st.button("✍️ Describe this Image", use_container_width=True):
                 with st.spinner("🧠 Gemini is analyzing the image..."):
                     try:
-                        # Prepare the image and prompt for the multimodal API call
-                        image_part = {
-                            "mime_type": uploaded_image.type,
-                            "data": uploaded_image.getvalue()
-                        }
-                        prompt_text = (
-                            "Analyze this image and create a detailed, "
-                            "vivid, and artistic prompt for an AI image generator. "
-                            "Focus on subject, setting, style, colors, lighting, and composition. "
-                            "The prompt should be a single, fluid paragraph."
-                        )
+							# Open the uploaded file as a PIL Image object
+							pil_image = Image.open(uploaded_image)
 
-                        # Use a vision-capable model for this task
-                        response = client.models.generate_content(
-                            model="gemini-2.0-flash",
-                            contents=[prompt_text, image_part]
-                        )
-                        
-                        # Store the result in the session state
-                        st.session_state.generated_prompt = response.text
+							prompt_text = (
+								"Analyze this image and create a detailed, "
+								"vivid, and artistic prompt for an AI image generator. "
+								"Focus on subject, setting, style, colors, lighting, and composition. "
+								"The prompt should be a single, fluid paragraph."
+							)
 
-                    except Exception as e:
-                        st.error(f"Error analyzing image: {str(e)}")
-                        st.session_state.generated_prompt = None # Clear on error
+							# Pass the text and the PIL Image object directly to the model
+							response = client.models.generate_content(
+								model="gemini-2.0-flash",
+								contents=[prompt_text, pil_image]
+							)
+							
+							# Store the result in the session state
+							st.session_state.generated_prompt = response.text
+
+						except Exception as e:
+							st.error(f"Error analyzing image: {str(e)}")
+							st.session_state.generated_prompt = None # Clear on error
         
         # Display the result if it exists in the session state
         if st.session_state.generated_prompt:
