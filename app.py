@@ -1800,6 +1800,7 @@ with col1:
 
         # --- START: DISPLAY NEW VARIATION ---
         # --- START: DISPLAY NEW VARIATION ---
+        # --- START: DISPLAY NEW VARIATION ---
         if 'newly_generated_variations' in st.session_state and st.session_state.newly_generated_variations:
             st.markdown("---")
             st.markdown("### ✨ Your New Variation")
@@ -1812,6 +1813,12 @@ with col1:
                 caption="New Variation", 
                 use_container_width=True
             )
+
+            # --- START: AI DESCRIPTION FOR VARIATION ---
+            if variation_data.get('description'):
+                st.markdown("### 📝 AI Description (Variation)")
+                st.info(variation_data['description'])
+            # --- END: AI DESCRIPTION FOR VARIATION ---
 
             # --- START: EXPORT BUTTONS FOR VARIATION ---
             st.markdown("###### Export Variation")
@@ -1854,6 +1861,11 @@ with col1:
                     use_container_width=True
                 )
             # --- END: EXPORT BUTTONS FOR VARIATION ---
+
+            if st.button("Clear Variation Display", use_container_width=True):
+                 st.session_state.newly_generated_variations = None
+                 st.rerun()
+        # --- END: DISPLAY NEW VARIATION ---
 
             if st.button("Clear Variation Display", use_container_width=True):
                  st.session_state.newly_generated_variations = None
