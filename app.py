@@ -1790,21 +1790,6 @@ with col1:
                  st.rerun()
         # --- END: DISPLAY NEW VARIATION ---
 
-        # Description if available
-        if img_data.get('description'):
-            st.markdown("### 📝 AI Description")
-            st.info(img_data['description'])
-            # --- START: ADD THIS CODE BLOCK FOR TEXT-TO-SPEECH ---
-            try:
-                # Create an in-memory audio buffer
-                audio_buffer = BytesIO()
-                tts = gTTS(text=img_data['description'], lang='en', slow=False)
-                tts.write_to_fp(audio_buffer)
-                audio_buffer.seek(0)
-                st.audio(audio_buffer, format='audio/mp3', start_time=0)
-            except Exception as e:
-                st.warning(f"Could not generate audio for the description. Error: {e}")
-
         
         # Description if available
         if img_data.get('description'):
