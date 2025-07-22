@@ -1713,6 +1713,14 @@ with col1:
         st.image(img, caption="✨ Generated Masterpiece", use_container_width=True)
 
 
+        # Display current image
+    if st.session_state.current_image:
+        st.markdown("---")
+        img_data = st.session_state.current_image
+        img = Image.open(BytesIO(img_data['image_data']))
+        
+        st.image(img, caption="✨ Generated Masterpiece", use_container_width=True)
+        
         # --- START: GENERATE VARIATION FEATURE (SINGLE) ---
         with st.container(border=True):
             if st.button("🎨 Create Variation", use_container_width=True, type="primary"):
@@ -1762,6 +1770,40 @@ with col1:
                     except Exception as e:
                         st.error(f"Failed to generate a variation: {e}")
         # --- END: GENERATE VARIATION FEATURE (SINGLE) ---
+
+        # --- START: DISPLAY NEW VARIATION ---
+        if 'newly_generated_variations' in st.session_state and st.session_state.newly_generated_variations:
+            st.markdown("---")
+            st.markdown("### ✨ Your New Variation")
+            
+            # Since there's only one, we access it directly
+            variation_data = st.session_state.newly_generated_variations[0]
+            
+            st.image(
+                variation_data['image_data'], 
+                caption="New Variation", 
+                use_container_width=True
+            )
+
+            if st.button("Clear Variation Display", use_container_width=True):
+                 st.session_state.newly_generated_variations = None
+                 st.rerun()
+        # --- END: DISPLAY NEW VARIATION ---
+
+        # Description if available
+        if img_data.get('description'):
+            st.markdown("### 📝 AI Description")
+            st.info(img_data['description'])
+            # --- START: ADD THIS CODE BLOCK FOR TEXT-TO-SPEECH ---
+            try:
+                # Create an in-memory audio buffer
+                audio_buffer = BytesIO()
+                tts = gTTS(text=img_data['description'], lang='en', slow=False)
+                tts.write_to_fp(audio_buffer)
+                audio_buffer.seek(0)
+                st.audio(audio_buffer, format='audio/mp3', start_time=0)
+            except Exception as e:
+                st.warning(f"Could not generate audio for the description. Error: {e}")
 
         
         # Description if available
