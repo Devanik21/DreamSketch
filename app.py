@@ -1726,6 +1726,24 @@ with col1:
         img = Image.open(BytesIO(img_data['image_data']))
         
         st.image(img, caption="✨ Generated Masterpiece", use_container_width=True)
+        # vvvvv  ADD THIS BLOCK FOR THE FAVORITE BUTTON  vvvvv
+        def toggle_favorite(image_id):
+            if image_id in st.session_state.favorites:
+                st.session_state.favorites.remove(image_id)
+            else:
+                st.session_state.favorites.append(image_id)
+
+        # Use a filled or empty star for visual feedback
+        is_favorited = img_data['id'] in st.session_state.favorites
+        star_icon = "★" if is_favorited else "☆"
+        
+        st.button(
+            f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", 
+            on_click=toggle_favorite, 
+            args=(img_data['id'],),
+            use_container_width=True
+        )
+        # ^^^^^  END OF FAVORITE BUTTON BLOCK  ^^^^^
 
 
         
