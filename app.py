@@ -732,14 +732,7 @@ with st.sidebar:
         "Blue hour", "Neon", "Candlelight", "Harsh", "Backlit"
     ])
         # ADD THIS SLIDER FOR TEMPERATURE CONTROL
-    temperature = st.slider(
-        "🌡️ Temperature (Creativity)",
-        min_value=0.0,
-        max_value=2.0,
-        value=0.9,
-        step=0.05,
-        help="Controls the randomness of the output. Lower values are more predictable, higher values are more creative."
-    )
+
     
     
     # Mood presets - INSERT THIS SECTION HERE
@@ -1519,6 +1512,14 @@ with st.sidebar:
             "enhancement": "playful elements, imaginative details, childlike wonder, whimsical charm"
         }
     }
+        temperature = st.slider(
+        "🌡️ Temperature (Creativity)",
+        min_value=0.0,
+        max_value=2.0,
+        value=0.9,
+        step=0.05,
+        help="Controls the randomness of the output. Lower values are more predictable, higher values are more creative."
+    )
     
     # Apply preset button
     if mood_preset != "Custom" and mood_preset in MOOD_PRESETS:
