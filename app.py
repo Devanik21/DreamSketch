@@ -1831,6 +1831,79 @@ with col2:
     # Quick actions
     if st.session_state.images:
         st.markdown("### 🦄 Quick Actions")
+
+        # ... after st.markdown("### 🦄 Quick Actions")
+
+    # --- START: IMAGE-TO-PROMPT FEATURE ---
+    with st.expander("📸 Image to Prompt ✨", expanded=True):
+        uploaded_image = st.file_uploader(
+            "Upload an image to have AI create a prompt from it.",
+            type=["png", "jpg", "jpeg", "webp"],
+            label_visibility="collapsed"
+        )
+
+        # This will hold the generated prompt in the session
+        if 'generated_prompt' not in st.session_state:
+            st.session_state.generated_prompt = None
+
+        if uploaded_image:
+            # Display a smaller thumbnail of the uploaded image
+            st.image(uploaded_image, caption="Your Upload", width=120)
+
+            if st.button("✍️ Describe this Image", use_container_width=True):
+                with st.spinner("🧠 Gemini is analyzing the image..."):
+                    try:
+                        # Prepare the image and prompt for the multimodal API call
+                        image_part = {
+                            "mime_type": uploaded_image.type,
+                            "data": uploaded_image.getvalue()
+                        }
+                        prompt_text = (
+                            "Analyze this image and create a detailed, "
+                            "vivid, and artistic prompt for an AI image generator. "
+                            "Focus on subject, setting, style, colors, lighting, and composition. "
+                            "The prompt should be a single, fluid paragraph."
+                        )
+
+                        # Use a vision-capable model for this task
+                        response = client.models.generate_content(
+                            model="gemini-pro-vision",
+                            contents=[prompt_text, image_part]
+                        )
+                        
+                        # Store the result in the session state
+                        st.session_state.generated_prompt = response.text
+
+                    except Exception as e:
+                        st.error(f"Error analyzing image: {str(e)}")
+                        st.session_state.generated_prompt = None # Clear on error
+        
+        # Display the result if it exists in the session state
+        if st.session_state.generated_prompt:
+            st.markdown("**🎨 Your Generated Prompt:**")
+            st.markdown(
+                f"""
+                <div style="background: rgba(99, 102, 241, 0.1); border-left: 5px solid #6366f1; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    {st.session_state.generated_prompt}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            
+            # Callback function to apply the prompt to the main text area
+            def apply_prompt_to_main_input():
+                st.session_state.main_prompt = st.session_state.generated_prompt
+                st.session_state.generated_prompt = None # Clear after applying
+
+            st.button(
+                "✅ Use This Prompt",
+                on_click=apply_prompt_to_main_input,
+                use_container_width=True,
+                type="primary"
+            )
+    # --- END: IMAGE-TO-PROMPT FEATURE ---
+
+        
         
         if st.button("🎲 Random Style", use_container_width=True):
             import random
