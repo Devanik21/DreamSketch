@@ -5,6 +5,7 @@ from PIL import Image
 from io import BytesIO
 import base64
 import json
+from gtts import gTTS
 import time
 import uuid
 
@@ -1715,6 +1716,22 @@ with col1:
         if img_data.get('description'):
             st.markdown("### 📝 AI Description")
             st.info(img_data['description'])
+                        # --- START: ADD THIS CODE BLOCK FOR TEXT-TO-SPEECH ---
+            try:
+                # Create an in-memory audio buffer
+                audio_buffer = BytesIO()
+
+                # Generate the speech using gTTS
+                tts = gTTS(text=img_data['description'], lang='en', slow=False)
+                tts.write_to_fp(audio_buffer)
+                audio_buffer.seek(0)
+
+                # Display the audio player in Streamlit
+                st.audio(audio_buffer, format='audio/mp3', start_time=0)
+
+            except Exception as e:
+                st.warning(f"Could not generate audio for the description. Error: {e}")
+            # --- END: ADD THIS CODE BLOCK ---
         
         # Download section
         st.markdown("### 💾 Export Your Masterpiece")
