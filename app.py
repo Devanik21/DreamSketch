@@ -2119,7 +2119,7 @@ st.markdown("""
 # Consolidate all your image filenames into one list
 gallery_images = [
     "k3.jpg", "k2.jpg", "k6.jpg", "k7.jpg", "k19.jpg", "k8.jpg", 
-    "k4.jpg", "k16.jpg", "k13.jpg", "k14.jpg", "k17.jpg", "k18.jpg"
+    "k4.jpg", "k16.jpg", "k13.jpg", "k14.jpg", "k17.jpg", "k1.jpg","k10.jpg","k9.jpg","k12.jpg","k18.jpg",
 ]
 
 st.sidebar.image("k15.jpg", use_container_width=True)
