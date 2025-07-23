@@ -2048,28 +2048,252 @@ with col2:
 
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # This container is now outside the 'if' condition, so it appears on startup.
+    # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
+    # This container is now outside the 'if' condition, so it appears on startup.
     with st.container(border=True):
         st.markdown("##### ✨ Feeling Lucky?")
 
         def generate_random_prompt():
-            # NOTE: This assumes 'random' is imported and 'STYLE_CATEGORIES' is defined elsewhere.
+            # NOTE: This assumes 'random' is imported.
+            
+            # ==============================================================================
+            # >>> EXPANDED SUBJECTS LIST (200+ items)
+            # ==============================================================================
             subjects = [
-                "A majestic dragon", "A futuristic city skyline", "A hidden waterfall oasis", 
-                "An ancient tree spirit", "A celestial fox", "A forgotten library in the clouds", 
-                "A steampunk airship navigating a storm", "A robot gardener tending to glowing plants", 
-                "A knight in ethereal armor", "An alien marketplace"
-            ]
-            details = [
-                "with cinematic lighting", "with an ethereal glow", "in vibrant, rich colors",
-                "exuding a sense of wonder", "with a dramatic atmosphere", "filled with intricate patterns",
-                "rendered in Unreal Engine 5", "in a hyperrealistic style", "as a piece of concept art",
-                "with a soft, dreamy focus"
+                # Fantasy & Mythology
+                "A majestic dragon soaring over a volcanic landscape",
+                "An ancient tree spirit with glowing eyes",
+                "A celestial fox with nine tails, leaping through stars",
+                "A forgotten library in the clouds",
+                "A knight in ethereal, glowing armor",
+                "A city carved into a giant crystal",
+                "A griffin nesting on a skyscraper",
+                "The world turtle swimming through the cosmos",
+                "A valkyrie descending from Valhalla",
+                "A phoenix being reborn from ashes",
+                "An enchanted forest where trees whisper secrets",
+                "A floating castle held aloft by magic",
+                "A mermaid queen on her coral throne",
+                "A dwarven city deep within a mountain, lit by forge fires",
+                "An elven archer with a bow made of moonlight",
+                "A kraken attacking a fleet of galleons",
+                "A wizard's tower filled with arcane artifacts",
+                "A goblin marketplace bustling with strange creatures",
+                "A druid communing with nature spirits",
+                "The Gates of Olympus, guarded by a cerberus",
+                "A kitsune in human form, walking through a Kyoto street",
+                "A golem made of ancient stone and vines",
+                "A dryad merging with her host tree",
+                "A steampunk airship navigating a storm",
+                "A leviathan sleeping in the abyssal deep",
+
+                # Sci-Fi & Futuristic
+                "A futuristic city skyline at sunset",
+                "A robot gardener tending to glowing alien plants",
+                "An alien marketplace on a distant planet",
+                "A lone astronaut discovering an ancient alien artifact",
+                "A bustling spaceport with ships from a thousand worlds",
+                "A cyberpunk detective in a rain-soaked neon city",
+                "A massive generation ship traveling between galaxies",
+                "A cyborg samurai in a bamboo forest",
+                "An abandoned terraforming colony on Mars",
+                "A Dyson sphere under construction",
+                "An android dreaming of electric sheep",
+                "A mech battle in a ruined metropolis",
+                "A glowing data stream inside a quantum computer",
+                "A city floating in the rings of Saturn",
+                "A portal to another dimension opening in a city square",
+                "A bio-mechanical jungle on a newly discovered world",
+                "A sleek starfighter in a cosmic dogfight",
+                "The interior of a massive space station",
+                "A post-apocalyptic scavenger with a cybernetic pet",
+                "A hovercraft race through canyons",
+                "An AI core room, visualized as a cathedral of light",
+                "A soldier in high-tech powered armor",
+                "A serene city on the moon, under a glass dome",
+                "A wormhole bridge connecting two galaxies",
+                "A hacker interfacing with a virtual world",
+
+                # Historical & Real-World
+                "A Roman legion marching through a dense forest",
+                "A samurai warrior meditating under a cherry blossom tree",
+                "A Viking longship sailing through a misty fjord",
+                "A bustling marketplace on the ancient Silk Road",
+                "The library of Alexandria in its prime",
+                "A pharaoh's tomb being discovered in Egypt",
+                "A medieval castle under siege",
+                "A Parisian street cafe in the 1920s",
+                "A Venetian carnival with elaborate masks",
+                "A lone cowboy overlooking the Grand Canyon",
+                "An Aztec temple at the height of the empire",
+                "A gladiator fight in the Colosseum",
+                "A quiet monastery in the Himalayas",
+                "A 1950s American diner at midnight",
+                "The construction of the Eiffel Tower",
+                "A secret agent in Cold War Berlin",
+                "A bustling Victorian London street",
+
+                # Nature & Animals
+                "A hidden waterfall oasis in a lush jungle",
+                "A majestic lion with a crown of stars",
+                "A pod of whales swimming through an aurora borealis",
+                "A hummingbird frozen in time, its wings a rainbow blur",
+                "A wise old elephant leading its herd",
+                "A forest of giant, bioluminescent mushrooms",
+                "A serene Japanese garden with a koi pond",
+                "A powerful volcanic eruption at night",
+                "A desert landscape under a galaxy-filled sky",
+                "A red panda sleeping on a mossy branch",
+                "A coral reef teeming with vibrant life",
+                "A lone wolf howling at the full moon",
+                "A majestic eagle catching a fish from a river",
+                "A sea turtle gliding through sunlit ocean waters",
+                "The Amazon rainforest, viewed from the canopy",
+                "A polar bear on a shrinking ice floe",
+                "A field of sunflowers turning towards the sun",
+
+                # Surreal & Abstract
+                "A clock melting over a branch, in the style of Dali",
+                "A staircase that spirals into the clouds",
+                "A city where the buildings are made of books",
+                "A person made of constellations and stardust",
+                "A forest where the trees are made of glass",
+                "An ocean made of liquid galaxies",
+                "A room where gravity is sideways",
+                "A chess game played by shadows",
+                "The sound of silence, visualized",
+                "A teacup containing a storm",
+                "A doorway to summer in the middle of a snowy field",
+                "A train that travels through memories",
+                "A bridge made of woven moonlight",
+                "A human heart made of clockwork and gears",
+                "A desert filled with shipwrecks",
+                "An orchestra of plants playing music",
+                "A face emerging from a canyon wall",
+
+                # People & Characters
+                "An old watchmaker in his workshop, surrounded by timepieces",
+                "A street artist painting a mural on a brick wall",
+                "A child reading a book under a magical, glowing tree",
+                "A chef in a chaotic, fantastical kitchen",
+                "A musician playing a violin that summons spirits",
+                "A scholar deciphering an ancient, glowing scroll",
+                "A deep-sea diver discovering an underwater city",
+                "A queen addressing her court in a grand throne room",
+                "A lonely lighthouse keeper during a storm",
+                "A ballerina whose dance creates ripples in reality",
+                "A blacksmith forging a legendary sword",
+                "A nomad traveling with a giant, gentle beast",
+                "A plague doctor in a deserted, gothic city",
+                "A pilot of a fantastical flying machine",
+                "A spy attending a masquerade ball",
             ]
             
-            # This simplified version doesn't require STYLE_CATEGORIES
-            full_prompt = f"{random.choice(subjects)}, {random.choice(details)}"
+            # ==============================================================================
+            # >>> EXPANDED DETAILS LIST (200+ items)
+            # ==============================================================================
+            details = [
+                # Artistic Styles
+                "in the style of a classical oil painting",
+                "as a vibrant watercolor illustration",
+                "in the style of Hayao Miyazaki",
+                "in the style of a detailed charcoal sketch",
+                "with an impressionist art style, visible brush strokes",
+                "in a surrealist style, like Salvador Dalí",
+                "with a pop art aesthetic, like Andy Warhol",
+                "as a vintage Japanese ukiyo-e woodblock print",
+                "in a modern anime or manga style",
+                "in the style of a gritty comic book panel",
+                "as a beautiful stained glass window",
+                "in the distinct style of Vincent van Gogh",
+                "with an art nouveau decorative style",
+                "in a minimalist, clean vector art style",
+                "as a pointillism painting",
+                "in a cubist style, like Picasso",
+                "as a piece of high-fantasy concept art",
+                "in the style of Moebius (Jean Giraud)",
+                "as a psychedelic, trippy art piece",
+                "in the style of a children's storybook illustration",
+                "with a dark, gothic art style",
+                "in the style of classic Disney animation",
+                "as a photobashed, realistic concept piece",
+                "in an abstract expressionist style",
+                "as a medieval illuminated manuscript",
+                "with a street art graffiti aesthetic",
+                "in the style of H.R. Giger, biomechanical",
 
-            # Apply the generated prompt to the main text area
+                # Lighting & Color
+                "with dramatic, cinematic lighting",
+                "with an ethereal, otherworldly glow",
+                "in vibrant, rich, saturated colors",
+                "with a soft, dreamy, and gentle focus",
+                "bathed in the golden hour light of sunset",
+                "illuminated by a neon, cyberpunk glow",
+                "in a stark black and white, high contrast",
+                "with a monochromatic color scheme",
+                "with a pastel color palette",
+                "lit by magical, bioluminescent light sources",
+                "with volumetric lighting and god rays streaming down",
+                "using a chiaroscuro lighting technique",
+                "with a warm and cozy, candlelit atmosphere",
+                "in a cool, moody blue and purple color palette",
+                "with a nostalgic sepia tone",
+                "backlit, creating a powerful silhouette",
+                "with shimmering, iridescent colors",
+                "with a vaporwave aesthetic, pinks and cyans",
+                "in a dark, foreboding, and ominous light",
+                "lit by the light of a full moon",
+                "with lens flare and anamorphic streaks",
+
+                # Composition & Framing
+                "as an ultra-wide, panoramic shot",
+                "in a detailed macro, close-up view",
+                "shot with a fisheye lens",
+                "from a dramatic low-angle perspective",
+                "viewed from a bird's-eye-view, looking down",
+                "with a symmetrical and balanced composition",
+                "using the rule of thirds for a dynamic composition",
+                "with a shallow depth of field, beautiful bokeh",
+                "in a cinematic widescreen aspect ratio",
+
+                # Mood & Atmosphere
+                "exuding a sense of wonder and awe",
+                "with a dramatic and epic atmosphere",
+                "filled with intricate, fractal patterns",
+                "creating a feeling of peace and tranquility",
+                "with a mysterious and enigmatic mood",
+                "conveying a sense of profound loneliness",
+                "in a whimsical and playful setting",
+                "with a dark, dystopian, and oppressive feeling",
+                "creating a sense of grand scale and adventure",
+                "with a cozy, comfortable, and safe atmosphere",
+                "in a chaotic and energetic scene",
+                "with a nostalgic and melancholic tone",
+                "exuding power and majesty",
+                "in a serene and meditative environment",
+
+                # Rendering & Texture
+                "rendered in Unreal Engine 5, hyperrealistic",
+                "as a hyper-detailed, 8K resolution photograph",
+                "with a glossy, reflective finish",
+                "with a rough, textured, matte finish",
+                "made of polished chrome and glass",
+                "appearing weathered, ancient, and worn",
+                "with a grainy, film-like texture",
+                "in sharp, crisp focus from front to back",
+                "with heavy impasto, thick paint strokes",
+                "made of translucent, glowing crystal",
+                "etched in gold and silver",
+                "with a cel-shaded, cartoon-like rendering",
+                "as an intricate line art drawing",
+                "with a smooth, airbrushed quality",
+                "rendered in Octane, cinematic VFX",
+            ]
+
+            # Combine the parts into a full prompt
+            full_prompt = f"{random.choice(subjects)}, {random.choice(details)}"
+            
+            # Apply the generated prompt to the main text area in your app
             st.session_state.main_prompt = full_prompt
 
         st.button(
@@ -2078,6 +2302,7 @@ with col2:
             use_container_width=True,
             help="Generate a random, creative prompt to get you started."
         )
+    # --- END: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # --- END: SURPRISE ME - RANDOM PROMPT GENERATOR ---
 
 
