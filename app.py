@@ -1568,6 +1568,8 @@ with st.sidebar:
                     if st.button(f"View #{i+1}", key=f"view_{i}", use_container_width=True):
                         st.session_state.current_image = img_data
                         st.rerun()
+                        
+                    st.markdown("---")    
 
 # Main content area
 col1, col2 = st.columns([2, 1])
