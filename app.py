@@ -2122,7 +2122,7 @@ gallery_images = [
     "k4.jpg", "k16.jpg", "k13.jpg", "k14.jpg", "k17.jpg", "k18.jpg"
 ]
 
-st.sidebar.image("k9.jpg", use_container_width=True)
+st.sidebar.image("k15.jpg", use_container_width=True)
 
 
 # Select one image at random from the list
