@@ -1694,34 +1694,20 @@ with col1:
         if st.button("✨ Generate Masterpiece", key="generate_btn", use_container_width=True):
             if not prompt.strip():
                 st.markdown('<div class="error-box">❌ Please enter a prompt to begin your creative journey!</div>', unsafe_allow_html=True)
-                        else:
+            else:
                 # Clear any previously displayed variations for a clean slate
                 if 'newly_generated_variations' in st.session_state:
                     st.session_state.newly_generated_variations = None
                 
-                # >>> REPLACE THE OLD PROMPT ENHANCEMENT LOGIC WITH THIS <<<
-
-                # Start with the base prompt
-                final_prompt_parts = [prompt.strip()]
-
-                # Add style and mood details if a preset or enhancement is active
+                # Enhance prompt if requested or preset applied
                 if enhance_prompt or (hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied):
                     if hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied:
                         preset = st.session_state.preset_applied
-                        final_prompt_parts.append(f"{preset['styles'][0]} style, {preset['color_mood']} color palette, {preset['lighting']} lighting, {preset['enhancement']}")
+                        enhanced_prompt = f"{prompt}, {preset['styles'][0]} style, {preset['color_mood']} color palette, {preset['lighting']} lighting, {preset['enhancement']}, {quality_level} quality"
                     else:
-                        final_prompt_parts.append(f"{selected_style} style, {color_mood} color palette, {lighting} lighting")
-                
-                final_prompt_parts.append(f"{quality_level} quality")
-
-                # 🎨 Combine the positive parts of the prompt
-                enhanced_prompt = ", ".join(final_prompt_parts)
-
-                # 🚫 Add the negative prompt if it exists
-                if negative_prompt.strip():
-                    enhanced_prompt += f", a negative prompt to avoid: ({negative_prompt.strip()})"
-                
-                # >>> END OF REPLACEMENT BLOCK <<<
+                        enhanced_prompt = f"{prompt}, {selected_style} style, {color_mood} color palette, {lighting} lighting, {quality_level} quality"
+                else:
+                    enhanced_prompt = prompt
                 
                 # --- ADDED: Step 2 - Add the new prompt to history ---
                 if enhanced_prompt not in st.session_state.prompt_history:
