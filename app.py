@@ -12,7 +12,7 @@ import uuid
 
 # Page config
 st.set_page_config(
-    page_title="🖼️  Studio",
+    page_title="🖼️ DreamCanvas",
     page_icon="🎨",
     layout="wide",
     initial_sidebar_state="expanded"
