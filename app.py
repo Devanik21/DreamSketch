@@ -1960,7 +1960,21 @@ with col1:
             if st.button("Clear Variation Display", use_container_width=True):
                  st.session_state.newly_generated_variations = None
                  st.rerun()
+
+            
+                        # --- ADDED: Image Details for Variation ---
+            st.markdown(f"""
+            <div class="download-container">
+            <strong>📊 Image Details:</strong><br>
+            • Size: {variation_img.size[0]} × {variation_img.size[1]} pixels<br>
+            • Format: {variation_img.format or 'N/A'}<br>
+            • Mode: {variation_img.mode}<br>
+            • Generated: {variation_data['generation_time']}
+            </div>
+            """, unsafe_allow_html=True)    
         # --- END: DISPLAY NEW VARIATION ---
+
+            
 
 
         # --- END: DISPLAY NEW VARIATION ---
