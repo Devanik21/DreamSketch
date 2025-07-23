@@ -2392,19 +2392,71 @@ with col2:
         # --- START: PROMPT HISTORY & FAVORITES FEATURE ---
 
         # 1. Prompt History
+        # 1. Prompt History
         with st.expander("📜 Prompt History"):
             if not st.session_state.prompt_history:
                 st.info("Your recent prompts will appear here.")
             else:
-                def apply_historical_prompt(prompt_text):
-                    st.session_state.main_prompt = prompt_text
+                # --- ADVANCED PROMPT HISTORY CONTROLS ---
+                with st.container(border=True):
+                    st.markdown("##### 🔬 Filter & Sort History")
+                    
+                    # 1. Search Bar for History
+                    search_query_hist = st.text_input(
+                        "🔍 Search by Keyword",
+                        placeholder="e.g., majestic, neon, painting...",
+                        key="prompt_hist_search"
+                    )
+                    
+                    # 2. Sort Order for History
+                    sort_order_hist = st.selectbox(
+                        "⏳ Sort History",
+                        ["Newest First", "Oldest First"],
+                        key="prompt_hist_sort"
+                    )
+
+                # --- FILTERING AND SORTING LOGIC ---
                 
-                for i, prompt in enumerate(st.session_state.prompt_history[:10]): # Show last 10
-                    with st.container(border=True):
-                        st.markdown(f"<small>{prompt[:100]}...</small>", unsafe_allow_html=True)
-                        st.button("✍️ Use", key=f"hist_{i}", on_click=apply_historical_prompt, args=(prompt,), use_container_width=True)
+                # Start with the full history
+                history_list = st.session_state.prompt_history
                 
-                if st.button("Clear History", use_container_width=True):
+                # Apply search filter
+                if search_query_hist:
+                    history_list = [
+                        p for p in history_list if search_query_hist.lower() in p.lower()
+                    ]
+
+                # Apply sorting
+                # New prompts are inserted at the start, so the list is already "Newest First"
+                if sort_order_hist == "Oldest First":
+                    display_list = list(reversed(history_list))
+                else: # "Newest First"
+                    display_list = history_list
+                
+                st.markdown("---")
+                st.markdown(f"**{len(display_list)}** prompt(s) found.")
+
+                if not display_list:
+                    st.info("No prompts match your current filter criteria.")
+                else:
+                    def apply_historical_prompt(prompt_text):
+                        st.session_state.main_prompt = prompt_text
+                    
+                    # Display the filtered and sorted prompts
+                    for prompt in display_list:
+                        with st.container(border=True):
+                            st.markdown(f"<small>{prompt[:100]}...</small>", unsafe_allow_html=True)
+                            # Use a hash of the prompt for a unique, stable key
+                            st.button(
+                                "✍️ Use This Prompt", 
+                                key=f"hist_use_{hash(prompt)}", 
+                                on_click=apply_historical_prompt, 
+                                args=(prompt,), 
+                                use_container_width=True
+                            )
+                
+                st.markdown("---")
+                if st.button("Clear Entire History", use_container_width=True):
                     st.session_state.prompt_history = []
                     st.rerun()
 
