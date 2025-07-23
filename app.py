@@ -2045,8 +2045,43 @@ with col2:
         - **Cinematic**: "Movie poster style, dramatic lighting, epic composition"
         - **Fantasy**: "Magic realism, ethereal glow, mythical atmosphere"
         """)
-    
-    # Quick actions
+
+    # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
+    # This container is now outside the 'if' condition, so it appears on startup.
+    with st.container(border=True):
+        st.markdown("##### ✨ Feeling Lucky?")
+
+        def generate_random_prompt():
+            # NOTE: This assumes 'random' is imported and 'STYLE_CATEGORIES' is defined elsewhere.
+            subjects = [
+                "A majestic dragon", "A futuristic city skyline", "A hidden waterfall oasis", 
+                "An ancient tree spirit", "A celestial fox", "A forgotten library in the clouds", 
+                "A steampunk airship navigating a storm", "A robot gardener tending to glowing plants", 
+                "A knight in ethereal armor", "An alien marketplace"
+            ]
+            details = [
+                "with cinematic lighting", "with an ethereal glow", "in vibrant, rich colors",
+                "exuding a sense of wonder", "with a dramatic atmosphere", "filled with intricate patterns",
+                "rendered in Unreal Engine 5", "in a hyperrealistic style", "as a piece of concept art",
+                "with a soft, dreamy focus"
+            ]
+            
+            # This simplified version doesn't require STYLE_CATEGORIES
+            full_prompt = f"{random.choice(subjects)}, {random.choice(details)}"
+
+            # Apply the generated prompt to the main text area
+            st.session_state.main_prompt = full_prompt
+
+        st.button(
+            "🎲 Surprise Me!", 
+            on_click=generate_random_prompt, 
+            use_container_width=True,
+            help="Generate a random, creative prompt to get you started."
+        )
+    # --- END: SURPRISE ME - RANDOM PROMPT GENERATOR ---
+
+
+    # Quick actions will still only appear after the first image is generated.
     if st.session_state.images:
         st.markdown("### 🦄 Quick Actions")
 
