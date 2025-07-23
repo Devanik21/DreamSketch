@@ -1561,27 +1561,105 @@ with st.sidebar:
     # Image Gallery
     if st.session_state.images:
         st.markdown("### 🖼️ Your Gallery")
+
+        # --- ADVANCED GALLERY CONTROLS ---
+        with st.container(border=True):
+            st.markdown("##### 🔬 Filter & Sort")
+            
+            # 1. Search Bar
+            search_query = st.text_input(
+                "🔍 Search by Prompt",
+                placeholder="e.g., dragon, crystal, forest...",
+                key="gallery_search"
+            )
+            
+            # 2. Filter by Style
+            # Get a unique, sorted list of styles used in the gallery
+            all_styles_in_gallery = sorted(list(set(
+                img.get('style_used', 'N/A') for img in st.session_state.images
+            )))
+            selected_styles_filter = st.multiselect(
+                "🎨 Filter by Style",
+                options=all_styles_in_gallery,
+                key="gallery_style_filter"
+            )
+            
+            # 3. Sort Order
+            sort_order = st.selectbox(
+                "⏳ Sort by",
+                ["Newest First", "Oldest First"],
+                key="gallery_sort"
+            )
+
+        # --- FILTERING AND SORTING LOGIC ---
         
-        # Clear gallery button
-        if st.button("🗑️ Clear Gallery", use_container_width=True):
+        # Start with all images and apply filters sequentially
+        filtered_images = st.session_state.images
+        
+        # Apply search query filter
+        if search_query:
+            filtered_images = [
+                img for img in filtered_images
+                if search_query.lower() in img.get('original_prompt', '').lower() or \
+                   search_query.lower() in img.get('enhanced_prompt', '').lower()
+            ]
+            
+        # Apply style filter
+        if selected_styles_filter:
+            filtered_images = [
+                img for img in filtered_images
+                if img.get('style_used') in selected_styles_filter
+            ]
+            
+        # Apply sorting
+        # Note: New images are appended, so the default list is "Oldest First"
+        if sort_order == "Newest First":
+            # Create a reversed copy for display
+            display_list = list(reversed(filtered_images))
+        else: # "Oldest First"
+            display_list = filtered_images
+
+        st.markdown("---")
+
+        # --- DISPLAY FILTERED GALLERY ---
+        
+        # Show how many results were found
+        st.markdown(f"**{len(display_list)}** image(s) found.")
+
+        if not display_list:
+            st.info("No images match your current filter criteria.")
+        else:
+            # Display thumbnail gallery
+            for img_data in display_list:
+                # Using a unique ID for the key is more robust with filtering
+                img_id = img_data['id']
+                with st.container():
+                    col1, col2 = st.columns([1, 3])
+                    with col1:
+                        img = Image.open(BytesIO(img_data['image_data']))
+                        img.thumbnail((80, 80))
+                        st.image(img, use_container_width=True)
+                    
+                    with col2:
+                        # Display the prompt for context
+                        prompt_summary = img_data.get('original_prompt', 'No Prompt')[:50]
+                        st.markdown(f"<small>*{prompt_summary}...*</small>", unsafe_allow_html=True)
+                        
+                        if st.button("View Image", key=f"view_{img_id}", use_container_width=True):
+                            st.session_state.current_image = img_data
+                            st.rerun()
+
+        st.markdown("---")
+
+        # Clear gallery button remains at the end
+        if st.button("🗑️ Clear Entire Gallery", use_container_width=True):
             st.session_state.images = []
             st.session_state.current_image = None
+            st.session_state.favorites = [] # Also clear favorites
+            st.session_state.prompt_history = [] # Also clear history
             st.rerun()
-        
-        # Display thumbnail gallery
-        for i, img_data in enumerate(st.session_state.images):
-            with st.container():
-                col1, col2 = st.columns([1, 3])
-                with col1:
-                    # Create thumbnail
-                    img = Image.open(BytesIO(img_data['image_data']))
-                    img.thumbnail((80, 80))
-                    st.image(img, use_container_width=True)
-                
-                with col2:
-                    if st.button(f"{i+1}", key=f"view_{i}", use_container_width=True):
-                        st.session_state.current_image = img_data
-                        st.rerun()
+            
+        st.markdown("---")
                         
         st.markdown("---")        
 
