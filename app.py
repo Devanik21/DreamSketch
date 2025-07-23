@@ -1569,7 +1569,7 @@ with st.sidebar:
                         st.session_state.current_image = img_data
                         st.rerun()
                         
-                st.markdown("---")        
+            st.markdown("---")        
 
 # Main content area
 col1, col2 = st.columns([2, 1])
