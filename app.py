@@ -2409,25 +2409,89 @@ with col2:
                     st.rerun()
 
         # 2. Favorites
+        # 2. Favorites
         with st.expander("⭐ Favorites"):
             if not st.session_state.favorites:
                 st.info("Your favorite images will appear here. Click the ☆ icon on an image to save it.")
             else:
-                favorited_images = [img for img in st.session_state.images if img['id'] in st.session_state.favorites]
-                
-                # Create a grid for thumbnails
-                cols = st.columns(3)
-                for i, fav_img_data in enumerate(favorited_images):
-                    with cols[i % 3]:
-                        thumb = Image.open(BytesIO(fav_img_data['image_data']))
-                        thumb.thumbnail((100, 100))
-                        
-                        if st.button(f"{i+1}", key=f"fav_btn_{i}", use_container_width=True):
-                            st.session_state.current_image = fav_img_data
-                            st.rerun()
-                        st.image(thumb, use_container_width=True)
+                # First, get the list of all favorited image data
+                favorited_images = [
+                    img for img in st.session_state.images if img['id'] in st.session_state.favorites
+                ]
 
-        # --- END: PROMPT HISTORY & FAVORITES FEATURE ---
+                # --- ADVANCED FAVORITES CONTROLS ---
+                with st.container(border=True):
+                    st.markdown("##### 🔬 Filter & Sort Favorites")
+                    
+                    # 1. Search Bar for Favorites
+                    search_query_fav = st.text_input(
+                        "🔍 Search Favorites by Prompt",
+                        placeholder="e.g., cyberpunk, serene...",
+                        key="fav_search"
+                    )
+
+                    # 2. Filter by Style (options are generated only from favorites)
+                    fav_styles = sorted(list(set(
+                        img.get('style_used', 'N/A') for img in favorited_images
+                    )))
+                    selected_styles_fav = st.multiselect(
+                        "🎨 Filter Favorites by Style",
+                        options=fav_styles,
+                        key="fav_style_filter"
+                    )
+                    
+                    # 3. Sort Order for Favorites
+                    sort_order_fav = st.selectbox(
+                        "⏳ Sort Favorites by",
+                        ["Newest First", "Oldest First"],
+                        key="fav_sort"
+                    )
+
+                # --- FILTERING LOGIC ---
+                filtered_favorites = favorited_images
+                
+                if search_query_fav:
+                    filtered_favorites = [
+                        img for img in filtered_favorites
+                        if search_query_fav.lower() in img.get('original_prompt', '').lower() or \
+                           search_query_fav.lower() in img.get('enhanced_prompt', '').lower()
+                    ]
+                
+                if selected_styles_fav:
+                    filtered_favorites = [
+                        img for img in filtered_favorites
+                        if img.get('style_used') in selected_styles_fav
+                    ]
+
+                # --- SORTING & DISPLAY LOGIC ---
+                st.markdown("---")
+                
+                # Sort the filtered list based on generation time
+                if sort_order_fav == "Newest First":
+                    display_list = sorted(filtered_favorites, key=lambda x: x.get('generation_time', ''), reverse=True)
+                else: # "Oldest First"
+                    display_list = sorted(filtered_favorites, key=lambda x: x.get('generation_time', ''))
+
+                st.markdown(f"**{len(display_list)}** favorite(s) found.")
+
+                if not display_list:
+                    st.info("No favorites match your current filter criteria.")
+                else:
+                    # Create a grid for thumbnails
+                    cols = st.columns(3)
+                    for i, fav_img_data in enumerate(display_list):
+                        with cols[i % 3]:
+                            thumb = Image.open(BytesIO(fav_img_data['image_data']))
+                            thumb.thumbnail((150, 150))
+                            
+                            # Use the unique image ID for the key to prevent errors
+                            if st.button(f"View #{i+1}", key=f"fav_view_{fav_img_data['id']}", use_container_width=True):
+                                st.session_state.current_image = fav_img_data
+                                # Clear newly generated variations when viewing an old image
+                                if 'newly_generated_variations' in st.session_state:
+                                    st.session_state.newly_generated_variations = None
+                                st.rerun()
+                            st.image(thumb, use_container_width=True, caption=f"{fav_img_data.get('style_used', '')}")
 
 
 
