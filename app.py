@@ -1928,10 +1928,20 @@ with col1:
                 use_container_width=True
             )
             # --- START: AI DESCRIPTION FOR VARIATION ---
+                        # --- AI DESCRIPTION FOR VARIATION ---
             if variation_data.get('description'):
                 st.markdown("### 📝 AI Description (Variation)")
                 st.info(variation_data['description'])
-            # --- END: AI DESCRIPTION FOR VARIATION ---
+
+                # --- ADDED: Text-to-speech for Variation Description ---
+                try:
+                    audio_buffer_var = BytesIO()
+                    tts_var = gTTS(text=variation_data['description'], lang='en', slow=False)
+                    tts_var.write_to_fp(audio_buffer_var)
+                    audio_buffer_var.seek(0)
+                    st.audio(audio_buffer_var, format='audio/mp3', start_time=0)
+                except Exception as e:
+                    st.warning(f"Could not generate audio for the variation description. Error: {e}")
 
             # --- START: EXPORT BUTTONS FOR VARIATION ---
             st.markdown("### 💾 Export Your Variation Masterpiece")
