@@ -2068,7 +2068,7 @@ with col2:
                         thumb = Image.open(BytesIO(fav_img_data['image_data']))
                         thumb.thumbnail((100, 100))
                         
-                        if st.button(f"View Fav #{i+1}", key=f"fav_btn_{i}", use_container_width=True):
+                        if st.button(f"F{i+1}", key=f"fav_btn_{i}", use_container_width=True):
                             st.session_state.current_image = fav_img_data
                             st.rerun()
                         st.image(thumb, use_container_width=True)
