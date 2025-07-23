@@ -2122,6 +2122,9 @@ gallery_images = [
     "k4.jpg", "k16.jpg", "k13.jpg", "k14.jpg", "k17.jpg", "k18.jpg"
 ]
 
+st.sidebar.image("k10.jpg", use_container_width=True)
+
+
 # Select one image at random from the list
 random_image_to_display = random.choice(gallery_images)
 
