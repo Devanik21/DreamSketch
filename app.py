@@ -19,6 +19,19 @@ st.set_page_config(
 )
 
 
+.rainbow-header {
+    font-weight: bold;
+    /* blue → teal → yellow → orange */
+    background: linear-gradient(
+      90deg,
+      #7fa4ff 0%,
+      #4cd9c0 33%,
+      #ffea5d 66%,
+      #ff8a65 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 
 st.sidebar.image("k5.jpg", use_container_width=True)
 
@@ -708,7 +721,7 @@ STYLE_CATEGORIES = {
 
 # Sidebar for advanced options
 with st.sidebar:
-    st.markdown("### 🎨 Creative Controls")
+    t.markdown("<h3 class='rainbow-header'>🎨 Creative Controls</h3>", unsafe_allow_html=True)
     
     # Style selection
     selected_category = st.selectbox("🎭 Style Category", list(STYLE_CATEGORIES.keys()))
