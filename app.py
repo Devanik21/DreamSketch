@@ -1916,7 +1916,7 @@ with col1:
             # --- END: AI DESCRIPTION FOR VARIATION ---
 
             # --- START: EXPORT BUTTONS FOR VARIATION ---
-            st.markdown("###### Export Variation")
+            st.markdown("### 💾 Export Your Variation Masterpiece")
             
             # Open the image data once for reuse
             variation_img = Image.open(BytesIO(variation_data['image_data']))
