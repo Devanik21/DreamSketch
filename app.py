@@ -1800,74 +1800,7 @@ with col1:
 
         # --- START: DISPLAY NEW VARIATION ---
         # --- START: DISPLAY NEW VARIATION ---
-        # --- START: DISPLAY NEW VARIATION ---
-        if 'newly_generated_variations' in st.session_state and st.session_state.newly_generated_variations:
-            st.markdown("---")
-            st.markdown("### ✨ Your New Variation")
-            
-            # Since there's only one, we access it directly
-            variation_data = st.session_state.newly_generated_variations[0]
-            
-            st.image(
-                variation_data['image_data'], 
-                caption="New Variation", 
-                use_container_width=True
-            )
-            # --- START: AI DESCRIPTION FOR VARIATION ---
-            if variation_data.get('description'):
-                st.markdown("### 📝 AI Description (Variation)")
-                st.info(variation_data['description'])
-            # --- END: AI DESCRIPTION FOR VARIATION ---
 
-            # --- START: EXPORT BUTTONS FOR VARIATION ---
-            st.markdown("###### Export Variation")
-            
-            # Open the image data once for reuse
-            variation_img = Image.open(BytesIO(variation_data['image_data']))
-            
-            # Create two columns for the buttons
-            dl_col1, dl_col2 = st.columns(2)
-
-            with dl_col1:
-                # PNG download logic
-                png_buffer = BytesIO()
-                variation_img.save(png_buffer, format="PNG", optimize=True)
-                st.download_button(
-                    label="📥 Download PNG",
-                    data=png_buffer.getvalue(),
-                    file_name=f"variation_{int(time.time())}.png",
-                    mime="image/png",
-                    key=f"dl_var_png_{variation_data['id']}",
-                    use_container_width=True
-                )
-
-            with dl_col2:
-                # JPG download logic
-                jpg_buffer = BytesIO()
-                # Handle transparency for JPG conversion
-                if variation_img.mode == 'RGBA':
-                    jpg_img = Image.new('RGB', variation_img.size, (255, 255, 255))
-                    jpg_img.paste(variation_img, mask=variation_img.split()[-1])
-                else:
-                    jpg_img = variation_img
-                jpg_img.save(jpg_buffer, format="JPEG", quality=95, optimize=True)
-                st.download_button(
-                    label="📥 Download JPG",
-                    data=jpg_buffer.getvalue(),
-                    file_name=f"variation_{int(time.time())}.jpg",
-                    mime="image/jpeg",
-                    key=f"dl_var_jpg_{variation_data['id']}",
-                    use_container_width=True
-                )
-            # --- END: EXPORT BUTTONS FOR VARIATION ---
-
-            if st.button("Clear Variation Display", use_container_width=True):
-                 st.session_state.newly_generated_variations = None
-                 st.rerun()
-        # --- END: DISPLAY NEW VARIATION ---
-
-
-        # --- END: DISPLAY NEW VARIATION ---
         st.markdown("---")
         # Description if available
         if img_data.get('description'):
@@ -1961,6 +1894,76 @@ with col1:
         • Generated: {img_data['generation_time']}
         </div>
         """, unsafe_allow_html=True)
+
+        
+                # --- START: DISPLAY NEW VARIATION ---
+        if 'newly_generated_variations' in st.session_state and st.session_state.newly_generated_variations:
+            st.markdown("---")
+            st.markdown("### ✨ Your New Variation")
+            
+            # Since there's only one, we access it directly
+            variation_data = st.session_state.newly_generated_variations[0]
+            
+            st.image(
+                variation_data['image_data'], 
+                caption="New Variation", 
+                use_container_width=True
+            )
+            # --- START: AI DESCRIPTION FOR VARIATION ---
+            if variation_data.get('description'):
+                st.markdown("### 📝 AI Description (Variation)")
+                st.info(variation_data['description'])
+            # --- END: AI DESCRIPTION FOR VARIATION ---
+
+            # --- START: EXPORT BUTTONS FOR VARIATION ---
+            st.markdown("###### Export Variation")
+            
+            # Open the image data once for reuse
+            variation_img = Image.open(BytesIO(variation_data['image_data']))
+            
+            # Create two columns for the buttons
+            dl_col1, dl_col2 = st.columns(2)
+
+            with dl_col1:
+                # PNG download logic
+                png_buffer = BytesIO()
+                variation_img.save(png_buffer, format="PNG", optimize=True)
+                st.download_button(
+                    label="📥 Download PNG",
+                    data=png_buffer.getvalue(),
+                    file_name=f"variation_{int(time.time())}.png",
+                    mime="image/png",
+                    key=f"dl_var_png_{variation_data['id']}",
+                    use_container_width=True
+                )
+
+            with dl_col2:
+                # JPG download logic
+                jpg_buffer = BytesIO()
+                # Handle transparency for JPG conversion
+                if variation_img.mode == 'RGBA':
+                    jpg_img = Image.new('RGB', variation_img.size, (255, 255, 255))
+                    jpg_img.paste(variation_img, mask=variation_img.split()[-1])
+                else:
+                    jpg_img = variation_img
+                jpg_img.save(jpg_buffer, format="JPEG", quality=95, optimize=True)
+                st.download_button(
+                    label="📥 Download JPG",
+                    data=jpg_buffer.getvalue(),
+                    file_name=f"variation_{int(time.time())}.jpg",
+                    mime="image/jpeg",
+                    key=f"dl_var_jpg_{variation_data['id']}",
+                    use_container_width=True
+                )
+            # --- END: EXPORT BUTTONS FOR VARIATION ---
+
+            if st.button("Clear Variation Display", use_container_width=True):
+                 st.session_state.newly_generated_variations = None
+                 st.rerun()
+        # --- END: DISPLAY NEW VARIATION ---
+
+
+        # --- END: DISPLAY NEW VARIATION ---
 
 with col2:
     st.markdown("### 💡 Quick Tips")
