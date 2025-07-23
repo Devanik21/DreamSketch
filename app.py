@@ -2114,19 +2114,21 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-st.image("k3.jpg", use_container_width=True)
-st.sidebar.image("k2.jpg", use_container_width=True)
-st.image("k6.jpg", use_container_width=True)
-st.image("k7.jpg", use_container_width=True)
-st.image("k19.jpg", use_container_width=True)
-st.image("k8.jpg", use_container_width=True)
-st.sidebar.image("k4.jpg", use_container_width=True)
+# --- START: RANDOM GALLERY IMAGE DISPLAY ---
 
-st.image("k16.jpg", use_container_width=True)
-st.image("k13.jpg", use_container_width=True)
-st.image("k14.jpg", use_container_width=True)
-st.sidebar.image("k17.jpg", use_container_width=True)
-st.sidebar.image("k18.jpg", use_container_width=True)
+# Consolidate all your image filenames into one list
+gallery_images = [
+    "k3.jpg", "k2.jpg", "k6.jpg", "k7.jpg", "k19.jpg", "k8.jpg", 
+    "k4.jpg", "k16.jpg", "k13.jpg", "k14.jpg", "k17.jpg", "k18.jpg"
+]
+
+# Select one image at random from the list
+random_image_to_display = random.choice(gallery_images)
+
+# Display the randomly selected image
+st.image(random_image_to_display, use_container_width=True)
+
+# --- END: RANDOM GALLERY IMAGE DISPLAY ---
 
 
 st.markdown("---")
