@@ -19,17 +19,6 @@ st.set_page_config(
 )
 
 
-.rainbow-header {
-    font-weight: bold;
-    background: linear-gradient(
-      #7fa4ff 0%,
-      #4cd9c0 33%,
-      #ffea5d 66%,
-      #ff8a65 100%
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
 
 st.sidebar.image("k5.jpg", use_container_width=True)
 
@@ -70,6 +59,20 @@ st.markdown("""
         --text-secondary: #cbd5e1;
         --text-muted: #94a3b8;
     }
+
+    .rainbow-header {
+    font-weight: bold;
+    /* blue → teal → yellow → orange */
+    background: linear-gradient(
+      90deg,
+      #7fa4ff 0%,
+      #4cd9c0 33%,
+      #ffea5d 66%,
+      #ff8a65 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
     
     .stApp {
         background: radial-gradient(ellipse at top, var(--nebula-dark) 0%, var(--deep-space) 70%);
