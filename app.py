@@ -1565,7 +1565,7 @@ with st.sidebar:
                     st.image(img, use_container_width=True)
                 
                 with col2:
-                    if st.button(f"View #{i+1}", key=f"view_{i}", use_container_width=True):
+                    if st.button(f"{i+1}", key=f"view_{i}", use_container_width=True):
                         st.session_state.current_image = img_data
                         st.rerun()
                         
