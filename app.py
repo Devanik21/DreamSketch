@@ -70,7 +70,8 @@ st.markdown("""
       #ffea5d 66%,
       #ff8a65 100%
     );
-    
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
     
     .stApp {
