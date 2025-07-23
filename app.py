@@ -1560,7 +1560,7 @@ with st.sidebar:
     
     # Image Gallery
     if st.session_state.images:
-        st.markdown("### 🖼️ Your Gallery")
+        st.markdown("### ✨ Your Gallery")
 
         # --- ADVANCED GALLERY CONTROLS ---
         with st.container(border=True):
