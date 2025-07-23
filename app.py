@@ -21,7 +21,6 @@ st.set_page_config(
 
 .rainbow-header {
     font-weight: bold;
-    /* blue → teal → yellow → orange */
     background: linear-gradient(
       90deg,
       #7fa4ff 0%,
