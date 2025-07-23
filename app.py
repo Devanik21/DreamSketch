@@ -1675,6 +1675,15 @@ with col1:
         help="Be descriptive! Include details about subjects, settings, mood, and style.",
         key="main_prompt"
     )
+        # >>> ADD THIS CODE BLOCK <<<
+    negative_prompt = st.text_area(
+        "🚫 Negative Prompt (Optional)",
+        height=80,
+        placeholder="e.g., blurry, ugly, text, watermark, extra limbs, bad anatomy...",
+        help="Tell the AI what to AVOID in the image. Separate concepts with commas.",
+        key="negative_prompt_input"
+    )
+    # >>> END OF CODE BLOCK <<<
     
     # Prompt enhancement options
     enhance_prompt = st.checkbox("🚀 Auto-enhance prompt with selected styles", key="enhance_check")
