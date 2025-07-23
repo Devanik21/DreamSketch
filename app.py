@@ -35,55 +35,39 @@ if 'prompt_history' not in st.session_state:
 if 'favorites' not in st.session_state:
     st.session_state.favorites = []
 
+# Otherworldly CSS with cosmic aesthetics
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     
     * {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
     :root {
-        /* Cosmic Color Palette - Easy on Eyes */
-        --void-black: #0a0a0f;
-        --deep-space: #12121a;
-        --nebula-dark: #1a1a27;
-        --stardust-gray: #262634;
-        --cosmic-mist: #3a3a4a;
-        
-        /* Soft Accent Colors */
-        --dream-purple: #7c3aed;
-        --cosmic-blue: #3b82f6;
-        --nebula-cyan: #22d3ee;
-        --aurora-green: #10b981;
-        --stellar-pink: #f472b6;
-        --moon-white: #f8fafc;
-        
-        /* Text Colors - Gentle on Eyes */
+        --cosmic-purple: #6366f1;
+        --cosmic-blue: #0ea5e9;
+        --cosmic-cyan: #06b6d4;
+        --cosmic-emerald: #10b981;
+        --cosmic-violet: #8b5cf6;
+        --cosmic-pink: #ec4899;
+        --deep-space: #0a0a0f;
+        --nebula-dark: #1a1a2e;
+        --star-dust: #16213e;
+        --aurora-glow: rgba(99, 102, 241, 0.15);
         --text-primary: #e2e8f0;
         --text-secondary: #cbd5e1;
         --text-muted: #94a3b8;
-        --text-dim: #64748b;
-        
-        /* Glow Effects */
-        --soft-glow: rgba(124, 58, 237, 0.15);
-        --gentle-glow: rgba(59, 130, 246, 0.1);
-        --dream-glow: rgba(34, 211, 238, 0.08);
     }
     
-    /* Main App Background */
     .stApp {
-        background: 
-            radial-gradient(ellipse 80% 50% at 50% -20%, var(--nebula-dark) 0%, transparent 70%),
-            radial-gradient(ellipse 60% 80% at 90% 120%, rgba(124, 58, 237, 0.05) 0%, transparent 70%),
-            linear-gradient(180deg, var(--deep-space) 0%, var(--void-black) 100%);
+        background: radial-gradient(ellipse at top, var(--nebula-dark) 0%, var(--deep-space) 70%);
         background-attachment: fixed;
         color: var(--text-primary);
         min-height: 100vh;
         position: relative;
     }
     
-    /* Subtle Floating Stars Effect */
     .stApp::before {
         content: '';
         position: fixed;
@@ -91,135 +75,143 @@ st.markdown("""
         left: 0;
         width: 100%;
         height: 100%;
-        background-image: 
-            radial-gradient(1px 1px at 25px 35px, rgba(248, 250, 252, 0.3), transparent),
-            radial-gradient(1px 1px at 85px 75px, rgba(124, 58, 237, 0.4), transparent),
-            radial-gradient(1px 1px at 145px 125px, rgba(34, 211, 238, 0.3), transparent),
-            radial-gradient(1px 1px at 205px 45px, rgba(248, 250, 252, 0.2), transparent),
-            radial-gradient(1px 1px at 275px 185px, rgba(59, 130, 246, 0.3), transparent),
-            radial-gradient(1px 1px at 325px 95px, rgba(244, 114, 182, 0.2), transparent);
-        background-repeat: repeat;
-        background-size: 350px 200px;
-        animation: gentleFloat 25s linear infinite;
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
         pointer-events: none;
         z-index: -1;
-        opacity: 0.7;
     }
     
-    @keyframes gentleFloat {
-        0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.7; }
-        25% { transform: translateY(-10px) translateX(5px); opacity: 0.5; }
-        50% { transform: translateY(-5px) translateX(-3px); opacity: 0.8; }
-        75% { transform: translateY(-15px) translateX(8px); opacity: 0.4; }
+    /* Floating particles effect */
+    .stApp::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(1px 1px at 20px 30px, rgba(255, 255, 255, 0.15), transparent),
+            radial-gradient(1px 1px at 40px 70px, rgba(99, 102, 241, 0.3), transparent),
+            radial-gradient(1px 1px at 90px 40px, rgba(236, 72, 153, 0.2), transparent),
+            radial-gradient(1px 1px at 130px 80px, rgba(6, 182, 212, 0.2), transparent),
+            radial-gradient(1px 1px at 160px 30px, rgba(255, 255, 255, 0.1), transparent);
+        background-repeat: repeat;
+        background-size: 200px 100px;
+        animation: twinkle 20s linear infinite;
+        pointer-events: none;
+        z-index: -1;
+        opacity: 0.6;
     }
     
-    /* DreamCanvas Title Container */
+    @keyframes twinkle {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 0.8; }
+    }
+    
     .title-container {
-        background: 
-            linear-gradient(135deg, 
-                rgba(124, 58, 237, 0.08) 0%,
-                rgba(59, 130, 246, 0.05) 35%,
-                rgba(34, 211, 238, 0.08) 70%,
-                rgba(16, 185, 129, 0.06) 100%
-            );
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(124, 58, 237, 0.15);
-        border-radius: 20px;
-        padding: 2.5rem 2rem;
+        background: linear-gradient(
+            135deg,
+            rgba(99, 102, 241, 0.1) 0%,
+            rgba(236, 72, 153, 0.05) 35%,
+            rgba(6, 182, 212, 0.08) 70%,
+            rgba(139, 92, 246, 0.1) 100%
+        );
+        backdrop-filter: blur(24px);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 24px;
+        padding: 3rem 2rem;
         margin: 2rem auto;
         text-align: center;
         position: relative;
         overflow: hidden;
         box-shadow: 
-            0 20px 40px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(248, 250, 252, 0.05);
+            0 24px 48px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
     
-    /* Subtle Rotating Border Effect */
     .title-container::before {
         content: '';
         position: absolute;
-        top: -2px;
-        left: -2px;
-        right: -2px;
-        bottom: -2px;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
         background: conic-gradient(
             from 0deg,
             transparent 0deg,
-            rgba(124, 58, 237, 0.2) 90deg,
-            transparent 180deg,
-            rgba(34, 211, 238, 0.15) 270deg,
+            rgba(99, 102, 241, 0.15) 60deg,
+            transparent 120deg,
+            rgba(236, 72, 153, 0.1) 180deg,
+            transparent 240deg,
+            rgba(6, 182, 212, 0.15) 300deg,
             transparent 360deg
         );
-        border-radius: 22px;
-        animation: slowRotate 30s linear infinite;
+        animation: rotate 20s linear infinite;
         z-index: -1;
-        opacity: 0.6;
     }
     
-    @keyframes slowRotate {
+    @keyframes rotate {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
     }
     
-    /* DreamCanvas Title Text */
-    .dream-title {
-        font-size: clamp(2.5rem, 5vw, 3.8rem);
+    .title-text {
+        font-size: clamp(2.5rem, 5vw, 4rem);
         font-weight: 800;
         background: linear-gradient(
             135deg,
-            #f8fafc 0%,
-            #e0e7ff 20%,
-            #c7d2fe 40%,
-            #a5b4fc 60%,
-            #8b5cf6 80%,
-            #7c3aed 100%
+            #e2e8f0 0%,
+            #c084fc 25%,
+            #60a5fa 50%,
+            #34d399 75%,
+            #fbbf24 100%
         );
-        background-size: 200% 200%;
+        background-size: 300% 300%;
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
-        animation: dreamShimmer 6s ease-in-out infinite;
+        animation: gradientShift 8s ease-in-out infinite;
         margin: 0;
-        letter-spacing: -0.02em;
+        text-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
         position: relative;
     }
     
-    @keyframes dreamShimmer {
+    @keyframes gradientShift {
         0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
+        25% { background-position: 100% 0%; }
+        50% { background-position: 100% 100%; }
+        75% { background-position: 0% 100%; }
     }
     
-    /* Subtitle */
-    .dream-subtitle {
-        font-size: 1.1rem;
+    .subtitle {
+        font-size: 1.25rem;
         color: var(--text-secondary);
-        margin-top: 0.75rem;
+        margin-top: 1rem;
         font-weight: 400;
-        opacity: 0.8;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        font-size: 0.9rem;
+        opacity: 0.9;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
     
-    /* Buttons with Soft Glass Effect */
+    /* Buttons with glass morphism */
     .stButton > button {
         background: linear-gradient(
             135deg,
-            rgba(124, 58, 237, 0.12) 0%,
-            rgba(59, 130, 246, 0.08) 100%
+            rgba(99, 102, 241, 0.15) 0%,
+            rgba(139, 92, 246, 0.15) 100%
         );
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(124, 58, 237, 0.2);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(99, 102, 241, 0.3);
         color: var(--text-primary);
-        padding: 0.8rem 1.8rem;
-        border-radius: 12px;
-        font-weight: 500;
-        font-size: 0.95rem;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 0.875rem 2rem;
+        border-radius: 16px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 
-            0 4px 16px rgba(0, 0, 0, 0.15),
-            inset 0 1px 0 rgba(248, 250, 252, 0.05);
+            0 8px 32px rgba(99, 102, 241, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
         width: 100%;
         position: relative;
         overflow: hidden;
@@ -235,22 +227,22 @@ st.markdown("""
         background: linear-gradient(
             90deg,
             transparent 0%,
-            rgba(248, 250, 252, 0.08) 50%,
+            rgba(255, 255, 255, 0.1) 50%,
             transparent 100%
         );
-        transition: left 0.4s ease;
+        transition: left 0.5s ease;
     }
     
     .stButton > button:hover {
-        transform: translateY(-1px);
+        transform: translateY(-2px);
         box-shadow: 
-            0 8px 24px rgba(124, 58, 237, 0.15),
-            inset 0 1px 0 rgba(248, 250, 252, 0.1);
-        border-color: rgba(124, 58, 237, 0.3);
+            0 16px 48px rgba(99, 102, 241, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        border-color: rgba(99, 102, 241, 0.5);
         background: linear-gradient(
             135deg,
-            rgba(124, 58, 237, 0.18) 0%,
-            rgba(59, 130, 246, 0.12) 100%
+            rgba(99, 102, 241, 0.25) 0%,
+            rgba(139, 92, 246, 0.25) 100%
         );
     }
     
@@ -258,244 +250,290 @@ st.markdown("""
         left: 100%;
     }
     
-    /* Sidebar - Deep Space */
+    /* Sidebar styling */
     .stSidebar {
         background: linear-gradient(
             180deg,
-            rgba(26, 26, 39, 0.95) 0%,
-            rgba(18, 18, 26, 0.98) 100%
+            rgba(26, 26, 46, 0.95) 0%,
+            rgba(10, 10, 15, 0.98) 100%
         );
-        backdrop-filter: blur(20px);
-        border-right: 1px solid rgba(124, 58, 237, 0.1);
+        backdrop-filter: blur(24px);
+        border-right: 1px solid rgba(99, 102, 241, 0.2);
     }
     
     .stSidebar > div {
         background: transparent;
     }
     
-    /* Input Fields - Soft and Easy on Eyes */
+    /* Input fields with glass effect */
     .stTextInput > div > div > input,
     .stTextArea > div > div > textarea {
-        background: rgba(124, 58, 237, 0.04) !important;
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(148, 163, 184, 0.15) !important;
-        border-radius: 10px !important;
+        background: rgba(99, 102, 241, 0.05) !important;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        border-radius: 12px !important;
         color: var(--text-primary) !important;
-        padding: 0.9rem !important;
+        padding: 1rem !important;
         font-size: 0.95rem;
-        transition: all 0.25s ease;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
     
     .stTextInput > div > div > input:focus,
     .stTextArea > div > div > textarea:focus {
-        border-color: rgba(124, 58, 237, 0.3) !important;
+        border-color: rgba(99, 102, 241, 0.5) !important;
         box-shadow: 
-            0 0 0 2px rgba(124, 58, 237, 0.1),
-            0 4px 16px rgba(0, 0, 0, 0.12) !important;
+            0 0 0 3px rgba(99, 102, 241, 0.15),
+            0 8px 32px rgba(0, 0, 0, 0.2) !important;
         outline: none !important;
-        background: rgba(124, 58, 237, 0.06) !important;
+        background: rgba(99, 102, 241, 0.08) !important;
     }
     
-    /* Select Boxes */
+    /* Select boxes */
     .stSelectbox > div > div {
-        background: rgba(124, 58, 237, 0.04) !important;
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(148, 163, 184, 0.15) !important;
-        border-radius: 10px !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        background: rgba(99, 102, 241, 0.05) !important;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
     
     .stSelectbox > div > div > div {
         color: var(--text-primary) !important;
-        padding: 0.7rem !important;
+        padding: 0.75rem !important;
     }
     
-    /* Headers with Gentle Gradients */
+    /* Checkbox styling */
+    .stCheckbox > label {
+        color: var(--text-secondary) !important;
+        font-weight: 500;
+    }
+    
+    .stCheckbox > label > div > div {
+        background: rgba(99, 102, 241, 0.1) !important;
+        border: 1px solid rgba(99, 102, 241, 0.3) !important;
+        border-radius: 4px !important;
+    }
+    
+    /* Headers */
     .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 {
         color: var(--text-primary) !important;
-        font-weight: 600;
+        font-weight: 700;
     }
     
     .stMarkdown h3 {
-        font-size: 1.4rem;
+        font-size: 1.5rem;
         margin-bottom: 1rem;
-        background: linear-gradient(135deg, var(--dream-purple), var(--nebula-cyan));
+        background: linear-gradient(135deg, var(--cosmic-purple), var(--cosmic-cyan));
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
-        opacity: 0.9;
     }
     
-    /* Expandable Sections */
+    /* Expandable sections */
     .stExpander > div > div > div > div {
-        background: rgba(124, 58, 237, 0.04) !important;
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(148, 163, 184, 0.1) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        background: rgba(99, 102, 241, 0.05) !important;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.15) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
     
-    /* Custom Containers */
-    .cosmic-container {
+    /* Custom containers */
+    .download-container {
         background: linear-gradient(
             135deg,
-            rgba(16, 185, 129, 0.06) 0%,
-            rgba(34, 211, 238, 0.08) 100%
+            rgba(16, 185, 129, 0.1) 0%,
+            rgba(6, 182, 212, 0.1) 100%
         );
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(34, 211, 238, 0.15);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(16, 185, 129, 0.2);
         padding: 1.5rem;
-        border-radius: 16px;
+        border-radius: 20px;
         margin-top: 1rem;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
     }
     
-    .dream-gallery {
-        background: rgba(124, 58, 237, 0.04);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(148, 163, 184, 0.1);
+    .image-gallery {
+        background: rgba(99, 102, 241, 0.05);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.15);
         padding: 1.5rem;
-        border-radius: 16px;
+        border-radius: 20px;
         margin: 1rem 0;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
     
     .gallery-item {
-        background: rgba(248, 250, 252, 0.03);
-        backdrop-filter: blur(6px);
-        border: 1px solid rgba(148, 163, 184, 0.08);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         padding: 1rem;
-        border-radius: 10px;
+        border-radius: 12px;
         margin: 0.75rem 0;
         cursor: pointer;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
     
     .gallery-item:hover {
-        background: rgba(124, 58, 237, 0.08);
-        border-color: rgba(124, 58, 237, 0.2);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.1);
+        background: rgba(99, 102, 241, 0.1);
+        border-color: rgba(99, 102, 241, 0.3);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(99, 102, 241, 0.15);
     }
     
     .gallery-item.selected {
-        background: rgba(124, 58, 237, 0.1);
-        border-color: rgba(124, 58, 237, 0.25);
-        box-shadow: 0 4px 16px rgba(124, 58, 237, 0.15);
+        background: rgba(99, 102, 241, 0.15);
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
     }
     
-    /* Status Messages */
+    /* Status boxes */
     .error-box {
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.08));
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(239, 68, 68, 0.2);
-        padding: 1rem;
-        border-radius: 12px;
-        color: #fca5a5;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15));
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        padding: 1.25rem;
+        border-radius: 16px;
+        color: #fecaca;
         margin: 1rem 0;
-        box-shadow: 0 4px 16px rgba(239, 68, 68, 0.1);
+        box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15);
     }
     
     .success-box {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.08));
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(16, 185, 129, 0.2);
-        padding: 1rem;
-        border-radius: 12px;
-        color: #86efac;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15));
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        padding: 1.25rem;
+        border-radius: 16px;
+        color: #a7f3d0;
         margin: 1rem 0;
-        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
+        box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15);
     }
     
     .info-box {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(124, 58, 237, 0.08));
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(59, 130, 246, 0.2);
-        padding: 1rem;
-        border-radius: 12px;
-        color: #bfdbfe;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        padding: 1.25rem;
+        border-radius: 16px;
+        color: #c7d2fe;
         margin: 1rem 0;
-        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.1);
+        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
     }
     
-    /* Download Button */
+    /* Download button */
     .stDownloadButton > button {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(34, 211, 238, 0.12)) !important;
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(16, 185, 129, 0.25) !important;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2)) !important;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(16, 185, 129, 0.4) !important;
         color: var(--text-primary) !important;
-        padding: 0.7rem 1.5rem;
-        border-radius: 10px;
-        font-weight: 500;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15);
         width: 100%;
     }
     
     .stDownloadButton > button:hover {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(34, 211, 238, 0.18)) !important;
-        border-color: rgba(16, 185, 129, 0.35) !important;
-        transform: translateY(-1px);
-        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.15);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.3)) !important;
+        border-color: rgba(16, 185, 129, 0.6) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 48px rgba(16, 185, 129, 0.25);
     }
     
-    /* Smooth Scrollbar */
+    /* Scrollbar styling */
     ::-webkit-scrollbar {
-        width: 6px;
+        width: 8px;
     }
     
     ::-webkit-scrollbar-track {
-        background: rgba(148, 163, 184, 0.05);
-        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
     }
     
     ::-webkit-scrollbar-thumb {
-        background: rgba(124, 58, 237, 0.2);
-        border-radius: 3px;
-        transition: all 0.25s ease;
+        background: rgba(99, 102, 241, 0.3);
+        border-radius: 4px;
+        transition: all 0.3s ease;
     }
     
     ::-webkit-scrollbar-thumb:hover {
-        background: rgba(124, 58, 237, 0.35);
+        background: rgba(99, 102, 241, 0.5);
     }
     
-    /* Gentle Loading Animation */
-    @keyframes gentlePulse {
-        0%, 100% { opacity: 0.3; }
-        50% { opacity: 0.7; }
+    /* Loading animations */
+    @keyframes pulse {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 1; }
     }
     
     .loading-pulse {
-        animation: gentlePulse 2.5s ease-in-out infinite;
+        animation: pulse 2s ease-in-out infinite;
     }
     
-    /* Responsive Design */
+    /* Responsive adjustments */
     @media (max-width: 768px) {
         .title-container {
-            padding: 2rem 1.5rem;
+            padding: 2rem 1rem;
             margin: 1rem;
         }
         
-        .dream-title {
-            font-size: 2.2rem;
+        .title-text {
+            font-size: 2.5rem;
         }
         
-        .dream-subtitle {
-            font-size: 0.85rem;
+        .subtitle {
+            font-size: 1rem;
         }
     }
 </style>
 """, unsafe_allow_html=True)
 
-# DreamCanvas Title
+
+
+
 st.markdown("""
-<div class="title-container">
-    <h1 class="dream-title">DreamCanvas</h1>
-    <p class="dream-subtitle">Text to Image • Painting Possibilities</p>
-</div>
+<style>
+  /* ——— Static full‑line rainbow ——— */
+  .pretty-title {
+    font-size: 3rem;
+    font-weight: bold;
+    text-align: center;
+    /* blue → teal → yellow → orange */
+    background: linear-gradient(
+      90deg,
+      #7fa4ff 0%,
+      #4cd9c0 33%,
+      #ffea5d 66%,
+      #ff8a65 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .pretty-subtitle {
+    font-size: 1.2rem;
+    text-align: center;
+    margin-top: -0.5rem;
+    /* reversed stops for contrast */
+    background: linear-gradient(
+      90deg,
+      #ff8a65 0%,
+      #ffea5d 33%,
+      #4cd9c0 66%,
+      #7fa4ff 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+</style>
+
+<h1 class="pretty-title">DreamCanvas - Painting Possibilities</h1>
 """, unsafe_allow_html=True)
+
 
 st.image("k11.jpg", use_container_width=True)
 
