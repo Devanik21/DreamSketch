@@ -1813,27 +1813,6 @@ with col1:
                 caption="New Variation", 
                 use_container_width=True
             )
-
-                        # --- START: FAVORITE BUTTON FOR VARIATION ---
-            def toggle_favorite_variation(image_id):
-                if image_id in st.session_state.favorites:
-                    st.session_state.favorites.remove(image_id)
-                else:
-                    st.session_state.favorites.append(image_id)
-
-            # Use a filled or empty star for visual feedback
-            is_favorited_var = variation_data['id'] in st.session_state.favorites
-            star_icon_var = "★" if is_favorited_var else "☆"
-            
-            st.button(
-                f"{star_icon_var} {'Favorited' if is_favorited_var else 'Favorite'}", 
-                on_click=toggle_favorite_variation, 
-                args=(variation_data['id'],),
-                key=f"fav_btn_variation_{variation_data['id']}", # Unique key for this button
-                use_container_width=True
-            )
-            # --- END: FAVORITE BUTTON FOR VARIATION ---
-
             # --- START: AI DESCRIPTION FOR VARIATION ---
             if variation_data.get('description'):
                 st.markdown("### 📝 AI Description (Variation)")
