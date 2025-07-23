@@ -722,7 +722,7 @@ STYLE_CATEGORIES = {
 
 # Sidebar for advanced options
 with st.sidebar:
-    st.markdown("<h3 class='rainbow-header'>🎨 Creative Controls</h3>", unsafe_allow_html=True)
+    st.markdown("### 🎨 Creative Controls")
     
     # Style selection
     selected_category = st.selectbox("🎭 Style Category", list(STYLE_CATEGORIES.keys()))
