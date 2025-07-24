@@ -1739,14 +1739,23 @@ with col1:
                     progress_bar.progress(60)
                     
                     # Generate image
+                    # --- CORRECTED CODE ---
+                    # Build the contents list for the API call
+                    generation_contents = [enhanced_prompt]
+                    
+                    # Add the negative prompt if it exists
+                    if negative_prompt:
+                        generation_contents.append(f"Negative prompt: {negative_prompt}")
+
+                    # Generate image
                     response = client.models.generate_content(
                         model="gemini-2.0-flash-exp-image-generation",
-                        contents=enhanced_prompt,
+                        contents=generation_contents, # Use the new list here
                         config=types.GenerateContentConfig(
                             response_modalities=["text", "image"]
                         )
                     )
-                    # ... The rest of your try...except block continues from here ...
+                    # --- END OF CORRECTION ---
                     
                     progress_bar.progress(80)
                     status_text.text("🎭 Adding final touches...")
@@ -1866,13 +1875,22 @@ with col1:
                             "Maintain the core subject and theme, but creatively alter the composition, lighting, or details to offer a fresh perspective."
                         )
 
+                        # --- CORRECTED CODE ---
+                        # Build the contents list for the API call
+                        variation_contents = [variation_prompt, original_image_pil]
+
+                        # Add the negative prompt if it exists from the main input
+                        if negative_prompt:
+                             variation_contents.append(f"Negative prompt: {negative_prompt}")
+                        
                         response = client.models.generate_content(
                             model="gemini-2.0-flash-exp-image-generation",
-                            contents=[variation_prompt, original_image_pil],
+                            contents=variation_contents, # Use the new list here
                             config=types.GenerateContentConfig(
                                 response_modalities=["text", "image"]
                             )
                         )
+                        # --- END OF CORRECTION ---
 
                         new_image_data = None
                         new_description = ""
