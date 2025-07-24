@@ -2182,6 +2182,7 @@ with col2:
 
 
     # --- Outpainting (Magic Expand) ---
+    # --- Outpainting (Magic Expand) ---
     with st.expander("↔️ Outpainting (Magic Expand)", expanded=False):
 
         st.info("Expand your image by adding new content around the edges, guided by a prompt.")
@@ -2213,8 +2214,23 @@ with col2:
                 if not any([expand_left, expand_right, expand_top, expand_bottom]):
                     st.warning("Please select at least one direction to expand.")
                 else:
-                    with st.spinner("The AI is expanding your canvas..."):
+                    spinner_text = "Analyzing image style..."
+                    with st.spinner(spinner_text):
                         try:
+                            # --- STEP 1: Analyze the original image to get its style ---
+                            analysis_prompt = "You are an art historian. In 10 words or less, describe the visual style of this image (e.g., 'vibrant anime style, sunset lighting'). Do not describe the content, only the style."
+                            
+                            analysis_response = client.models.generate_content(
+                                model="gemini-2.0-flash", 
+                                contents=[analysis_prompt, original_pil]
+                            )
+                            image_style = analysis_response.candidates[0].content.parts[0].text.strip()
+                            st.info(f"Detected Style: {image_style}")
+                            
+                            spinner_text = "Expanding your canvas with the detected style..."
+                            st.spinner(spinner_text)
+
+                            # --- STEP 2: Use the detected style to create a better outpainting prompt ---
                             w, h = original_pil.size
                             new_w = w + (int(w * expand_percent / 100) if expand_left else 0) + (int(w * expand_percent / 100) if expand_right else 0)
                             new_h = h + (int(h * expand_percent / 100) if expand_top else 0) + (int(h * expand_percent / 100) if expand_bottom else 0)
@@ -2225,11 +2241,13 @@ with col2:
                             new_img.paste(original_pil, (paste_x, paste_y))
                             mask.paste(0, (paste_x, paste_y, paste_x + w, paste_y + h))
                             
+                            # Create the new, more detailed prompt
                             outpaint_api_prompt = (
-                                "You are an expert image editor. You are given an original image placed on a larger canvas, a mask, and a text prompt. "
-                                "Your task is to perform outpainting. The white area of the mask indicates the new, empty space you must fill. "
-                                "Fill this space based on the original image content and the text prompt, creating a seamless and logical extension of the scene. "
-                                f"Text prompt: '{outpainting_prompt}'"
+                                "You are an expert image editor performing an outpainting task. "
+                                "Fill the white area of the mask with a seamless, logical extension of the original image. "
+                                f"The content to add is: '{outpainting_prompt}'. "
+                                f"Crucially, you MUST match the existing art style, which is: '{image_style}'. "
+                                "Do not introduce new, clashing styles."
                             )
 
                             response = client.models.generate_content(
