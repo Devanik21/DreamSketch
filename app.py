@@ -1560,7 +1560,7 @@ with st.sidebar:
     
     # Image Gallery
     if st.session_state.images:
-        st.markdown("### ✨ Your Gallery")
+        st.markdown("### ⭐ Your Gallery")
 
         # --- ADVANCED GALLERY CONTROLS ---
         with st.container(border=True):
@@ -1686,7 +1686,7 @@ with col1:
     # >>> END OF CODE BLOCK <<<
     
     # Prompt enhancement options
-    enhance_prompt = st.checkbox("🚀 Auto-enhance prompt with selected styles", key="enhance_check")
+    enhance_prompt = st.checkbox(" ✨ Auto-enhance prompt with selected styles", key="enhance_check")
     
     # Generate button
     generate_col1, generate_col2, generate_col3 = st.columns([1, 2, 1])
