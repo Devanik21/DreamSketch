@@ -36,10 +36,13 @@ if 'favorites' not in st.session_state:
     st.session_state.favorites = []
 
 # At the top of your script with other initializations
+# At the top of your script with other initializations
 if 'image_chat_history' not in st.session_state:
     st.session_state.image_chat_history = []
 if 'chat_image' not in st.session_state:
     st.session_state.chat_image = None
+if 'current_chat_file_id' not in st.session_state: # <-- ADD THIS LINE
+    st.session_state.current_chat_file_id = None
     
 # Otherworldly CSS with cosmic aesthetics
 st.markdown("""
@@ -2198,21 +2201,24 @@ with col2:
                         st.error(f"Could not analyze the image. Error: {e}")
 
     # --- START: CHAT WITH YOUR IMAGE ---
+    # --- START: CORRECTED CHAT WITH YOUR IMAGE ---
     with st.expander("💬 Chat with Your Image", expanded=True):
 
-        # Section for uploading the image
         chat_uploaded_image = st.file_uploader(
             "Upload an image to start a conversation about it.",
             type=["png", "jpg", "jpeg", "webp"],
             key="chat_uploader"
         )
 
-        # If a new image is uploaded, clear the old chat and store the new image
-        if chat_uploaded_image:
+        # --- FIX: Only reset the chat if a NEW image is uploaded ---
+        if chat_uploaded_image and chat_uploaded_image.file_id != st.session_state.current_chat_file_id:
+            # This is a new file, so update the state
+            st.session_state.current_chat_file_id = chat_uploaded_image.file_id
             st.session_state.chat_image = Image.open(chat_uploaded_image)
-            st.session_state.image_chat_history = [] # Reset history for new image
+            st.session_state.image_chat_history = [] # Reset history for the new image
+            st.info("New image loaded. You can now start chatting.")
 
-        # If there's an image in the session state, display it and the chat interface
+
         if st.session_state.chat_image:
             st.image(st.session_state.chat_image, caption="Image for Conversation", use_container_width=True)
 
@@ -2222,9 +2228,7 @@ with col2:
                     st.markdown(message["content"])
 
             # Input for the user's question
-            question = st.chat_input("Ask a question about the image...")
-
-            if question:
+            if question := st.chat_input("Ask a question about the image..."):
                 # Add user question to chat history
                 st.session_state.image_chat_history.append({"role": "user", "content": question})
                 with st.chat_message("user"):
@@ -2236,27 +2240,23 @@ with col2:
                         # Prepare the contents for the API call
                         chat_contents = [question, st.session_state.chat_image]
 
-                        # Call the Gemini API - explicitly using gemini-2.0-flash
                         response = client.models.generate_content(
-                            model="gemini-2.0-flash",
+                            model="gemini-2.0-flash-exp-image-generation",
                             contents=chat_contents
                         )
                         
-                        # Get the AI's response
                         ai_response = response.candidates[0].content.parts[0].text
-
-                        # Add AI response to chat history
                         st.session_state.image_chat_history.append({"role": "assistant", "content": ai_response})
-                        with st.chat_message("assistant"):
-                            st.markdown(ai_response)
                         
-                        # Rerun to update the display instantly
-                        st.rerun()
+                        # --- FIX: Removed st.rerun(). Streamlit will automatically rerun. ---
+                        st.experimental_rerun() # Use experimental_rerun for better control in chat apps
 
                     except Exception as e:
                         st.error(f"An error occurred: {e}")
         else:
             st.info("Please upload an image to begin your chat.")
+            
+    # --- END: CORRECTED CHAT WITH YOUR IMAGE ---
 
     # --- END: CHAT WITH YOUR IMAGE ---
     # --- END: IMAGE-TO-PROMPT (REVERSE IMAGE SEARCH) ---
