@@ -2175,6 +2175,7 @@ with col2:
     # --- START: IMAGE-TO-PROMPT (REVERSE IMAGE SEARCH) ---
     # --- START: FINAL POLISHED IMAGE-TO-PROMPT ---
     # --- START: FINAL POLISHED IMAGE-TO-PROMPT ---
+    # --- START: FINAL POLISHED IMAGE-TO-PROMPT (REVISED PROMPT) ---
     with st.expander("🖼️ Analyze Image to Create a Prompt", expanded=True):
         
         analysis_uploaded_image = st.file_uploader(
@@ -2183,7 +2184,6 @@ with col2:
             key="analysis_uploader"
         )
 
-        # --- CORRECTED LOGIC USING A CALLBACK ---
         def apply_analyzed_prompt():
             """Copies the analyzed prompt to the main prompt area."""
             st.session_state.main_prompt = st.session_state.analyzed_prompt_text
@@ -2195,17 +2195,21 @@ with col2:
             
             with st.spinner("Letting the AI study your image..."):
                 try:
-                    # ... (rest of your analysis logic remains the same)
                     img_for_analysis = Image.open(analysis_uploaded_image)
+                    
+                    # --- FIX: More specific instruction for the AI ---
                     prompt_for_analysis = [
-                        "Analyze this image...", # Your detailed prompt
+                        "You are an expert prompt writer for AI image generators. Look at the provided image and write a single, detailed, plain-text prompt that could be used to generate a similar image. Do not include any analysis, explanations, headings, or markdown formatting. Only output the prompt itself.",
                         img_for_analysis
                     ]
+
                     analysis_response = client.models.generate_content(
                         model="gemini-2.0-flash",
                         contents=prompt_for_analysis
                     )
+                    
                     st.session_state.analyzed_prompt_text = analysis_response.candidates[0].content.parts[0].text
+                    
                 except Exception as e:
                     st.error(f"Could not analyze the image. Error: {e}")
                     st.session_state.current_analysis_file_id = None
@@ -2226,6 +2230,8 @@ with col2:
         
         elif not st.session_state.current_analysis_file_id:
              st.info("Please upload an image to begin analysis.")
+
+    # --- END: FINAL POLISHED IMAGE-TO-PROMPT (REVISED PROMPT) ---
 
     # --- END: FINAL POLISHED IMAGE-TO-PROMPT ---
 
