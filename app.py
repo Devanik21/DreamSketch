@@ -2243,7 +2243,7 @@ with col2:
                         chat_contents = [question, st.session_state.chat_image]
 
                         response = client.models.generate_content(
-                            model="gemini-2.0-flash-exp-image-generation",
+                            model="gemini-2.0-flash",
                             contents=chat_contents
                         )
                         
