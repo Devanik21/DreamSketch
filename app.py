@@ -35,6 +35,12 @@ if 'prompt_history' not in st.session_state:
 if 'favorites' not in st.session_state:
     st.session_state.favorites = []
 
+# At the top of your script with other initializations
+if 'image_chat_history' not in st.session_state:
+    st.session_state.image_chat_history = []
+if 'chat_image' not in st.session_state:
+    st.session_state.chat_image = None
+    
 # Otherworldly CSS with cosmic aesthetics
 st.markdown("""
 <style>
@@ -2173,7 +2179,7 @@ with col2:
 
                         # Call the Gemini API
                         analysis_response = client.models.generate_content(
-                            model="gemini-2.0-flash-exp-image-generation",
+                            model="gemini-2.0-flash",
                             contents=prompt_for_analysis
                         )
 
@@ -2190,6 +2196,69 @@ with col2:
 
                     except Exception as e:
                         st.error(f"Could not analyze the image. Error: {e}")
+
+    # --- START: CHAT WITH YOUR IMAGE ---
+    with st.expander("💬 Chat with Your Image", expanded=True):
+
+        # Section for uploading the image
+        chat_uploaded_image = st.file_uploader(
+            "Upload an image to start a conversation about it.",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="chat_uploader"
+        )
+
+        # If a new image is uploaded, clear the old chat and store the new image
+        if chat_uploaded_image:
+            st.session_state.chat_image = Image.open(chat_uploaded_image)
+            st.session_state.image_chat_history = [] # Reset history for new image
+
+        # If there's an image in the session state, display it and the chat interface
+        if st.session_state.chat_image:
+            st.image(st.session_state.chat_image, caption="Image for Conversation", use_container_width=True)
+
+            # Display the chat history
+            for message in st.session_state.image_chat_history:
+                with st.chat_message(message["role"]):
+                    st.markdown(message["content"])
+
+            # Input for the user's question
+            question = st.chat_input("Ask a question about the image...")
+
+            if question:
+                # Add user question to chat history
+                st.session_state.image_chat_history.append({"role": "user", "content": question})
+                with st.chat_message("user"):
+                    st.markdown(question)
+
+                # Show a spinner while the AI is thinking
+                with st.spinner("AI is analyzing..."):
+                    try:
+                        # Prepare the contents for the API call
+                        chat_contents = [question, st.session_state.chat_image]
+
+                        # Call the Gemini API - explicitly using gemini-2.0-flash
+                        response = client.models.generate_content(
+                            model="gemini-2.0-flash",
+                            contents=chat_contents
+                        )
+                        
+                        # Get the AI's response
+                        ai_response = response.candidates[0].content.parts[0].text
+
+                        # Add AI response to chat history
+                        st.session_state.image_chat_history.append({"role": "assistant", "content": ai_response})
+                        with st.chat_message("assistant"):
+                            st.markdown(ai_response)
+                        
+                        # Rerun to update the display instantly
+                        st.rerun()
+
+                    except Exception as e:
+                        st.error(f"An error occurred: {e}")
+        else:
+            st.info("Please upload an image to begin your chat.")
+
+    # --- END: CHAT WITH YOUR IMAGE ---
     # --- END: IMAGE-TO-PROMPT (REVERSE IMAGE SEARCH) ---
 
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
