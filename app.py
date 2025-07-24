@@ -2182,6 +2182,7 @@ with col2:
 
 
     # --- Outpainting (Magic Expand) ---
+    # --- Outpainting (Magic Expand) ---
     with st.expander("↔️ Outpainting (Magic Expand)", expanded=False):
 
         st.info("Expand your image by adding new content around the edges, guided by a prompt.")
@@ -2206,7 +2207,8 @@ with col2:
             cols = st.columns(2)
             expand_left = cols[0].checkbox("Left")
             expand_right = cols[1].checkbox("Right")
-
+            expand_top = cols[0].checkbox("Top")
+            expand_bottom = cols[1].checkbox("Bottom")
             
             if st.button("↔️ Generate Outpainting", use_container_width=True):
                 if not any([expand_left, expand_right, expand_top, expand_bottom]):
