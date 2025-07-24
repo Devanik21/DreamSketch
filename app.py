@@ -2204,11 +2204,11 @@ with col2:
             st.image(original_pil, caption="Original Image")
 
             outpainting_prompt = st.text_input("Describe what to add in the new space (or leave blank to let the AI decide)", placeholder="e.g., a starry sky, more of the forest...", key="outpainting_prompt_text")
-            expand_percent = st.slider("Expansion Amount (%)", 10, 100, 25, key="outpainting_expand", help="Controls the size of the new border around the image.")
+            expand_percent = st.slider("Expansion Amount (%)", 10, 60, 25, key="outpainting_expand", help="Controls the size of the new border around the image.")
             
             # REMOVED: Checkboxes for manual direction control.
             
-            if st.button("🚀 Auto-Expand Image", use_container_width=True):
+            if st.button("♾️ Auto-Expand Image", use_container_width=True):
                 spinner_text = "Analyzing image style..."
                 with st.spinner(spinner_text):
                     try:
