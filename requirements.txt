@@ -3,4 +3,4 @@ google-genai
 pillow
 gTTS
 numpy
-streamlit-drawable-canvas
+streamlit-drawable-canvas>=0.9.3
