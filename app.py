@@ -2184,64 +2184,69 @@ with col2:
     # --- Outpainting (Magic Expand) ---
     # --- Outpainting (Magic Expand) ---
     # --- Outpainting (Magic Expand) ---
+    # --- Outpainting (Magic Expand) ---
     with st.expander("↔️ Outpainting (Auto-Expand)", expanded=False):
 
         st.info("Expand your image automatically on all sides. The AI will fill in the new space.")
         
         outpainting_image = st.file_uploader(
-            "Upload your source image",
+            "Upload your source image to begin",
             type=["png", "jpg", "jpeg", "webp"],
             key="outpainting_uploader"
         )
 
+        # NEW: This logic handles a new image upload and updates the session state.
         if outpainting_image:
-            # Reset data if a new image is uploaded
-            if 'outpainting_img_bytes' not in st.session_state or outpainting_image.getvalue() != st.session_state.get('outpainting_img_bytes'):
-                st.session_state.outpainting_img_bytes = outpainting_image.getvalue()
-                st.session_state.outpainting_data = None
+            st.session_state.outpainting_img_bytes = outpainting_image.getvalue()
+            # Clear any previous results when a new image is uploaded
+            if 'outpainting_data' in st.session_state:
+                del st.session_state.outpainting_data
 
+        # NEW: The entire UI is now inside this block. It stays active as long as an image is in memory.
+        if 'outpainting_img_bytes' in st.session_state and st.session_state.outpainting_img_bytes:
+            
             original_pil = Image.open(BytesIO(st.session_state.outpainting_img_bytes))
-            st.image(original_pil, caption="Original Image")
+            
+            # --- Display area for the original image and a clear button ---
+            img_col, clear_col = st.columns([4, 1])
+            with img_col:
+                st.image(original_pil, caption="Original Image")
+            with clear_col:
+                def clear_outpainting_state():
+                    if 'outpainting_img_bytes' in st.session_state:
+                        del st.session_state.outpainting_img_bytes
+                    if 'outpainting_data' in st.session_state:
+                        del st.session_state.outpainting_data
+                st.button("Clear", on_click=clear_outpainting_state, help="Click to remove the current image and start over.")
 
-            outpainting_prompt = st.text_input("Describe what to add in the new space (or leave blank to let the AI decide)", placeholder="e.g., a starry sky, more of the forest...", key="outpainting_prompt_text")
-            expand_percent = st.slider("Expansion Amount (%)", 10, 60, 25, key="outpainting_expand", help="Controls the size of the new border around the image.")
+            st.markdown("---")
+
+            # --- Persistent Controls ---
+            outpainting_prompt = st.text_input("Describe what to add in the new space (or leave blank)", placeholder="e.g., a starry sky, more of the forest...", key="outpainting_prompt_text")
+            expand_percent = st.slider("Expansion Amount (%)", 10, 100, 25, key="outpainting_expand", help="Controls the size of the new border around the image.")
             
-            # REMOVED: Checkboxes for manual direction control.
-            
-            if st.button("♾️ Auto-Expand Image", use_container_width=True):
+            if st.button("🚀 Auto-Expand Image", use_container_width=True):
                 spinner_text = "Analyzing image style..."
                 with st.spinner(spinner_text):
                     try:
-                        # --- STEP 1: Analyze the original image to get its style ---
+                        # (The rest of the generation logic remains the same)
                         analysis_prompt = "You are an art historian. In 10 words or less, describe the visual style of this image (e.g., 'vibrant anime style, sunset lighting'). Do not describe the content, only the style."
-                        
-                        analysis_response = client.models.generate_content(
-                            model="gemini-2.0-flash", 
-                            contents=[analysis_prompt, original_pil]
-                        )
+                        analysis_response = client.models.generate_content(model="gemini-2.0-flash", contents=[analysis_prompt, original_pil])
                         image_style = analysis_response.candidates[0].content.parts[0].text.strip()
                         st.info(f"Detected Style: {image_style}")
                         
                         spinner_text = "Expanding your canvas with the detected style..."
                         st.spinner(spinner_text)
 
-                        # --- STEP 2: Use the detected style to create a better outpainting prompt ---
                         w, h = original_pil.size
-                        
-                        # NEW: Calculate a uniform border for expansion.
                         expand_border = int(min(w, h) * expand_percent / 100)
                         new_w = w + (2 * expand_border)
                         new_h = h + (2 * expand_border)
-
-                        # The original image is now centered on the new, larger canvas.
                         new_img = Image.new('RGB', (new_w, new_h), (0, 0, 0))
-                        mask = Image.new('L', (new_w, new_h), 255) # White area is what the AI will fill
-                        
-                        paste_x = expand_border
-                        paste_y = expand_border
-                        
+                        mask = Image.new('L', (new_w, new_h), 255)
+                        paste_x, paste_y = expand_border, expand_border
                         new_img.paste(original_pil, (paste_x, paste_y))
-                        mask.paste(0, (paste_x, paste_y, paste_x + w, paste_y + h)) # Black out the original image area on the mask
+                        mask.paste(0, (paste_x, paste_y, paste_x + w, paste_y + h))
                         
                         outpaint_api_prompt = (
                             "You are an expert image editor performing an outpainting task. "
@@ -2257,20 +2262,16 @@ with col2:
                             config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
 
-                        # Process response and create a full metadata dictionary
                         st.session_state.outpainting_data = None
                         for part in response.candidates[0].content.parts:
                             if part.inline_data:
                                 st.session_state.outpainting_data = {
-                                    'id': str(uuid.uuid4()),
-                                    'image_data': part.inline_data.data,
+                                    'id': str(uuid.uuid4()), 'image_data': part.inline_data.data,
                                     'original_prompt': f"Auto-Expanded: {outpainting_prompt}",
                                     'enhanced_prompt': outpaint_api_prompt,
-                                    'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                                    'style_used': image_style,
+                                    'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': image_style,
                                     'description': f"An outpainted image based on the prompt '{outpainting_prompt}' in the style of '{image_style}'.",
-                                    'aspect_ratio': f"{new_w}:{new_h}",
-                                    'quality_level': "Standard"
+                                    'aspect_ratio': f"{new_w}:{new_h}", 'quality_level': "Standard"
                                 }
                                 break
                         
@@ -2280,43 +2281,34 @@ with col2:
                     except Exception as e:
                         st.error(f"Outpainting failed: {e}")
 
-        # --- Display results and action buttons ---
-        if 'outpainting_data' in st.session_state and st.session_state.outpainting_data:
-            st.markdown("---")
-            st.markdown("#### ✨ Outpainting Result")
-            
-            result_data = st.session_state.outpainting_data
-            result_img = Image.open(BytesIO(result_data['image_data']))
-            st.image(result_img, use_container_width=True, caption="Your expanded masterpiece")
-            
-            dl_col, fav_col = st.columns(2)
-
-            with dl_col:
-                st.download_button(
-                    label="📥 Download Image",
-                    data=result_data['image_data'],
-                    file_name="outpainted_image.png",
-                    mime="image/png",
-                    use_container_width=True
-                )
-            
-            with fav_col:
-                is_favorited = result_data['id'] in st.session_state.favorites
-
-                def add_outpaint_to_gallery_and_favs():
-                    data = st.session_state.outpainting_data
-                    if not any(img['id'] == data['id'] for img in st.session_state.images):
-                        st.session_state.images.append(data)
-                    if data['id'] not in st.session_state.favorites:
-                        st.session_state.favorites.append(data['id'])
-
-                st.button(
-                    "★ Add to Gallery & Favorites" if not is_favorited else "✓ Favorited",
-                    on_click=add_outpaint_to_gallery_and_favs,
-                    use_container_width=True,
-                    disabled=is_favorited,
-                    help="Adds this image to your main gallery and favorites list."
-                )
+            # --- Display results and action buttons ---
+            if 'outpainting_data' in st.session_state and st.session_state.outpainting_data:
+                st.markdown("---")
+                st.markdown("#### ✨ Outpainting Result")
+                
+                result_data = st.session_state.outpainting_data
+                result_img = Image.open(BytesIO(result_data['image_data']))
+                st.image(result_img, use_container_width=True, caption="Your expanded masterpiece")
+                
+                dl_col, fav_col = st.columns(2)
+                with dl_col:
+                    st.download_button(
+                        label="📥 Download Image", data=result_data['image_data'],
+                        file_name="outpainted_image.png", mime="image/png", use_container_width=True
+                    )
+                with fav_col:
+                    is_favorited = result_data['id'] in st.session_state.favorites
+                    def add_outpaint_to_gallery_and_favs():
+                        data = st.session_state.outpainting_data
+                        if not any(img['id'] == data['id'] for img in st.session_state.images):
+                            st.session_state.images.append(data)
+                        if data['id'] not in st.session_state.favorites:
+                            st.session_state.favorites.append(data['id'])
+                    st.button(
+                        "★ Add to Gallery & Favorites" if not is_favorited else "✓ Favorited",
+                        on_click=add_outpaint_to_gallery_and_favs, use_container_width=True,
+                        disabled=is_favorited, help="Adds this image to your main gallery and favorites list."
+                    )
     # --- START: FINAL ROBUST IMAGE-TO-PROMPT ---
     with st.expander("🖼️ Analyze Image to Create a Prompt", expanded=False):
 
