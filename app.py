@@ -2916,19 +2916,19 @@ st.markdown("""
 # --- START: RANDOM GALLERY IMAGE DISPLAY ---
 
 # Consolidate all your image filenames into one list
-gallery_images = [
+'''gallery_images = [
     "k3.jpg", "k2.jpg", "k6.jpg", "k7.jpg", "k19.jpg", "k8.jpg", 
     "k4.jpg", "k16.jpg", "k13.jpg", "k14.jpg", "k17.jpg", "k1.jpg","k10.jpg","k9.jpg","k12.jpg","k18.jpg",
-]
+]'''
 
 st.sidebar.image("k15.jpg", use_container_width=True)
 
 
 # Select one image at random from the list
-random_image_to_display = random.choice(gallery_images)
+
 
 # Display the randomly selected image
-st.image(random_image_to_display, use_container_width=True)
+st.image("k19.jpg", use_container_width=True)
 
 # --- END: RANDOM GALLERY IMAGE DISPLAY ---
 
