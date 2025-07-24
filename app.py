@@ -35,6 +35,8 @@ if 'prompt_history' not in st.session_state:
 if 'favorites' not in st.session_state:
     st.session_state.favorites = []
 
+
+
 # At the top of your script with other initializations
 # At the top of your script with other initializations
 if 'image_chat_history' not in st.session_state:
@@ -43,6 +45,16 @@ if 'chat_image' not in st.session_state:
     st.session_state.chat_image = None
 if 'current_chat_file_id' not in st.session_state: # <-- ADD THIS LINE
     st.session_state.current_chat_file_id = None
+
+
+# At the top of your script
+if 'analyzed_prompt_text' not in st.session_state:
+    st.session_state.analyzed_prompt_text = ""
+if 'current_analysis_file_id' not in st.session_state:
+    st.session_state.current_analysis_file_id = None
+
+
+
     
 # Otherworldly CSS with cosmic aesthetics
 st.markdown("""
@@ -2161,44 +2173,67 @@ with col2:
         """)
 
     # --- START: IMAGE-TO-PROMPT (REVERSE IMAGE SEARCH) ---
-    with st.expander("🖼️ Analyze Image to Create a Prompt"):
-        uploaded_image = st.file_uploader(
+    # --- START: FINAL POLISHED IMAGE-TO-PROMPT ---
+    with st.expander("🖼️ Analyze Image to Create a Prompt", expanded=True):
+        
+        analysis_uploaded_image = st.file_uploader(
             "Upload an image to generate a descriptive prompt from it.",
-            type=["png", "jpg", "jpeg", "webp"]
+            type=["png", "jpg", "jpeg", "webp"],
+            key="analysis_uploader"
         )
 
-        if uploaded_image:
-            st.image(uploaded_image, caption="Your Uploaded Image", use_container_width=True)
+        # Check if a new file has been uploaded
+        if analysis_uploaded_image and analysis_uploaded_image.file_id != st.session_state.current_analysis_file_id:
+            # It's a new image, so clear old results and process it
+            st.session_state.current_analysis_file_id = analysis_uploaded_image.file_id
+            st.session_state.analyzed_prompt_text = "" # Clear previous prompt
+            
+            with st.spinner("Letting the AI study your image..."):
+                try:
+                    img_for_analysis = Image.open(analysis_uploaded_image)
+                    prompt_for_analysis = [
+                        "Analyze this image in deep detail. Create a descriptive, high-quality prompt for an AI image generator to recreate something similar. Describe the main subject, the setting, the artistic style (e.g., oil painting, digital art, photography), the lighting, the color palette, and the overall mood. Be specific.",
+                        img_for_analysis
+                    ]
 
-            if st.button("Analyze Image", use_container_width=True):
-                with st.spinner("Letting the AI study your image..."):
-                    try:
-                        # Prepare the image and the prompt for the model
-                        img_for_analysis = Image.open(uploaded_image)
-                        prompt_for_analysis = [
-                            "Analyze this image in deep detail. Create a descriptive, high-quality prompt for an AI image generator to recreate something similar. Describe the main subject, the setting, the artistic style (e.g., oil painting, digital art, photography), the lighting, the color palette, and the overall mood. Be specific.",
-                            img_for_analysis
-                        ]
+                    # CONFIRMED: Using gemini-2.0-flash model
+                    analysis_response = client.models.generate_content(
+                        model="gemini-2.0-flash",
+                        contents=prompt_for_analysis
+                    )
+                    
+                    # Save the result to session state to prevent it from being lost
+                    st.session_state.analyzed_prompt_text = analysis_response.candidates[0].content.parts[0].text
+                    
+                except Exception as e:
+                    st.error(f"Could not analyze the image. Error: {e}")
+                    st.session_state.current_analysis_file_id = None # Reset on error
 
-                        # Call the Gemini API
-                        analysis_response = client.models.generate_content(
-                            model="gemini-2.0-flash",
-                            contents=prompt_for_analysis
-                        )
+        # Display the uploaded image if its ID is stored in the session
+        if st.session_state.current_analysis_file_id:
+            st.image(analysis_uploaded_image, caption="Image for Analysis", use_container_width=True)
 
-                        # Display the result
-                        generated_prompt = analysis_response.candidates[0].content.parts[0].text
-                        st.markdown("**📝 Generated Prompt:**")
-                        st.text_area("You can edit this prompt before using it:", value=generated_prompt, height=150, key="analyzed_prompt")
+        # Display the generated prompt if it exists in the session state
+        if st.session_state.analyzed_prompt_text:
+            st.markdown("**📝 Generated Prompt:**")
+            st.text_area("You can copy or use this prompt:", value=st.session_state.analyzed_prompt_text, height=150, key="analyzed_prompt_display")
+            
+            # --- FIX: "Use This Prompt" button now works correctly ---
+            if st.button("✍️ Use This Prompt", use_container_width=True):
+                st.session_state.main_prompt = st.session_state.analyzed_prompt_text
+                st.success("Prompt copied to the main text area!")
+                # No rerun needed here, the main prompt will update on the next interaction
+            
+            # Add a button to clear the analysis and start over
+            if st.button("🗑️ Clear Analysis", use_container_width=True):
+                st.session_state.analyzed_prompt_text = ""
+                st.session_state.current_analysis_file_id = None
+                st.rerun()
+        
+        elif not st.session_state.current_analysis_file_id:
+             st.info("Please upload an image to begin analysis.")
 
-                        # Button to apply the prompt to the main input
-                        if st.button("Use This Prompt", use_container_width=True):
-                            st.session_state.main_prompt = generated_prompt
-                            st.success("Prompt applied! You can now generate a masterpiece from it.")
-                            st.rerun()
-
-                    except Exception as e:
-                        st.error(f"Could not analyze the image. Error: {e}")
+    # --- END: FINAL POLISHED IMAGE-TO-PROMPT ---
 
     # --- START: CHAT WITH YOUR IMAGE ---
     # --- START: CHAT WITH YOUR IMAGE (WITH CLEAR BUTTON) ---
