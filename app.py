@@ -2178,7 +2178,7 @@ with col2:
     # --- START: FINAL POLISHED IMAGE-TO-PROMPT ---
     # --- START: FINAL POLISHED IMAGE-TO-PROMPT (REVISED PROMPT) ---
     # --- START: FINAL ROBUST IMAGE-TO-PROMPT ---
-    with st.expander("🖼️ Analyze Image to Create a Prompt", expanded=True):
+    with st.expander("🖼️ Analyze Image to Create a Prompt", expanded=False):
 
         analysis_uploaded_image = st.file_uploader(
             "Upload an image to generate a descriptive prompt from it.",
@@ -2244,7 +2244,7 @@ with col2:
     # --- START: CHAT WITH YOUR IMAGE ---
     # --- START: CHAT WITH YOUR IMAGE (WITH CLEAR BUTTON) ---
     # --- START: CHAT WITH YOUR IMAGE (FINAL VERSION) ---
-    with st.expander("💬 Chat with Your Image", expanded=True):
+    with st.expander("💬 Chat with Your Image", expanded=False):
 
         chat_uploaded_image = st.file_uploader(
             "Upload an image to start a conversation about it.",
