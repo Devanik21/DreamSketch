@@ -2249,7 +2249,7 @@ with col2:
                         st.session_state.image_chat_history.append({"role": "assistant", "content": ai_response})
                         
                         # --- FIX: Removed st.rerun(). Streamlit will automatically rerun. ---
-                        st.experimental_rerun() # Use experimental_rerun for better control in chat apps
+                        st.rerun() # Use experimental_rerun for better control in chat apps
 
                     except Exception as e:
                         st.error(f"An error occurred: {e}")
