@@ -2570,7 +2570,7 @@ with col2:
                                 if 'newly_generated_variations' in st.session_state:
                                     st.session_state.newly_generated_variations = None
                                 st.rerun()
-                            st.image(thumb, use_container_width=True, caption=f"{fav_img_data.get('style_used', '')}")
+                            st.image(thumb, use_container_width=True)
 
 
 
