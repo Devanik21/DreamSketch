@@ -2185,9 +2185,10 @@ with col2:
     # --- Outpainting (Magic Expand) ---
     # --- Outpainting (Magic Expand) ---
     # --- Outpainting (Magic Expand) ---
+    # --- Outpainting (Magic Expand) ---
     with st.expander("↔️ Outpainting (Auto-Expand)", expanded=False):
 
-        st.info("Expand your image automatically on all sides. The AI will fill in the new space.")
+        st.info("Expand your image automatically. Any white borders on your upload will be removed.")
         
         outpainting_image = st.file_uploader(
             "Upload your source image to begin",
@@ -2195,22 +2196,34 @@ with col2:
             key="outpainting_uploader"
         )
 
-        # NEW: This logic handles a new image upload and updates the session state.
         if outpainting_image:
             st.session_state.outpainting_img_bytes = outpainting_image.getvalue()
-            # Clear any previous results when a new image is uploaded
             if 'outpainting_data' in st.session_state:
                 del st.session_state.outpainting_data
 
-        # NEW: The entire UI is now inside this block. It stays active as long as an image is in memory.
         if 'outpainting_img_bytes' in st.session_state and st.session_state.outpainting_img_bytes:
             
+            # Load the uploaded image
             original_pil = Image.open(BytesIO(st.session_state.outpainting_img_bytes))
-            
-            # --- Display area for the original image and a clear button ---
+
+            # --- NEW: Auto-crop away any white borders from the uploaded image. ---
+            try:
+                # Create a background image matching the top-left pixel color
+                bg = Image.new("RGB", original_pil.size, original_pil.getpixel((0, 0)))
+                # Find the difference between the image and the background
+                diff = ImageChops.difference(original_pil.convert("RGB"), bg)
+                # Get the bounding box of the non-background area
+                bbox = diff.getbbox()
+                if bbox:
+                    # Crop the image to the bounding box
+                    original_pil = original_pil.crop(bbox)
+            except Exception as e:
+                st.warning(f"Could not perform auto-crop, using original image. Error: {e}")
+
+            # --- Display area for the (potentially cropped) original image and a clear button ---
             img_col, clear_col = st.columns([4, 1])
             with img_col:
-                st.image(original_pil, caption="Original Image")
+                st.image(original_pil, caption="Original Image (Auto-Cropped)")
             with clear_col:
                 def clear_outpainting_state():
                     if 'outpainting_img_bytes' in st.session_state:
@@ -2229,7 +2242,6 @@ with col2:
                 spinner_text = "Analyzing image style..."
                 with st.spinner(spinner_text):
                     try:
-                        # (The rest of the generation logic remains the same)
                         analysis_prompt = "You are an art historian. In 10 words or less, describe the visual style of this image (e.g., 'vibrant anime style, sunset lighting'). Do not describe the content, only the style."
                         analysis_response = client.models.generate_content(model="gemini-2.0-flash", contents=[analysis_prompt, original_pil])
                         image_style = analysis_response.candidates[0].content.parts[0].text.strip()
