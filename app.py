@@ -2202,6 +2202,7 @@ with col2:
 
     # --- START: CHAT WITH YOUR IMAGE ---
     # --- START: CHAT WITH YOUR IMAGE (WITH CLEAR BUTTON) ---
+    # --- START: CHAT WITH YOUR IMAGE (FINAL VERSION) ---
     with st.expander("💬 Chat with Your Image", expanded=True):
 
         chat_uploaded_image = st.file_uploader(
@@ -2221,12 +2222,10 @@ with col2:
         if st.session_state.chat_image:
             st.image(st.session_state.chat_image, caption="Image for Conversation", use_container_width=True)
 
-            # --- NEW: CLEAR CHAT BUTTON ---
-            if st.button("🗑️ Clear Current Chat", use_container_width=True):
-                # Reset all relevant session state variables for the chat
+            # --- CORRECTED: CLEAR CHAT BUTTON LOGIC ---
+            if st.button("🗑️ Clear Conversation", use_container_width=True):
+                # Only reset the chat history, keeping the image
                 st.session_state.image_chat_history = []
-                st.session_state.chat_image = None
-                st.session_state.current_chat_file_id = None
                 st.rerun() # Rerun to update the UI immediately
 
             # Display the chat history
@@ -2244,7 +2243,7 @@ with col2:
                         chat_contents = [question, st.session_state.chat_image]
 
                         response = client.models.generate_content(
-                            model="gemini-2.0-flash",
+                            model="gemini-2.0-flash-exp-image-generation",
                             contents=chat_contents
                         )
                         
@@ -2257,6 +2256,8 @@ with col2:
                         st.error(f"An error occurred: {e}")
         else:
             st.info("Please upload an image to begin your chat.")
+            
+    # --- END: CHAT WITH YOUR IMAGE (FINAL VERSION) ---
             
     # --- END: CHAT WITH YOUR IMAGE (WITH CLEAR BUTTON) ---
             
