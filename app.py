@@ -2151,6 +2151,47 @@ with col2:
         - **Fantasy**: "Magic realism, ethereal glow, mythical atmosphere"
         """)
 
+    # --- START: IMAGE-TO-PROMPT (REVERSE IMAGE SEARCH) ---
+    with st.expander("🖼️ Analyze Image to Create a Prompt"):
+        uploaded_image = st.file_uploader(
+            "Upload an image to generate a descriptive prompt from it.",
+            type=["png", "jpg", "jpeg", "webp"]
+        )
+
+        if uploaded_image:
+            st.image(uploaded_image, caption="Your Uploaded Image", use_container_width=True)
+
+            if st.button("Analyze Image", use_container_width=True):
+                with st.spinner("Letting the AI study your image..."):
+                    try:
+                        # Prepare the image and the prompt for the model
+                        img_for_analysis = Image.open(uploaded_image)
+                        prompt_for_analysis = [
+                            "Analyze this image in deep detail. Create a descriptive, high-quality prompt for an AI image generator to recreate something similar. Describe the main subject, the setting, the artistic style (e.g., oil painting, digital art, photography), the lighting, the color palette, and the overall mood. Be specific.",
+                            img_for_analysis
+                        ]
+
+                        # Call the Gemini API
+                        analysis_response = client.models.generate_content(
+                            model="gemini-2.0-flash-exp-image-generation",
+                            contents=prompt_for_analysis
+                        )
+
+                        # Display the result
+                        generated_prompt = analysis_response.candidates[0].content.parts[0].text
+                        st.markdown("**📝 Generated Prompt:**")
+                        st.text_area("You can edit this prompt before using it:", value=generated_prompt, height=150, key="analyzed_prompt")
+
+                        # Button to apply the prompt to the main input
+                        if st.button("Use This Prompt", use_container_width=True):
+                            st.session_state.main_prompt = generated_prompt
+                            st.success("Prompt applied! You can now generate a masterpiece from it.")
+                            st.rerun()
+
+                    except Exception as e:
+                        st.error(f"Could not analyze the image. Error: {e}")
+    # --- END: IMAGE-TO-PROMPT (REVERSE IMAGE SEARCH) ---
+
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # This container is now outside the 'if' condition, so it appears on startup.
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
