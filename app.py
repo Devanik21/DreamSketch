@@ -2566,9 +2566,6 @@ with col2:
                             # Use the unique image ID for the key to prevent errors
                             if st.button(f"{i+1}", key=f"fav_view_{fav_img_data['id']}", use_container_width=True):
                                 st.session_state.current_image = fav_img_data
-                                # Clear newly generated variations when viewing an old image
-                                if 'newly_generated_variations' in st.session_state:
-                                    st.session_state.newly_generated_variations = None
                                 st.rerun()
                             st.image(thumb, use_container_width=True)
 
