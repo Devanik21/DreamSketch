@@ -2181,6 +2181,90 @@ with col2:
 
 
 
+    # --- Outpainting (Magic Expand) ---
+    with st.expander("↔️ Outpainting (Magic Expand)", expanded=False):
+
+        st.info("Expand your image by adding new content around the edges, guided by a prompt.")
+        
+        outpainting_image = st.file_uploader(
+            "Upload your source image",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="outpainting_uploader"
+        )
+
+        if outpainting_image:
+            if 'outpainting_img_bytes' not in st.session_state or outpainting_image.getvalue() != st.session_state.get('outpainting_img_bytes'):
+                st.session_state.outpainting_img_bytes = outpainting_image.getvalue()
+                st.session_state.outpainting_result = None
+
+            original_pil = Image.open(BytesIO(st.session_state.outpainting_img_bytes))
+            st.image(original_pil, caption="Original Image")
+
+            outpainting_prompt = st.text_input("Describe what to add in the new space", placeholder="e.g., a beautiful starry sky, more of the forest, the rest of the ocean", key="outpainting_prompt_text")
+            expand_percent = st.slider("Expansion Amount (%)", 10, 100, 50, key="outpainting_expand")
+            
+            cols = st.columns(2)
+            expand_left = cols[0].checkbox("Left")
+            expand_right = cols[1].checkbox("Right")
+            expand_top = cols[0].checkbox("Top")
+            expand_bottom = cols[1].checkbox("Bottom")
+            
+            if st.button("↔️ Generate Outpainting", use_container_width=True):
+                if not any([expand_left, expand_right, expand_top, expand_bottom]):
+                    st.warning("Please select at least one direction to expand.")
+                else:
+                    with st.spinner("The AI is expanding your canvas..."):
+                        try:
+                            w, h = original_pil.size
+                            new_w = w + (int(w * expand_percent / 100) if expand_left else 0) + (int(w * expand_percent / 100) if expand_right else 0)
+                            new_h = h + (int(h * expand_percent / 100) if expand_top else 0) + (int(h * expand_percent / 100) if expand_bottom else 0)
+                            new_img = Image.new('RGB', (new_w, new_h), (0, 0, 0))
+                            mask = Image.new('L', (new_w, new_h), 255)
+                            paste_x = int(w * expand_percent / 100) if expand_left else 0
+                            paste_y = int(h * expand_percent / 100) if expand_top else 0
+                            new_img.paste(original_pil, (paste_x, paste_y))
+                            mask.paste(0, (paste_x, paste_y, paste_x + w, paste_y + h))
+                            
+                            outpaint_api_prompt = (
+                                "You are an expert image editor. You are given an original image placed on a larger canvas, a mask, and a text prompt. "
+                                "Your task is to perform outpainting. The white area of the mask indicates the new, empty space you must fill. "
+                                "Fill this space based on the original image content and the text prompt, creating a seamless and logical extension of the scene. "
+                                f"Text prompt: '{outpainting_prompt}'"
+                            )
+
+                            response = client.models.generate_content(
+                                model="gemini-2.0-flash-exp-image-generation",
+                                contents=[outpaint_api_prompt, new_img, mask],
+                                config=types.GenerateContentConfig(response_modalities=["text", "image"])
+                            )
+
+                            st.session_state.outpainting_result = None
+                            for part in response.candidates[0].content.parts:
+                                if part.inline_data:
+                                    st.session_state.outpainting_result = part.inline_data.data
+                                    break
+                            
+                            if not st.session_state.outpainting_result:
+                                st.error("The model did not return an image. Please try again.")
+
+                        except Exception as e:
+                            st.error(f"Outpainting failed: {e}")
+
+        if 'outpainting_result' in st.session_state and st.session_state.outpainting_result:
+            st.markdown("---")
+            st.markdown("#### ✨ Outpainting Result")
+            result_img = Image.open(BytesIO(st.session_state.outpainting_result))
+            st.image(result_img, use_container_width=True, caption="Your expanded masterpiece")
+            st.download_button(
+                label="📥 Download Outpainted Image",
+                data=st.session_state.outpainting_result,
+                file_name="outpainted_image.png",
+                mime="image/png",
+                use_container_width=True
+            )
+
+
+
 
     # ==============================================================================
     # --- START: FINAL ROBUST IMAGE-TO-PROMPT ---
