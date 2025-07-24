@@ -2274,6 +2274,7 @@ with col2:
             )
 
     # --- Outpainting (Magic Expand) ---
+    # --- Outpainting (Magic Expand) ---
     with st.expander("↔️ Outpainting (Magic Expand)", expanded=False):
 
         st.info("Expand your image by adding new content around the edges, guided by a prompt.")
@@ -2324,8 +2325,10 @@ with col2:
                             paste_y = int(h * expand_percent / 100) if expand_top else 0
 
                             new_img.paste(original_pil, (paste_x, paste_y))
-                            mask.paste(0, (paste_x, paste_y)) # Paste black on mask over original image
                             
+                            # --- THIS IS THE CORRECTED LINE ---
+                            mask.paste(0, (paste_x, paste_y, paste_x + w, paste_y + h))
+
                             # Construct the prompt
                             outpaint_api_prompt = (
                                 "You are an expert image editor. You are given an original image placed on a larger canvas, a mask, and a text prompt. "
