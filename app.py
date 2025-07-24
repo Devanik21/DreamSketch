@@ -1686,7 +1686,7 @@ with col1:
     # >>> END OF CODE BLOCK <<<
     
     # Prompt enhancement options
-    enhance_prompt = st.checkbox(" ✨ Auto-enhance prompt with selected styles", key="enhance_check")
+    enhance_prompt = st.checkbox(" 🦄 Auto-enhance prompt with selected styles", key="enhance_check")
     
     # Generate button
     generate_col1, generate_col2, generate_col3 = st.columns([1, 2, 1])
