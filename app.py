@@ -2201,7 +2201,7 @@ with col2:
                         st.error(f"Could not analyze the image. Error: {e}")
 
     # --- START: CHAT WITH YOUR IMAGE ---
-    # --- START: CORRECTED CHAT WITH YOUR IMAGE ---
+    # --- START: CHAT WITH YOUR IMAGE (WITH CLEAR BUTTON) ---
     with st.expander("💬 Chat with Your Image", expanded=True):
 
         chat_uploaded_image = st.file_uploader(
@@ -2210,9 +2210,8 @@ with col2:
             key="chat_uploader"
         )
 
-        # --- FIX: Only reset the chat if a NEW image is uploaded ---
+        # Only reset the chat if a NEW image is uploaded
         if chat_uploaded_image and chat_uploaded_image.file_id != st.session_state.current_chat_file_id:
-            # This is a new file, so update the state
             st.session_state.current_chat_file_id = chat_uploaded_image.file_id
             st.session_state.chat_image = Image.open(chat_uploaded_image)
             st.session_state.image_chat_history = [] # Reset history for the new image
@@ -2222,39 +2221,44 @@ with col2:
         if st.session_state.chat_image:
             st.image(st.session_state.chat_image, caption="Image for Conversation", use_container_width=True)
 
+            # --- NEW: CLEAR CHAT BUTTON ---
+            if st.button("🗑️ Clear Current Chat", use_container_width=True):
+                # Reset all relevant session state variables for the chat
+                st.session_state.image_chat_history = []
+                st.session_state.chat_image = None
+                st.session_state.current_chat_file_id = None
+                st.rerun() # Rerun to update the UI immediately
+
             # Display the chat history
             for message in st.session_state.image_chat_history:
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
 
-            # Input for the user's question
             if question := st.chat_input("Ask a question about the image..."):
-                # Add user question to chat history
                 st.session_state.image_chat_history.append({"role": "user", "content": question})
                 with st.chat_message("user"):
                     st.markdown(question)
 
-                # Show a spinner while the AI is thinking
                 with st.spinner("AI is analyzing..."):
                     try:
-                        # Prepare the contents for the API call
                         chat_contents = [question, st.session_state.chat_image]
 
                         response = client.models.generate_content(
-                            model="gemini-2.0-flash-exp-image-generation",
+                            model="gemini-2.0-flash",
                             contents=chat_contents
                         )
                         
                         ai_response = response.candidates[0].content.parts[0].text
                         st.session_state.image_chat_history.append({"role": "assistant", "content": ai_response})
                         
-                        # --- FIX: Removed st.rerun(). Streamlit will automatically rerun. ---
-                        st.rerun() # Use experimental_rerun for better control in chat apps
+                        st.rerun()
 
                     except Exception as e:
                         st.error(f"An error occurred: {e}")
         else:
             st.info("Please upload an image to begin your chat.")
+            
+    # --- END: CHAT WITH YOUR IMAGE (WITH CLEAR BUTTON) ---
             
     # --- END: CORRECTED CHAT WITH YOUR IMAGE ---
 
