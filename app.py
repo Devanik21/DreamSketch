@@ -52,7 +52,8 @@ if 'analyzed_prompt_text' not in st.session_state:
     st.session_state.analyzed_prompt_text = ""
 if 'current_analysis_file_id' not in st.session_state:
     st.session_state.current_analysis_file_id = None
-
+if 'analysis_image' not in st.session_state: # <-- ADD THIS LINE
+    st.session_state.analysis_image = None
 
 
     
@@ -2176,8 +2177,9 @@ with col2:
     # --- START: FINAL POLISHED IMAGE-TO-PROMPT ---
     # --- START: FINAL POLISHED IMAGE-TO-PROMPT ---
     # --- START: FINAL POLISHED IMAGE-TO-PROMPT (REVISED PROMPT) ---
+    # --- START: FINAL ROBUST IMAGE-TO-PROMPT ---
     with st.expander("🖼️ Analyze Image to Create a Prompt", expanded=True):
-        
+
         analysis_uploaded_image = st.file_uploader(
             "Upload an image to generate a descriptive prompt from it.",
             type=["png", "jpg", "jpeg", "webp"],
@@ -2185,51 +2187,53 @@ with col2:
         )
 
         def apply_analyzed_prompt():
-            """Copies the analyzed prompt to the main prompt area."""
             st.session_state.main_prompt = st.session_state.analyzed_prompt_text
             st.success("Prompt copied to the main text area!")
 
+        # This block now runs ONLY when a brand new image is uploaded.
         if analysis_uploaded_image and analysis_uploaded_image.file_id != st.session_state.current_analysis_file_id:
             st.session_state.current_analysis_file_id = analysis_uploaded_image.file_id
             st.session_state.analyzed_prompt_text = ""
-            
+            # --- FIX: Save the image object to session state ---
+            st.session_state.analysis_image = Image.open(analysis_uploaded_image)
+
             with st.spinner("Letting the AI study your image..."):
                 try:
-                    img_for_analysis = Image.open(analysis_uploaded_image)
-                    
-                    # --- FIX: More specific instruction for the AI ---
                     prompt_for_analysis = [
                         "You are an expert prompt writer for AI image generators. Look at the provided image and write a single, detailed, plain-text prompt that could be used to generate a similar image. Do not include any analysis, explanations, headings, or markdown formatting. Only output the prompt itself.",
-                        img_for_analysis
+                        st.session_state.analysis_image # Use the image from session state
                     ]
-
                     analysis_response = client.models.generate_content(
                         model="gemini-2.0-flash",
                         contents=prompt_for_analysis
                     )
-                    
                     st.session_state.analyzed_prompt_text = analysis_response.candidates[0].content.parts[0].text
-                    
                 except Exception as e:
                     st.error(f"Could not analyze the image. Error: {e}")
+                    # Clear all related state on error
+                    st.session_state.analysis_image = None
                     st.session_state.current_analysis_file_id = None
 
-        if st.session_state.current_analysis_file_id:
-            st.image(analysis_uploaded_image, caption="Image for Analysis", use_container_width=True)
+        # --- FIX: Check for the image object in session state before displaying anything ---
+        if st.session_state.analysis_image:
+            # --- FIX: Display the image from session state, not the uploader variable ---
+            st.image(st.session_state.analysis_image, caption="Image for Analysis", use_container_width=True)
 
-        if st.session_state.analyzed_prompt_text:
-            st.markdown("**📝 Generated Prompt:**")
-            st.text_area("You can copy or use this prompt:", value=st.session_state.analyzed_prompt_text, height=150, key="analyzed_prompt_display")
-            
-            st.button("✍️ Use This Prompt", use_container_width=True, on_click=apply_analyzed_prompt)
-            
+            if st.session_state.analyzed_prompt_text:
+                st.markdown("**📝 Generated Prompt:**")
+                st.text_area("You can copy or use this prompt:", value=st.session_state.analyzed_prompt_text, height=150, key="analyzed_prompt_display")
+                st.button("✍️ Use This Prompt", use_container_width=True, on_click=apply_analyzed_prompt)
+
+            # --- FIX: The clear button now resets all related state variables ---
             if st.button("🗑️ Clear Analysis", use_container_width=True):
                 st.session_state.analyzed_prompt_text = ""
                 st.session_state.current_analysis_file_id = None
+                st.session_state.analysis_image = None # Also clear the image object
                 st.rerun()
-        
-        elif not st.session_state.current_analysis_file_id:
+        else:
              st.info("Please upload an image to begin analysis.")
+
+    # --- END: FINAL ROBUST IMAGE-TO-PROMPT ---
 
     # --- END: FINAL POLISHED IMAGE-TO-PROMPT (REVISED PROMPT) ---
 
