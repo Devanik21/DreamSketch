@@ -2,3 +2,4 @@ streamlit
 google-genai
 pillow
 gTTS
+numpy
