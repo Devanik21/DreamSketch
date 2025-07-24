@@ -2165,7 +2165,7 @@ with col2:
         **Example**: *"A mystical forest guardian, ancient oak setting, Studio Ghibli style, serene mood, soft golden lighting"*
         """)
         
-    st.markdown("### 🛠️ Creative Utilities")
+    
     
     with st.expander("🎨 Style Examples"):
         st.markdown("""
@@ -2175,7 +2175,7 @@ with col2:
         - **Fantasy**: "Magic realism, ethereal glow, mythical atmosphere"
         """)
 
-    
+    st.markdown("### 🛠️ Creative Utilities")
     # --- START: FINAL ROBUST IMAGE-TO-PROMPT ---
     with st.expander("🖼️ Analyze Image to Create a Prompt", expanded=False):
 
