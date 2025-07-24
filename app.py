@@ -2174,6 +2174,7 @@ with col2:
 
     # --- START: IMAGE-TO-PROMPT (REVERSE IMAGE SEARCH) ---
     # --- START: FINAL POLISHED IMAGE-TO-PROMPT ---
+    # --- START: FINAL POLISHED IMAGE-TO-PROMPT ---
     with st.expander("🖼️ Analyze Image to Create a Prompt", expanded=True):
         
         analysis_uploaded_image = st.file_uploader(
@@ -2182,49 +2183,42 @@ with col2:
             key="analysis_uploader"
         )
 
-        # Check if a new file has been uploaded
+        # --- CORRECTED LOGIC USING A CALLBACK ---
+        def apply_analyzed_prompt():
+            """Copies the analyzed prompt to the main prompt area."""
+            st.session_state.main_prompt = st.session_state.analyzed_prompt_text
+            st.success("Prompt copied to the main text area!")
+
         if analysis_uploaded_image and analysis_uploaded_image.file_id != st.session_state.current_analysis_file_id:
-            # It's a new image, so clear old results and process it
             st.session_state.current_analysis_file_id = analysis_uploaded_image.file_id
-            st.session_state.analyzed_prompt_text = "" # Clear previous prompt
+            st.session_state.analyzed_prompt_text = ""
             
             with st.spinner("Letting the AI study your image..."):
                 try:
+                    # ... (rest of your analysis logic remains the same)
                     img_for_analysis = Image.open(analysis_uploaded_image)
                     prompt_for_analysis = [
-                        "Analyze this image in deep detail. Create a descriptive, high-quality prompt for an AI image generator to recreate something similar. Describe the main subject, the setting, the artistic style (e.g., oil painting, digital art, photography), the lighting, the color palette, and the overall mood. Be specific.",
+                        "Analyze this image...", # Your detailed prompt
                         img_for_analysis
                     ]
-
-                    # CONFIRMED: Using gemini-2.0-flash model
                     analysis_response = client.models.generate_content(
                         model="gemini-2.0-flash",
                         contents=prompt_for_analysis
                     )
-                    
-                    # Save the result to session state to prevent it from being lost
                     st.session_state.analyzed_prompt_text = analysis_response.candidates[0].content.parts[0].text
-                    
                 except Exception as e:
                     st.error(f"Could not analyze the image. Error: {e}")
-                    st.session_state.current_analysis_file_id = None # Reset on error
+                    st.session_state.current_analysis_file_id = None
 
-        # Display the uploaded image if its ID is stored in the session
         if st.session_state.current_analysis_file_id:
             st.image(analysis_uploaded_image, caption="Image for Analysis", use_container_width=True)
 
-        # Display the generated prompt if it exists in the session state
         if st.session_state.analyzed_prompt_text:
             st.markdown("**📝 Generated Prompt:**")
             st.text_area("You can copy or use this prompt:", value=st.session_state.analyzed_prompt_text, height=150, key="analyzed_prompt_display")
             
-            # --- FIX: "Use This Prompt" button now works correctly ---
-            if st.button("✍️ Use This Prompt", use_container_width=True):
-                st.session_state.main_prompt = st.session_state.analyzed_prompt_text
-                st.success("Prompt copied to the main text area!")
-                # No rerun needed here, the main prompt will update on the next interaction
+            st.button("✍️ Use This Prompt", use_container_width=True, on_click=apply_analyzed_prompt)
             
-            # Add a button to clear the analysis and start over
             if st.button("🗑️ Clear Analysis", use_container_width=True):
                 st.session_state.analyzed_prompt_text = ""
                 st.session_state.current_analysis_file_id = None
@@ -2232,6 +2226,8 @@ with col2:
         
         elif not st.session_state.current_analysis_file_id:
              st.info("Please upload an image to begin analysis.")
+
+    # --- END: FINAL POLISHED IMAGE-TO-PROMPT ---
 
     # --- END: FINAL POLISHED IMAGE-TO-PROMPT ---
 
