@@ -1720,8 +1720,8 @@ with col1:
                 st.markdown('<div class="error-box">❌ Please enter a prompt to begin your creative journey!</div>', unsafe_allow_html=True)
             else:
                 # Clear any previously displayed variations for a clean slate
-                if 'newly_generated_variations' in st.session_state:
-                    st.session_state.newly_generated_variations = None
+              #  if 'newly_generated_variations' in st.session_state:
+               #     st.session_state.newly_generated_variations = None
                 
                 # Enhance prompt if requested or preset applied
                 if enhance_prompt or (hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied):
