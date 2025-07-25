@@ -24,6 +24,42 @@ db = TinyDB('data/gallery_db.json')
 images_table = db.table('images')
 favorites_table = db.table('favorites')
 # --- END: DATABASE PERSISTENCE SETUP ---
+
+# --- START: DATABASE HELPER FUNCTIONS ---
+
+def load_data_from_db():
+    """Loads images and favorites from TinyDB into session state."""
+    # Load images
+    all_images = images_table.all()
+    # Decode image data from base64 to bytes
+    for img in all_images:
+        if 'image_data_b64' in img:
+            try:
+                img['image_data'] = base64.b64decode(img['image_data_b64'])
+            except (base64.binascii.Error, TypeError):
+                # Handle potential corruption or invalid base64 string
+                img['image_data'] = None # Or a placeholder image
+    # Filter out any corrupted images
+    st.session_state.images = [img for img in all_images if img['image_data'] is not None]
+
+    # Load favorites
+    favs_doc = favorites_table.get(doc_id=1)
+    st.session_state.favorites = favs_doc['ids'] if favs_doc else []
+
+def save_image_to_db(image_metadata):
+    """Encodes image data to Base64 and saves metadata to TinyDB."""
+    db_record = image_metadata.copy()
+    # Encode binary data to a base64 string for JSON compatibility
+    db_record['image_data_b64'] = base64.b64encode(db_record['image_data']).decode('utf-8')
+    # Remove the raw bytes data before insertion
+    del db_record['image_data']
+    images_table.insert(db_record)
+
+def save_favorites_to_db():
+    """Saves the current list of favorite IDs to TinyDB."""
+    favorites_table.upsert({'ids': st.session_state.favorites}, doc_id=1)
+
+# --- END: DATABASE HELPER FUNCTIONS ---
 # Page config
 st.set_page_config(
     page_title="🖼️ DreamCanvas",
@@ -62,41 +98,6 @@ if 'initialized' not in st.session_state:
 # --- END: MODIFIED SESSION STATE INITIALIZATION ---
 
 
-# --- START: DATABASE HELPER FUNCTIONS ---
-
-def load_data_from_db():
-    """Loads images and favorites from TinyDB into session state."""
-    # Load images
-    all_images = images_table.all()
-    # Decode image data from base64 to bytes
-    for img in all_images:
-        if 'image_data_b64' in img:
-            try:
-                img['image_data'] = base64.b64decode(img['image_data_b64'])
-            except (base64.binascii.Error, TypeError):
-                # Handle potential corruption or invalid base64 string
-                img['image_data'] = None # Or a placeholder image
-    # Filter out any corrupted images
-    st.session_state.images = [img for img in all_images if img['image_data'] is not None]
-
-    # Load favorites
-    favs_doc = favorites_table.get(doc_id=1)
-    st.session_state.favorites = favs_doc['ids'] if favs_doc else []
-
-def save_image_to_db(image_metadata):
-    """Encodes image data to Base64 and saves metadata to TinyDB."""
-    db_record = image_metadata.copy()
-    # Encode binary data to a base64 string for JSON compatibility
-    db_record['image_data_b64'] = base64.b64encode(db_record['image_data']).decode('utf-8')
-    # Remove the raw bytes data before insertion
-    del db_record['image_data']
-    images_table.insert(db_record)
-
-def save_favorites_to_db():
-    """Saves the current list of favorite IDs to TinyDB."""
-    favorites_table.upsert({'ids': st.session_state.favorites}, doc_id=1)
-
-# --- END: DATABASE HELPER FUNCTIONS ---
 
     
 # Otherworldly CSS with cosmic aesthetics
