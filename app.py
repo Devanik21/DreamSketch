@@ -2182,7 +2182,7 @@ with col2:
     # ... inside col2, after st.markdown("### 🛠️ Creative Utilities")
 
     # --- START: 4X UPSCALER TOOL ---
-    with st.expander(" ♾️ Upscaler", expanded=False):
+    with st.expander(" ♾️ Upscaler (4x) ", expanded=False):
         st.info("Increase the resolution of an image. This tool aims for a faithful 4x upscale without altering the original content.")
         
         upscaler_image = st.file_uploader(
