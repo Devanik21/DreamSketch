@@ -2200,7 +2200,7 @@ with col2:
             original_pil_upscale = Image.open(BytesIO(st.session_state.upscaler_img_bytes))
             st.image(original_pil_upscale, caption=f"Original Image ({original_pil_upscale.size[0]}x{original_pil_upscale.size[1]})")
 
-            if st.button("🚀 Generate 4x Upscaled Image", use_container_width=True):
+            if st.button(" ♾️ Generate Upscaled Image", use_container_width=True):
                 with st.spinner("Performing high-resolution upscale... This may take a moment."):
                     try:
                         # This prompt is crucial for telling the model to *only* upscale
