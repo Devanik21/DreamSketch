@@ -2214,14 +2214,22 @@ with col2:
                         response = client.models.generate_content(
                             model="gemini-2.0-flash-exp-image-generation",
                             contents=[upscale_prompt, original_pil_upscale],
-                            config=types.GenerateContentConfig(response_modalities=["image"])
+                            config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
                         
                         st.session_state.upscaled_result_data = None
-                        if response.candidates[0].content.parts and response.candidates[0].content.parts[0].inline_data:
-                            st.session_state.upscaled_result_data = response.candidates[0].content.parts[0].inline_data.data
-                        else:
+                        for part in response.candidates[0].content.parts:
+                            if part.inline_data:
+                                st.session_state.upscaled_result_data = part.inline_data.data
+                                break 
+
+
+
+                        if not st.session_state.upscaled_result_data:
                             st.error("The model did not return an upscaled image. Please try again.")
+                           
+                        
+                           
 
                     except Exception as e:
                         st.error(f"Upscaling failed: {e}")
