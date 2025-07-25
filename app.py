@@ -2223,8 +2223,7 @@ with col2:
                             )
                             image_style = analysis_response.candidates[0].content.parts[0].text.strip()
                             st.info(f"Detected Style: {image_style}")
-
-                            # Prepare the new canvas and mask
+                            
                             w, h = original_pil.size
                             new_w = w + (int(w * expand_percent / 100) if expand_left else 0) + (int(w * expand_percent / 100) if expand_right else 0)
                             new_h = h + (int(h * expand_percent / 100) if expand_top else 0) + (int(h * expand_percent / 100) if expand_bottom else 0)
@@ -2247,11 +2246,9 @@ with col2:
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
 
-                            # ▼▼▼ THIS IS THE CORRECTED LOGIC ▼▼▼
                             st.session_state.outpainting_result_dict = None
                             for part in response.candidates[0].content.parts:
                                 if part.inline_data:
-                                    # Create a dictionary instead of assigning bytes directly
                                     st.session_state.outpainting_result_dict = {
                                         "id": str(uuid.uuid4()),
                                         "image_data": part.inline_data.data,
@@ -2266,7 +2263,6 @@ with col2:
                         except Exception as e:
                             st.error(f"Outpainting failed: {e}")
 
-        # This display logic now correctly handles the dictionary
         if 'outpainting_result_dict' in st.session_state and st.session_state.outpainting_result_dict:
             st.markdown("---")
             st.markdown("#### ✨ Outpainting Result")
@@ -2305,7 +2301,7 @@ with col2:
                     st.toast("✅ Added to gallery!")
 
             with b_col1:
-                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery):
+                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_outpainted_{outpainted_data['id']}"):
                     add_outpainted_to_gallery()
                     st.rerun()
 
@@ -2324,10 +2320,10 @@ with col2:
                     else:
                         st.session_state.favorites.append(outpainted_data['id'])
                         st.toast("⭐ Added to favorites!")
-
-                st.button(f"{star_icon} {fav_text}", on_click=toggle_outpainted_favorite, use_container_width=True)
-            # --- END: NEWLY ADDED CODE ---
-    # --- START: FINAL ROBUST IMAGE-TO-PROMPT ---
+                
+                # ▼▼▼ THIS IS THE CORRECTED LINE ▼▼▼
+                st.button(f"{star_icon} {fav_text}", on_click=toggle_outpainted_favorite, use_container_width=True, key=f"fav_outpainted_{outpainted_data['id']}")
+                
     with st.expander("🖼️ Analyze Image to Create a Prompt", expanded=False):
 
         analysis_uploaded_image = st.file_uploader(
