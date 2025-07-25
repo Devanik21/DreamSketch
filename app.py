@@ -2246,8 +2246,7 @@ with col2:
     # --- END: 4X UPSCALER TOOL ---
 
     # The existing Outpainting expander should follow right after this block
-    with st.expander("↔️ Outpainting (Magic Expand)", expanded=False):
-        # ... (rest of the outpainting code)
+    
 
 
 
