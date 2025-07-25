@@ -2200,32 +2200,32 @@ with col2:
             original_pil_upscale = Image.open(BytesIO(st.session_state.upscaler_img_bytes))
             st.image(original_pil_upscale, caption=f"Original Image ({original_pil_upscale.size[0]}x{original_pil_upscale.size[1]})")
 
-            
-            if st.button("🚀 Generate 4x Upscaled Image", use_container_width=True):
-                with st.spinner("Performing high-resolution upscale... This may take a moment."):
-                    try:
-                        # This prompt is crucial for telling the model to *only* upscale
-                        upscale_prompt = (
-                            "Perform a 4x photorealistic upscale of the provided image. "
-                            "It is critically important to not change the content, style, composition, or colors of the original image. "
-                            "The output must be a high-resolution, high-detail, and faithful version of the original. "
-                            "Do not add, remove, or alter any elements."
-                        )
+            if st.button("🚀 Generate 4x Upscaled Image", use_container_width=True):
+                with st.spinner("Performing high-resolution upscale... This may take a moment."):
+                    try:
+                        # This prompt is crucial for telling the model to *only* upscale
+                        upscale_prompt = (
+                            "Perform a 4x photorealistic upscale of the provided image. "
+                            "It is critically important to not change the content, style, composition, or colors of the original image. "
+                            "The output must be a high-resolution, high-detail, and faithful version of the original. "
+                            "Do not add, remove, or alter any elements."
+                        )
 
-                        response = client.models.generate_content(
-                            model="gemini-2.0-flash-exp-image-generation",
-                            contents=[upscale_prompt, original_pil_upscale],
-                            config=types.GenerateContentConfig(response_modalities=["image"])
-                        )
-                        
-                        st.session_state.upscaled_result_data = None
-                        if response.candidates[0].content.parts and response.candidates[0].content.parts[0].inline_data:
-                            st.session_state.upscaled_result_data = response.candidates[0].content.parts[0].inline_data.data
-                        else:
-                            st.error("The model did not return an upscaled image. Please try again.")
+                        response = client.models.generate_content(
+                            model="gemini-2.0-flash-exp-image-generation",
+                            contents=[upscale_prompt, original_pil_upscale],
+                            config=types.GenerateContentConfig(response_modalities=["image"])
+                        )
+                        
+                        st.session_state.upscaled_result_data = None
+                        if response.candidates[0].content.parts and response.candidates[0].content.parts[0].inline_data:
+                            st.session_state.upscaled_result_data = response.candidates[0].content.parts[0].inline_data.data
+                        else:
+                            st.error("The model did not return an upscaled image. Please try again.")
 
-                    except Exception as e:
-                        st.error(f"Upscaling failed: {e}")
+                    except Exception as e:
+                        st.error(f"Upscaling failed: {e}")
+
         # Display the upscaled result if it exists
         if 'upscaled_result_data' in st.session_state and st.session_state.upscaled_result_data:
             st.markdown("---")
