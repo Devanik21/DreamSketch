@@ -2179,6 +2179,76 @@ with col2:
 
     st.markdown("### 🛠️ Creative Utilities")
 
+    # ... inside col2, after st.markdown("### 🛠️ Creative Utilities")
+
+    # --- START: 4X UPSCALER TOOL ---
+    with st.expander(" ♾️ Upscaler", expanded=False):
+        st.info("Increase the resolution of an image. This tool aims for a faithful 4x upscale without altering the original content.")
+        
+        upscaler_image = st.file_uploader(
+            "Upload your image to upscale",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="upscaler_uploader"
+        )
+
+        if upscaler_image:
+            # When a new image is uploaded, clear the previous result
+            if 'upscaler_img_bytes' not in st.session_state or upscaler_image.getvalue() != st.session_state.get('upscaler_img_bytes'):
+                st.session_state.upscaler_img_bytes = upscaler_image.getvalue()
+                st.session_state.upscaled_result_data = None
+
+            original_pil_upscale = Image.open(BytesIO(st.session_state.upscaler_img_bytes))
+            st.image(original_pil_upscale, caption=f"Original Image ({original_pil_upscale.size[0]}x{original_pil_upscale.size[1]})")
+
+            if st.button("🚀 Generate 4x Upscaled Image", use_container_width=True):
+                with st.spinner("Performing high-resolution upscale... This may take a moment."):
+                    try:
+                        # This prompt is crucial for telling the model to *only* upscale
+                        upscale_prompt = (
+                            "Perform a 4x photorealistic upscale of the provided image. "
+                            "It is critically important to not change the content, style, composition, or colors of the original image. "
+                            "The output must be a high-resolution, high-detail, and faithful version of the original. "
+                            "Do not add, remove, or alter any elements."
+                        )
+
+                        response = client.models.generate_content(
+                            model="gemini-2.0-flash-exp-image-generation",
+                            contents=[upscale_prompt, original_pil_upscale],
+                            config=types.GenerateContentConfig(response_modalities=["image"])
+                        )
+                        
+                        st.session_state.upscaled_result_data = None
+                        if response.candidates[0].content.parts and response.candidates[0].content.parts[0].inline_data:
+                            st.session_state.upscaled_result_data = response.candidates[0].content.parts[0].inline_data.data
+                        else:
+                            st.error("The model did not return an upscaled image. Please try again.")
+
+                    except Exception as e:
+                        st.error(f"Upscaling failed: {e}")
+
+        # Display the upscaled result if it exists
+        if 'upscaled_result_data' in st.session_state and st.session_state.upscaled_result_data:
+            st.markdown("---")
+            st.markdown("#### ✨ Upscaled Result")
+
+            upscaled_data = st.session_state.upscaled_result_data
+            result_img_upscaled = Image.open(BytesIO(upscaled_data))
+            
+            st.image(result_img_upscaled, use_container_width=True, caption=f"Upscaled Image ({result_img_upscaled.size[0]}x{result_img_upscaled.size[1]})")
+            
+            st.download_button(
+                label="📥 Download Upscaled Image",
+                data=upscaled_data,
+                file_name=f"upscaled_4x_{upscaler_image.name}",
+                mime="image/png",
+                use_container_width=True
+            )
+    # --- END: 4X UPSCALER TOOL ---
+
+    # The existing Outpainting expander should follow right after this block
+    with st.expander("↔️ Outpainting (Magic Expand)", expanded=False):
+        # ... (rest of the outpainting code)
+
 
 
     with st.expander("↔️ Outpainting (Magic Expand)", expanded=False):
