@@ -15,17 +15,6 @@ import os
 import base64
 from tinydb import TinyDB, Query
 
-# Create a data directory if it doesn't exist
-if not os.path.exists('data'):
-    os.makedirs('data')
-
-# Initialize the database and its tables
-db = TinyDB('data/gallery_db.json')
-images_table = db.table('images')
-favorites_table = db.table('favorites')
-# --- END: DATABASE PERSISTENCE SETUP ---
-
-# --- START: DATABASE HELPER FUNCTIONS ---
 
 def load_data_from_db():
     """Loads images and favorites from TinyDB into session state."""
@@ -58,6 +47,20 @@ def save_image_to_db(image_metadata):
 def save_favorites_to_db():
     """Saves the current list of favorite IDs to TinyDB."""
     favorites_table.upsert({'ids': st.session_state.favorites}, doc_id=1)
+
+# Create a data directory if it doesn't exist
+if not os.path.exists('data'):
+    os.makedirs('data')
+
+# Initialize the database and its tables
+db = TinyDB('data/gallery_db.json')
+images_table = db.table('images')
+favorites_table = db.table('favorites')
+# --- END: DATABASE PERSISTENCE SETUP ---
+
+# --- START: DATABASE HELPER FUNCTIONS ---
+
+
 
 # --- END: DATABASE HELPER FUNCTIONS ---
 # Page config
