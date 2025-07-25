@@ -2181,11 +2181,6 @@ with col2:
 
 
 
-    # --- Outpainting (Magic Expand) ---
-    # --- Outpainting (Magic Expand) ---
-    # --- Outpainting (Magic Expand) ---
-    # --- Outpainting (Magic Expand) ---
-    # --- Outpainting (Magic Expand) ---
     with st.expander("↔️ Outpainting (Magic Expand)", expanded=False):
 
         st.info("Expand your image by adding new content around the edges, guided by a prompt.")
@@ -2200,8 +2195,7 @@ with col2:
             # When a new image is uploaded, clear the previous result
             if 'outpainting_img_bytes' not in st.session_state or outpainting_image.getvalue() != st.session_state.get('outpainting_img_bytes'):
                 st.session_state.outpainting_img_bytes = outpainting_image.getvalue()
-                # Use a new key for the result dictionary to avoid conflicts
-                st.session_state.outpainting_result_dict = None
+                st.session_state.outpainting_result = None
 
             original_pil = Image.open(BytesIO(st.session_state.outpainting_img_bytes))
             st.image(original_pil, caption="Original Image")
@@ -2221,7 +2215,7 @@ with col2:
                 else:
                     with st.spinner("Analyzing image and expanding canvas..."):
                         try:
-                            # Analyze the original image to get its style
+                            # STEP 1: Analyze the original image to get its style
                             analysis_prompt = "In 10 words or less, describe the visual style of this image (e.g., 'vibrant anime style, sunset lighting'). Do not describe the content, only the style."
                             analysis_response = client.models.generate_content(
                                 model="gemini-2.0-flash", 
@@ -2230,7 +2224,7 @@ with col2:
                             image_style = analysis_response.candidates[0].content.parts[0].text.strip()
                             st.info(f"Detected Style: {image_style}")
 
-                            # Prepare the new canvas and mask
+                            # STEP 2: Prepare the new canvas and mask
                             w, h = original_pil.size
                             new_w = w + (int(w * expand_percent / 100) if expand_left else 0) + (int(w * expand_percent / 100) if expand_right else 0)
                             new_h = h + (int(h * expand_percent / 100) if expand_top else 0) + (int(h * expand_percent / 100) if expand_bottom else 0)
@@ -2255,11 +2249,11 @@ with col2:
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
 
-                            # Store result in a dictionary
-                            st.session_state.outpainting_result_dict = None
+                            # MODIFICATION: Store result in a dictionary for gallery/fav functionality
+                            st.session_state.outpainting_result = None
                             for part in response.candidates[0].content.parts:
                                 if part.inline_data:
-                                    st.session_state.outpainting_result_dict = {
+                                    st.session_state.outpainting_result = {
                                         "id": str(uuid.uuid4()),
                                         "image_data": part.inline_data.data,
                                         "prompt": outpainting_prompt,
@@ -2267,23 +2261,24 @@ with col2:
                                     }
                                     break
                             
-                            if not st.session_state.outpainting_result_dict:
+                            if not st.session_state.outpainting_result:
                                 st.error("The model did not return an image. Please try again.")
 
                         except Exception as e:
                             st.error(f"Outpainting failed: {e}")
 
-        # Display the result and the new buttons if an outpainted image exists
-        if 'outpainting_result_dict' in st.session_state and st.session_state.outpainting_result_dict:
+        # MODIFICATION: Display the result and the new buttons if an outpainted image exists
+        if 'outpainting_result' in st.session_state and st.session_state.outpainting_result:
             st.markdown("---")
             st.markdown("#### ✨ Outpainting Result")
 
-            outpainted_data = st.session_state.outpainting_result_dict
+            # Unpack the dictionary from session state
+            outpainted_data = st.session_state.outpainting_result
             result_img = Image.open(BytesIO(outpainted_data['image_data']))
             
             st.image(result_img, use_container_width=True, caption="Your expanded masterpiece")
             
-            # Download button
+            # Download button (updated to use the dictionary)
             st.download_button(
                 label="📥 Download Outpainted Image",
                 data=outpainted_data['image_data'],
@@ -2292,12 +2287,13 @@ with col2:
                 use_container_width=True
             )
 
-            # --- NEW: Add to Gallery & Favorite buttons ---
+            # --- START: NEWLY ADDED CODE ---
             b_col1, b_col2 = st.columns(2)
 
             is_in_gallery = any(img['id'] == outpainted_data['id'] for img in st.session_state.images)
 
             def add_outpainted_to_gallery():
+                # Check again to be safe in case of reruns
                 if not any(img['id'] == outpainted_data['id'] for img in st.session_state.images):
                     gallery_metadata = {
                         'id': outpainted_data['id'],
@@ -2326,9 +2322,11 @@ with col2:
                 fav_text = "Favorited" if is_favorited else "Favorite"
 
                 def toggle_outpainted_favorite():
+                    # If not in gallery, add it first
                     if not any(img['id'] == outpainted_data['id'] for img in st.session_state.images):
                         add_outpainted_to_gallery()
 
+                    # Now, toggle favorite status
                     if outpainted_data['id'] in st.session_state.favorites:
                         st.session_state.favorites.remove(outpainted_data['id'])
                         st.toast("💔 Removed from favorites.")
@@ -2337,6 +2335,7 @@ with col2:
                         st.toast("⭐ Added to favorites!")
 
                 st.button(f"{star_icon} {fav_text}", on_click=toggle_outpainted_favorite, use_container_width=True)
+            # --- END: NEWLY ADDED CODE ---
     # --- START: FINAL ROBUST IMAGE-TO-PROMPT ---
     with st.expander("🖼️ Analyze Image to Create a Prompt", expanded=False):
 
