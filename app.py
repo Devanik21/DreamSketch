@@ -2130,9 +2130,9 @@ with col1:
                 )
             # --- END: EXPORT BUTTONS FOR VARIATION ---
 
-            if st.button("Clear Variation Display", use_container_width=True):
-                 st.session_state.newly_generated_variations = None
-                 st.rerun()
+            #if st.button("Clear Variation Display", use_container_width=True):
+             #    st.session_state.newly_generated_variations = None
+               #  st.rerun()
 
             
                         # --- ADDED: Image Details for Variation ---
