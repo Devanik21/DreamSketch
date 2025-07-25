@@ -11,7 +11,20 @@ import random
 import uuid
 from streamlit_drawable_canvas import st_canvas
 import numpy as np
+# --- START: DATABASE PERSISTENCE SETUP ---
+import os
+import base64
+from tinydb import TinyDB, Query
 
+# Create a data directory if it doesn't exist
+if not os.path.exists('data'):
+    os.makedirs('data')
+
+# Initialize the database and its tables
+db = TinyDB('data/gallery_db.json')
+images_table = db.table('images')
+favorites_table = db.table('favorites')
+# --- END: DATABASE PERSISTENCE SETUP ---
 # Page config
 st.set_page_config(
     page_title="🖼️ DreamCanvas",
