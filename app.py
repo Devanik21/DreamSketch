@@ -46,7 +46,10 @@ def save_image_to_db(image_metadata):
 
 def save_favorites_to_db():
     """Saves the current list of favorite IDs to TinyDB."""
-    favorites_table.upsert({'ids': st.session_state.favorites}, doc_id=1)
+    # First, remove any existing list of favorites.
+    favorites_table.truncate()
+    # Then, insert the new, updated list as the only document.
+    favorites_table.insert({'ids': st.session_state.favorites})
 
 # Create a data directory if it doesn't exist
 if not os.path.exists('data'):
