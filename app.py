@@ -9,7 +9,6 @@ from gtts import gTTS
 import time
 import random
 import uuid
-from streamlit_drawable_canvas import st_canvas
 import numpy as np
 # --- START: DATABASE PERSISTENCE SETUP ---
 import os
