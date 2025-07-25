@@ -38,37 +38,65 @@ st.sidebar.image("k5.jpg", use_container_width=True)
 
 
 
-# Initialize session state
-if 'images' not in st.session_state:
-    st.session_state.images = []
-if 'current_image' not in st.session_state:
-    st.session_state.current_image = None
-# ... after initializing 'current_image'
-if 'prompt_history' not in st.session_state:
+# --- START: MODIFIED SESSION STATE INITIALIZATION ---
+
+# Initialize session state and load data only on the first run of a new session
+if 'initialized' not in st.session_state:
+    st.session_state.initialized = True # Mark as initialized immediately
+
+    # Load all persistent data from the database
+    load_data_from_db()
+
+    # Set the current image to the last one in the gallery if it exists
+    st.session_state.current_image = st.session_state.images[-1] if st.session_state.images else None
+
+    # Initialize non-persistent state variables that reset with each session
     st.session_state.prompt_history = []
-if 'favorites' not in st.session_state:
-    st.session_state.favorites = []
-
-
-
-# At the top of your script with other initializations
-# At the top of your script with other initializations
-if 'image_chat_history' not in st.session_state:
     st.session_state.image_chat_history = []
-if 'chat_image' not in st.session_state:
     st.session_state.chat_image = None
-if 'current_chat_file_id' not in st.session_state: # <-- ADD THIS LINE
     st.session_state.current_chat_file_id = None
-
-
-# At the top of your script
-if 'analyzed_prompt_text' not in st.session_state:
     st.session_state.analyzed_prompt_text = ""
-if 'current_analysis_file_id' not in st.session_state:
     st.session_state.current_analysis_file_id = None
-if 'analysis_image' not in st.session_state: # <-- ADD THIS LINE
     st.session_state.analysis_image = None
 
+# --- END: MODIFIED SESSION STATE INITIALIZATION ---
+
+
+# --- START: DATABASE HELPER FUNCTIONS ---
+
+def load_data_from_db():
+    """Loads images and favorites from TinyDB into session state."""
+    # Load images
+    all_images = images_table.all()
+    # Decode image data from base64 to bytes
+    for img in all_images:
+        if 'image_data_b64' in img:
+            try:
+                img['image_data'] = base64.b64decode(img['image_data_b64'])
+            except (base64.binascii.Error, TypeError):
+                # Handle potential corruption or invalid base64 string
+                img['image_data'] = None # Or a placeholder image
+    # Filter out any corrupted images
+    st.session_state.images = [img for img in all_images if img['image_data'] is not None]
+
+    # Load favorites
+    favs_doc = favorites_table.get(doc_id=1)
+    st.session_state.favorites = favs_doc['ids'] if favs_doc else []
+
+def save_image_to_db(image_metadata):
+    """Encodes image data to Base64 and saves metadata to TinyDB."""
+    db_record = image_metadata.copy()
+    # Encode binary data to a base64 string for JSON compatibility
+    db_record['image_data_b64'] = base64.b64encode(db_record['image_data']).decode('utf-8')
+    # Remove the raw bytes data before insertion
+    del db_record['image_data']
+    images_table.insert(db_record)
+
+def save_favorites_to_db():
+    """Saves the current list of favorite IDs to TinyDB."""
+    favorites_table.upsert({'ids': st.session_state.favorites}, doc_id=1)
+
+# --- END: DATABASE HELPER FUNCTIONS ---
 
     
 # Otherworldly CSS with cosmic aesthetics
@@ -1828,7 +1856,10 @@ with col1:
                         
                         # Add to gallery and set as current
                         st.session_state.images.append(image_metadata)
+                        save_image_to_db(image_metadata)
+
                         st.session_state.current_image = image_metadata
+                        
                         
                         # Clear progress
                         progress_container.empty()
@@ -1881,6 +1912,13 @@ with col1:
                 st.session_state.favorites.remove(image_id)
             else:
                 st.session_state.favorites.append(image_id)
+
+            save_favorites_to_db()
+
+        
+                
+
+        
 
         # Use a filled or empty star for visual feedback
         is_favorited = img_data['id'] in st.session_state.favorites
@@ -1946,6 +1984,7 @@ with col1:
                                 'aspect_ratio': img_data.get('aspect_ratio'), 'quality_level': img_data.get('quality_level')
                             }
                             st.session_state.images.append(new_image_metadata)
+                            save_image_to_db(new_image_metadata)
                             newly_generated.append(new_image_metadata)
                     
                         st.session_state.newly_generated_variations = newly_generated
@@ -2387,6 +2426,7 @@ with col2:
                         'aspect_ratio': 'N/A', 'quality_level': 'N/A'
                     }
                     st.session_state.images.append(gallery_metadata)
+                    save_image_to_db(gallery_metadata)
                     st.toast("✅ Added to gallery!")
 
             with b_col1:
