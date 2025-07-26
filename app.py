@@ -11,7 +11,7 @@ import random
 import uuid
 import numpy as np
 from sklearn.cluster import KMeans
-
+from collections import Counter
 # --- START: DATABASE PERSISTENCE SETUP ---
 import os
 import base64
@@ -118,11 +118,6 @@ utilities_table = db.table('utilities_gallery')
 favorites_table = db.table('favorites')
 # --- END: DATABASE PERSISTENCE SETUP ---
 
-# --- START: DATABASE HELPER FUNCTIONS ---
-
-
-
-# --- END: DATABASE HELPER FUNCTIONS ---
 # Page config
 st.set_page_config(
     page_title="🖼️ DreamCanvas",
@@ -150,7 +145,6 @@ if 'initialized' not in st.session_state:
     st.session_state.current_image = st.session_state.images[-1] if st.session_state.images else None
 
     # Initialize non-persistent state variables that reset with each session
-    st.session_state.utility_images = [] # Will be populated by load_data_from_db
     st.session_state.prompt_history = []
     st.session_state.image_chat_history = []
     st.session_state.chat_image = None
@@ -1796,8 +1790,6 @@ with st.sidebar:
             st.rerun()
             
         st.markdown("---")
-                        
-        st.markdown("---")        
 
 # Main content area
 col1, col2 = st.columns([2, 1])
@@ -1978,20 +1970,7 @@ with col1:
         img = Image.open(BytesIO(img_data['image_data']))
         
         st.image(img, caption="✨ Generated Masterpiece", use_container_width=True)
-        # vvvvv  ADD THIS BLOCK FOR THE FAVORITE BUTTON  vvvvv
-        def toggle_favorite(image_id):
-            if image_id in st.session_state.favorites:
-                st.session_state.favorites.remove(image_id)
-                st.toast("💔 Removed from favorites.")
-            else:
-                st.session_state.favorites.append(image_id)
-                st.toast("⭐ Added to favorites!")
-
-            save_favorites_to_db()
-
         
-                
-
         
 
         # Use a filled or empty star for visual feedback
@@ -2004,7 +1983,6 @@ with col1:
             args=(img_data['id'],),
             use_container_width=True
         )
-        # ^^^^^  END OF FAVORITE BUTTON BLOCK  ^^^^^
 
 
         
@@ -2179,13 +2157,6 @@ with col1:
                 caption="New Variation", 
                 use_container_width=True
             )
-
-                        # --- FAVORITE BUTTON FOR VARIATION ---
-            def toggle_favorite_variation(image_id):
-                if image_id in st.session_state.favorites:
-                    st.session_state.favorites.remove(image_id)
-                else:
-                    st.session_state.favorites.append(image_id)
 
             is_favorited_var = variation_data['id'] in st.session_state.favorites
             star_icon_var = "★" if is_favorited_var else "☆"
@@ -3568,11 +3539,19 @@ with col2:
             st.markdown(f"**Suggested**: {st.session_state.temp_style}")
         
         if st.button("📊 Gallery Stats", use_container_width=True):
+            total_images = len(st.session_state.images) + len(st.session_state.utility_images)
+            if st.session_state.images:
+                style_counts = Counter(img.get('style_used', 'N/A') for img in st.session_state.images)
+                most_common_style = style_counts.most_common(1)[0][0] if style_counts else "N/A"
+            else:
+                most_common_style = "N/A"
+
             st.markdown(f"""
             <div class="info-box">
             <strong>📈 Your Stats:</strong><br>
-            • Images Generated: {len(st.session_state.images)}<br>
-            • Most Used Style: {selected_style}<br>
+            • Total Images Generated: {total_images}<br>
+            • Favorites: {len(st.session_state.favorites)}<br>
+            • Most Used Style: {most_common_style}<br>
             • Session Started: {time.strftime('%H:%M')}
             </div>
             """, unsafe_allow_html=True)
