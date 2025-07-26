@@ -2689,6 +2689,74 @@ with col2:
                     st.code(hex_color, language=None)
     # --- END: COLOR PALETTE GENERATOR ---
 
+    # --- START: IMAGE COLORIZER ---
+    with st.expander("🎨 Image Colorizer", expanded=False):
+        st.info("Bring black and white photos to life by adding realistic color.")
+        
+        colorizer_image = st.file_uploader(
+            "Upload a black and white image to colorize",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="colorizer_uploader"
+        )
+
+        if colorizer_image:
+            # When a new image is uploaded, clear the previous result
+            if 'colorizer_img_bytes' not in st.session_state or colorizer_image.getvalue() != st.session_state.get('colorizer_img_bytes'):
+                st.session_state.colorizer_img_bytes = colorizer_image.getvalue()
+                st.session_state.colorized_result_data = None
+
+            original_pil_colorize = Image.open(BytesIO(st.session_state.colorizer_img_bytes))
+            st.image(original_pil_colorize, caption=f"Original B&W Image ({original_pil_colorize.size[0]}x{original_pil_colorize.size[1]})")
+
+            if st.button("🎨 Generate Colorized Image", use_container_width=True):
+                with st.spinner("Breathing life and color into the image..."):
+                    try:
+                        # This prompt is crucial for telling the model to colorize
+                        colorize_prompt = (
+                            "You are an expert photo restoration artist specializing in colorization. "
+                            "Colorize the provided black and white image. "
+                            "The goal is to produce a realistic, vibrant, and historically/contextually appropriate result. "
+                            "Pay close attention to skin tones, natural landscapes, and material textures. "
+                            "Do not alter the original composition or content, only add color."
+                        )
+
+                        response = client.models.generate_content(
+                            model="gemini-2.0-flash-exp-image-generation",
+                            contents=[colorize_prompt, original_pil_colorize],
+                            config=types.GenerateContentConfig(response_modalities=["text", "image"])
+                        )
+                        
+                        st.session_state.colorized_result_data = None
+                        for part in response.candidates[0].content.parts:
+                            if part.inline_data:
+                                st.session_state.colorized_result_data = part.inline_data.data
+                                break
+
+                        if not st.session_state.colorized_result_data:
+                            st.error("The model did not return a colorized image. Please try again.")
+
+                    except Exception as e:
+                        st.error(f"Colorization failed: {e}")
+
+        # Display the colorized result if it exists
+        if 'colorized_result_data' in st.session_state and st.session_state.colorized_result_data:
+            st.markdown("---")
+            st.markdown("#### ✨ Colorized Result")
+
+            colorized_data = st.session_state.colorized_result_data
+            result_img_colorized = Image.open(BytesIO(colorized_data))
+            
+            st.image(result_img_colorized, use_container_width=True, caption=f"Colorized Image ({result_img_colorized.size[0]}x{result_img_colorized.size[1]})")
+            
+            st.download_button(
+                label="📥 Download Colorized Image",
+                data=colorized_data,
+                file_name=f"colorized_{colorizer_image.name}",
+                mime="image/png",
+                use_container_width=True
+            )
+    # --- END: IMAGE COLORIZER ---
+
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # This container is now outside the 'if' condition, so it appears on startup.
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
