@@ -109,7 +109,7 @@ def save_image_to_db(image_metadata):
         return False
 
 def save_favorites_to_db():
-    """Saves the current list of favorite IDs to TinyDB."""
+    #"""Saves the current list of favorite IDs to TinyDB."""
     # First, remove any existing list of favorites.
     favorites_table.truncate()
     # Then, insert the new, updated list as the only document.
