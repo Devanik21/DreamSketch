@@ -2351,45 +2351,6 @@ with col2:
                 mime="image/png",
                 use_container_width=True
             )
-                # --- Add to Gallery & Favorites buttons ---
-                # --- Add to Gallery & Favorites buttons ---
-            b_col1, b_col2 = st.columns(2)
-            up_id = f"upscaled_{int(time.time())}"
-            def add_upscaled_to_gallery():
-                if not any(img['id'] == up_id for img in st.session_state.images):
-                    gallery_metadata = {
-                        'id': up_id,
-                        'image_data': upscaled_data,
-                        'original_prompt': 'Upscaled image',
-                        'enhanced_prompt': '4x upscaled',
-                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                        'style_used': 'Upscale',
-                        'color_mood': 'N/A', 'lighting': 'N/A',
-                        'description': 'Image created with Upscaler tool.',
-                        'aspect_ratio': 'N/A', 'quality_level': 'N/A'
-                    }
-                    st.session_state.images.append(gallery_metadata)
-                    save_image_to_db(gallery_metadata)
-                    st.toast("✅ Added to gallery!")
-            with b_col1:
-                is_in_gallery = any(img['id'] == up_id for img in st.session_state.images)
-                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_upscaled_{up_id}"):
-                    add_upscaled_to_gallery()
-                    st.rerun()
-            with b_col2:
-                is_favorited = up_id in st.session_state.favorites
-                star_icon = "★" if is_favorited else "☆"
-                fav_text = "Favorited" if is_favorited else "Favorite"
-                def handle_upscaled_favorite():
-                    if not any(img['id'] == up_id for img in st.session_state.images):
-                        add_upscaled_to_gallery()
-                    toggle_and_save_favorite(up_id)
-                st.button(
-                    f"{star_icon} {fav_text}",
-                    on_click=handle_upscaled_favorite,
-                    use_container_width=True,
-                    key=f"fav_upscaled_{up_id}"
-                )
     # --- END: 4X UPSCALER TOOL ---
 
     # The existing Outpainting expander should follow right after this block
@@ -2496,9 +2457,10 @@ with col2:
                 use_container_width=True
             )
 
-                # --- Add to Gallery & Favorites buttons ---
-                # --- Add to Gallery & Favorites buttons ---
             b_col1, b_col2 = st.columns(2)
+
+            is_in_gallery = any(img['id'] == outpainted_data['id'] for img in st.session_state.images)
+
             def add_outpainted_to_gallery():
                 if not any(img['id'] == outpainted_data['id'] for img in st.session_state.images):
                     gallery_metadata = {
@@ -2515,22 +2477,30 @@ with col2:
                     st.session_state.images.append(gallery_metadata)
                     save_image_to_db(gallery_metadata)
                     st.toast("✅ Added to gallery!")
+
             with b_col1:
                 is_in_gallery = any(img['id'] == outpainted_data['id'] for img in st.session_state.images)
                 if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_outpainted_{outpainted_data['id']}"):
                     add_outpainted_to_gallery()
                     st.rerun()
+
             with b_col2:
                 is_favorited = outpainted_data['id'] in st.session_state.favorites
                 star_icon = "★" if is_favorited else "☆"
                 fav_text = "Favorited" if is_favorited else "Favorite"
+
+                # This new handler ensures the image is in the gallery BEFORE favoriting
                 def handle_outpainted_favorite():
+                    # First, ensure the image exists in the main gallery
                     if not any(img['id'] == outpainted_data['id'] for img in st.session_state.images):
                         add_outpainted_to_gallery()
+                    
+                    # Now, call the universal favorite function you created earlier
                     toggle_and_save_favorite(outpainted_data['id'])
+
                 st.button(
                     f"{star_icon} {fav_text}",
-                    on_click=handle_outpainted_favorite,
+                    on_click=handle_outpainted_favorite, # Use our new handler
                     use_container_width=True,
                     key=f"fav_outpainted_{outpainted_data['id']}"
                 )
@@ -2589,7 +2559,7 @@ with col2:
                 st.rerun()
         else:
              st.info("Please upload an image to begin analysis.")
- 
+
     # --- END: FINAL ROBUST IMAGE-TO-PROMPT ---
 
     # --- END: FINAL POLISHED IMAGE-TO-PROMPT (REVISED PROMPT) ---
@@ -2666,9 +2636,6 @@ with col2:
 
     # --- START: COLOR PALETTE GENERATOR ---
     with st.expander("🎨 Color Palette Generator", expanded=False):
-            # --- Add to Gallery & Favorites buttons ---
-        # Move to top level of result block
-
         st.info("Upload an image to extract its dominant color palette.")
         
         palette_image = st.file_uploader(
@@ -2757,52 +2724,11 @@ with col2:
                     mime="image/png",
                     use_container_width=True
                 )
-                # --- Add to Gallery & Favorites buttons ---
-                b_col1, b_col2 = st.columns(2)
-                pal_id = f"palette_{int(time.time())}"
-                def add_palette_to_gallery():
-                    if not any(img['id'] == pal_id for img in st.session_state.images):
-                        gallery_metadata = {
-                            'id': pal_id,
-                            'image_data': img_buffer.getvalue(),
-                            'original_prompt': 'Extracted color palette',
-                            'enhanced_prompt': 'Palette image',
-                            'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                            'style_used': 'Palette',
-                            'color_mood': 'N/A', 'lighting': 'N/A',
-                            'description': f'Palette: {hex_colors}',
-                            'aspect_ratio': 'N/A', 'quality_level': 'N/A'
-                        }
-                        st.session_state.images.append(gallery_metadata)
-                        save_image_to_db(gallery_metadata)
-                        st.toast("✅ Added to gallery!")
-                with b_col1:
-                    is_in_gallery = any(img['id'] == pal_id for img in st.session_state.images)
-                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_palette_{pal_id}"):
-                        add_palette_to_gallery()
-                        st.rerun()
-                with b_col2:
-                    is_favorited = pal_id in st.session_state.favorites
-                    star_icon = "★" if is_favorited else "☆"
-                    fav_text = "Favorited" if is_favorited else "Favorite"
-                    def handle_palette_favorite():
-                        if not any(img['id'] == pal_id for img in st.session_state.images):
-                            add_palette_to_gallery()
-                        toggle_and_save_favorite(pal_id)
-                    st.button(
-                        f"{star_icon} {fav_text}",
-                        on_click=handle_palette_favorite,
-                        use_container_width=True,
-                        key=f"fav_palette_{pal_id}"
-                    )
             # --- END: ADDED DOWNLOAD OPTIONS ---
     # --- END: COLOR PALETTE GENERATOR ---
 
     # --- START: IMAGE COLORIZER ---
     with st.expander("🎨 Image Colorizer", expanded=False):
-            # --- Add to Gallery & Favorites buttons ---
-        # Move to top level of result block
-        
         st.info("Bring black and white photos to life by adding realistic color.")
         
         colorizer_image = st.file_uploader(
@@ -2816,7 +2742,6 @@ with col2:
             if 'colorizer_img_bytes' not in st.session_state or colorizer_image.getvalue() != st.session_state.get('colorizer_img_bytes'):
                 st.session_state.colorizer_img_bytes = colorizer_image.getvalue()
                 st.session_state.colorized_result_data = None
-                
 
             original_pil_colorize = Image.open(BytesIO(st.session_state.colorizer_img_bytes))
             st.image(original_pil_colorize, caption=f"Original B&W Image ({original_pil_colorize.size[0]}x{original_pil_colorize.size[1]})")
@@ -2848,9 +2773,6 @@ with col2:
                         if not st.session_state.colorized_result_data:
                             st.error("The model did not return a colorized image. Please try again.")
 
-                        else:
-                            st.session_state.colorized_original_name = colorizer_image.name
-
                     except Exception as e:
                         st.error(f"Colorization failed: {e}")
 
@@ -2867,54 +2789,14 @@ with col2:
             st.download_button(
                 label="📥 Download Colorized Image",
                 data=colorized_data,
-                file_name=f"colorized_{st.session_state.get('colorized_original_name', 'image.png')}",
+                file_name=f"colorized_{colorizer_image.name}",
                 mime="image/png",
                 use_container_width=True
             )
-            # --- Add to Gallery & Favorites buttons ---
-            b_col1, b_col2 = st.columns(2)
-            col_id = f"colorized_{int(time.time())}"
-            def add_colorized_to_gallery():
-                if not any(img['id'] == col_id for img in st.session_state.images):
-                    gallery_metadata = {
-                        'id': col_id,
-                        'image_data': colorized_data,
-                        'original_prompt': 'Colorized image',
-                        'enhanced_prompt': 'Colorized result',
-                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                        'style_used': 'Colorizer',
-                        'color_mood': 'N/A', 'lighting': 'N/A',
-                        'description': 'Image created with Colorizer tool.',
-                        'aspect_ratio': 'N/A', 'quality_level': 'N/A'
-                    }
-                    st.session_state.images.append(gallery_metadata)
-                    save_image_to_db(gallery_metadata)
-                    st.toast("✅ Added to gallery!")
-            with b_col1:
-                is_in_gallery = any(img['id'] == col_id for img in st.session_state.images)
-                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_colorized_{col_id}"):
-                    add_colorized_to_gallery()
-                    st.rerun()
-            with b_col2:
-                is_favorited = col_id in st.session_state.favorites
-                star_icon = "★" if is_favorited else "☆"
-                fav_text = "Favorited" if is_favorited else "Favorite"
-                def handle_colorized_favorite():
-                    if not any(img['id'] == col_id for img in st.session_state.images):
-                        add_colorized_to_gallery()
-                    toggle_and_save_favorite(col_id)
-                st.button(
-                    f"{star_icon} {fav_text}",
-                    on_click=handle_colorized_favorite,
-                    use_container_width=True,
-                    key=f"fav_colorized_{col_id}"
-                )
     # --- END: IMAGE COLORIZER ---
 
     # --- START: ASCII ART GENERATOR ---
     with st.expander("📝 ASCII Art Generator", expanded=False):
-        # --- Add to Gallery & Favorites buttons ---
-        
         st.info("Convert any image into text-based ASCII art.")
         
         ascii_image_file = st.file_uploader(
@@ -2972,51 +2854,10 @@ with col2:
                 mime="text/plain",
                 use_container_width=True
             )
-            # --- Add to Gallery & Favorites buttons ---
-            b_col1, b_col2 = st.columns(2)
-            ascii_id = f"ascii_{int(time.time())}"
-            def add_ascii_to_gallery():
-                if not any(img['id'] == ascii_id for img in st.session_state.images):
-                    gallery_metadata = {
-                        'id': ascii_id,
-                        'image_data': ascii_result.encode('utf-8'),
-                        'original_prompt': 'ASCII art',
-                        'enhanced_prompt': 'ASCII text',
-                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                        'style_used': 'ASCII',
-                        'color_mood': 'N/A', 'lighting': 'N/A',
-                        'description': 'ASCII art generated.',
-                        'aspect_ratio': 'N/A', 'quality_level': 'N/A'
-                    }
-                    st.session_state.images.append(gallery_metadata)
-                    save_image_to_db(gallery_metadata)
-                    st.toast("✅ Added to gallery!")
-            with b_col1:
-                is_in_gallery = any(img['id'] == ascii_id for img in st.session_state.images)
-                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_ascii_{ascii_id}"):
-                    add_ascii_to_gallery()
-                    st.rerun()
-            with b_col2:
-                is_favorited = ascii_id in st.session_state.favorites
-                star_icon = "★" if is_favorited else "☆"
-                fav_text = "Favorited" if is_favorited else "Favorite"
-                def handle_ascii_favorite():
-                    if not any(img['id'] == ascii_id for img in st.session_state.images):
-                        add_ascii_to_gallery()
-                    toggle_and_save_favorite(ascii_id)
-                st.button(
-                    f"{star_icon} {fav_text}",
-                    on_click=handle_ascii_favorite,
-                    use_container_width=True,
-                    key=f"fav_ascii_{ascii_id}"
-                )
     # --- END: ASCII ART GENERATOR ---
 
     # --- START: PENCIL SKETCH CONVERTER ---
     with st.expander("✏️ Pencil Sketch Converter", expanded=False):
-            # --- Add to Gallery & Favorites buttons ---
-        # Move to top level of result block
-        
         st.info("Convert a color photo into a beautiful, artistic pencil sketch.")
         
         sketch_image_file = st.file_uploader(
@@ -3083,51 +2924,10 @@ with col2:
                 mime="image/png",
                 use_container_width=True
             )
-            # --- Add to Gallery & Favorites buttons ---
-            b_col1, b_col2 = st.columns(2)
-            sketch_id = f"sketch_{int(time.time())}"
-            def add_sketch_to_gallery():
-                if not any(img['id'] == sketch_id for img in st.session_state.images):
-                    gallery_metadata = {
-                        'id': sketch_id,
-                        'image_data': result_sketch_data,
-                        'original_prompt': 'Pencil sketch',
-                        'enhanced_prompt': 'Sketch result',
-                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                        'style_used': 'Sketch',
-                        'color_mood': 'N/A', 'lighting': 'N/A',
-                        'description': 'Pencil sketch generated.',
-                        'aspect_ratio': 'N/A', 'quality_level': 'N/A'
-                    }
-                    st.session_state.images.append(gallery_metadata)
-                    save_image_to_db(gallery_metadata)
-                    st.toast("✅ Added to gallery!")
-            with b_col1:
-                is_in_gallery = any(img['id'] == sketch_id for img in st.session_state.images)
-                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_sketch_{sketch_id}"):
-                    add_sketch_to_gallery()
-                    st.rerun()
-            with b_col2:
-                is_favorited = sketch_id in st.session_state.favorites
-                star_icon = "★" if is_favorited else "☆"
-                fav_text = "Favorited" if is_favorited else "Favorite"
-                def handle_sketch_favorite():
-                    if not any(img['id'] == sketch_id for img in st.session_state.images):
-                        add_sketch_to_gallery()
-                    toggle_and_save_favorite(sketch_id)
-                st.button(
-                    f"{star_icon} {fav_text}",
-                    on_click=handle_sketch_favorite,
-                    use_container_width=True,
-                    key=f"fav_sketch_{sketch_id}"
-                )
     # --- END: PENCIL SKETCH CONVERTER ---
 
     # --- START: GLITCH ART GENERATOR ---
     with st.expander("👾 Glitch Art Generator", expanded=False):
-            # --- Add to Gallery & Favorites buttons ---
-        # Move to top level of result block
-        
         st.info("Add a cool, retro, digital glitch effect to your images.")
         
         glitch_image_file = st.file_uploader(
@@ -3188,51 +2988,10 @@ with col2:
                 mime="image/png",
                 use_container_width=True
             )
-            # --- Add to Gallery & Favorites buttons ---
-            b_col1, b_col2 = st.columns(2)
-            glitch_id = f"glitch_{int(time.time())}"
-            def add_glitch_to_gallery():
-                if not any(img['id'] == glitch_id for img in st.session_state.images):
-                    gallery_metadata = {
-                        'id': glitch_id,
-                        'image_data': result_glitch_data,
-                        'original_prompt': 'Glitch art',
-                        'enhanced_prompt': 'Glitch result',
-                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                        'style_used': 'Glitch',
-                        'color_mood': 'N/A', 'lighting': 'N/A',
-                        'description': 'Glitch art generated.',
-                        'aspect_ratio': 'N/A', 'quality_level': 'N/A'
-                    }
-                    st.session_state.images.append(gallery_metadata)
-                    save_image_to_db(gallery_metadata)
-                    st.toast("✅ Added to gallery!")
-            with b_col1:
-                is_in_gallery = any(img['id'] == glitch_id for img in st.session_state.images)
-                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_glitch_{glitch_id}"):
-                    add_glitch_to_gallery()
-                    st.rerun()
-            with b_col2:
-                is_favorited = glitch_id in st.session_state.favorites
-                star_icon = "★" if is_favorited else "☆"
-                fav_text = "Favorited" if is_favorited else "Favorite"
-                def handle_glitch_favorite():
-                    if not any(img['id'] == glitch_id for img in st.session_state.images):
-                        add_glitch_to_gallery()
-                    toggle_and_save_favorite(glitch_id)
-                st.button(
-                    f"{star_icon} {fav_text}",
-                    on_click=handle_glitch_favorite,
-                    use_container_width=True,
-                    key=f"fav_glitch_{glitch_id}"
-                )
     # --- END: GLITCH ART GENERATOR ---
 
     # --- START: HALFTONE PRINT EFFECT ---
     with st.expander("📰 Halftone Print Effect", expanded=False):
-            # --- Add to Gallery & Favorites buttons ---
-        # Move to top level of result block
-        
         st.info("Recreate the classic dotted print effect seen in newspapers and comics. Color mode works best with larger dot scales.")
 
         halftone_image_file = st.file_uploader(
@@ -3309,44 +3068,6 @@ with col2:
             st.markdown("#### ✨ Halftone Result")
             st.image(st.session_state.halftone_art_result, use_container_width=True, caption="Your generated halftone print")
             st.download_button(label="💾 Download as .png file", data=st.session_state.halftone_art_result, file_name=f"halftone_art_{int(time.time())}.png", mime="image/png", use_container_width=True)
-            # --- Add to Gallery & Favorites buttons ---
-            b_col1, b_col2 = st.columns(2)
-            half_id = f"halftone_{int(time.time())}"
-            def add_halftone_to_gallery():
-                if not any(img['id'] == half_id for img in st.session_state.images):
-                    gallery_metadata = {
-                        'id': half_id,
-                        'image_data': st.session_state.halftone_art_result,
-                        'original_prompt': 'Halftone effect',
-                        'enhanced_prompt': 'Halftone result',
-                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                        'style_used': 'Halftone',
-                        'color_mood': 'N/A', 'lighting': 'N/A',
-                        'description': 'Halftone effect generated.',
-                        'aspect_ratio': 'N/A', 'quality_level': 'N/A'
-                    }
-                    st.session_state.images.append(gallery_metadata)
-                    save_image_to_db(gallery_metadata)
-                    st.toast("✅ Added to gallery!")
-            with b_col1:
-                is_in_gallery = any(img['id'] == half_id for img in st.session_state.images)
-                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_halftone_{half_id}"):
-                    add_halftone_to_gallery()
-                    st.rerun()
-            with b_col2:
-                is_favorited = half_id in st.session_state.favorites
-                star_icon = "★" if is_favorited else "☆"
-                fav_text = "Favorited" if is_favorited else "Favorite"
-                def handle_halftone_favorite():
-                    if not any(img['id'] == half_id for img in st.session_state.images):
-                        add_halftone_to_gallery()
-                    toggle_and_save_favorite(half_id)
-                st.button(
-                    f"{star_icon} {fav_text}",
-                    on_click=handle_halftone_favorite,
-                    use_container_width=True,
-                    key=f"fav_halftone_{half_id}"
-                )
     # --- END: HALFTONE PRINT EFFECT ---
 
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
