@@ -2230,7 +2230,20 @@ with col1:
                     key=f"dl_var_json_{variation_data['id']}",
                     use_container_width=True
                 )
+                        # --- ADDED: Image Details for Variation ---
+            st.markdown(f"""
+            <div class="download-container">
+            <strong>📊 Image Details:</strong><br>
+            • Size: {variation_img.size[0]} × {variation_img.size[1]} pixels<br>
+            • Format: {variation_img.format or 'N/A'}<br>
+            • Mode: {variation_img.mode}<br>
+            • Generated: {variation_data['generation_time']}
+            </div>
+            """, unsafe_allow_html=True)
             # --- END: EXPORT BUTTONS FOR VARIATION ---
+            # --- END: EXPORT BUTTONS FOR VARIATION ---
+
+
 
 
             
