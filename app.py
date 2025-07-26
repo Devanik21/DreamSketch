@@ -2795,6 +2795,117 @@ with col2:
             )
     # --- END: IMAGE COLORIZER ---
 
+    # --- START: EXIF METADATA VIEWER ---
+    with st.expander("📷 EXIF Metadata Viewer", expanded=False):
+        st.info("Upload a photo (usually a JPG from a camera) to view its hidden metadata (EXIF).")
+        
+        exif_image_file = st.file_uploader(
+            "Upload an image to view its EXIF data",
+            type=["jpg", "jpeg", "tiff"],
+            key="exif_uploader"
+        )
+
+        if exif_image_file:
+            try:
+                img_for_exif = Image.open(exif_image_file)
+                st.image(img_for_exif, caption="Image for EXIF Analysis", use_container_width=True)
+
+                exif_data = img_for_exif._getexif()
+
+                if exif_data:
+                    from PIL.ExifTags import TAGS
+                    exif_info = {}
+                    for tag, value in exif_data.items():
+                        decoded_tag = TAGS.get(tag, tag)
+                        if isinstance(value, bytes):
+                            try:
+                                value = value.decode('utf-8', errors='ignore')
+                            except:
+                                value = repr(value)
+                        exif_info[str(decoded_tag)] = value
+                    
+                    st.markdown("#### 📋 Extracted EXIF Data")
+                    exif_display_data = {
+                        "Tag": list(exif_info.keys()),
+                        "Value": [str(v)[:200] for v in exif_info.values()]
+                    }
+                    st.dataframe(exif_display_data, use_container_width=True)
+
+                    exif_json = json.dumps(exif_info, indent=2, default=str)
+                    st.download_button(
+                        label="💾 Download Full EXIF (JSON)",
+                        data=exif_json,
+                        file_name=f"exif_{exif_image_file.name}.json",
+                        mime="application/json",
+                        use_container_width=True
+                    )
+                else:
+                    st.warning("No EXIF metadata found in this image.")
+            except Exception as e:
+                st.error(f"Could not read image or EXIF data: {e}")
+    # --- END: EXIF METADATA VIEWER ---
+
+    # --- START: ASCII ART GENERATOR ---
+    with st.expander("📝 ASCII Art Generator", expanded=False):
+        st.info("Convert any image into text-based ASCII art.")
+        
+        ascii_image_file = st.file_uploader(
+            "Upload an image to convert to ASCII",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="ascii_uploader"
+        )
+
+        if ascii_image_file:
+            if 'ascii_img_bytes' not in st.session_state or ascii_image_file.getvalue() != st.session_state.get('ascii_img_bytes'):
+                st.session_state.ascii_img_bytes = ascii_image_file.getvalue()
+                st.session_state.ascii_art_result = None
+
+            original_pil_ascii = Image.open(BytesIO(st.session_state.ascii_img_bytes))
+            st.image(original_pil_ascii, caption="Image for ASCII Conversion", use_container_width=True)
+
+            st.markdown("##### ⚙️ ASCII Settings")
+            ascii_width = st.slider("Output Width (characters)", 50, 300, 100, key="ascii_width")
+            ASCII_CHARS_OPTIONS = {
+                "Detailed": "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ",
+                "Simple": "@%#*+=-:. ",
+                "Blocks": "█▓▒░ "
+            }
+            char_option = st.selectbox("Character Set", list(ASCII_CHARS_OPTIONS.keys()), key="ascii_chars")
+            invert_colors = st.checkbox("Light text on dark background", key="ascii_invert")
+
+            if st.button("📝 Generate ASCII Art", use_container_width=True):
+                with st.spinner("Converting pixels to text..."):
+                    try:
+                        ASCII_CHARS = ASCII_CHARS_OPTIONS[char_option]
+                        if not invert_colors: # Default is dark text on light, so we reverse the dense-to-sparse list
+                            ASCII_CHARS = ASCII_CHARS[::-1]
+                        
+                        width, height = original_pil_ascii.size
+                        aspect_ratio = height / width
+                        new_height = int(aspect_ratio * ascii_width * 0.55) # Correction factor for char aspect ratio
+                        resized_image = original_pil_ascii.resize((ascii_width, new_height))
+                        grayscale_image = resized_image.convert("L")
+                        
+                        pixels = grayscale_image.getdata()
+                        ascii_str = "\n".join("".join(ASCII_CHARS[pixel * (len(ASCII_CHARS)-1) // 255] for pixel in pixels[i:i+ascii_width]) for i in range(0, len(pixels), ascii_width))
+                        st.session_state.ascii_art_result = ascii_str
+                    except Exception as e:
+                        st.error(f"ASCII conversion failed: {e}")
+
+        if 'ascii_art_result' in st.session_state and st.session_state.ascii_art_result:
+            st.markdown("---")
+            st.markdown("#### ✨ ASCII Art Result")
+            ascii_result = st.session_state.ascii_art_result
+            st.code(ascii_result, language=None)
+            st.download_button(
+                label="💾 Download as .txt file",
+                data=ascii_result,
+                file_name=f"ascii_art_{int(time.time())}.txt",
+                mime="text/plain",
+                use_container_width=True
+            )
+    # --- END: ASCII ART GENERATOR ---
+
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # This container is now outside the 'if' condition, so it appears on startup.
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
