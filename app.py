@@ -11,6 +11,7 @@ import random
 import uuid
 import numpy as np
 from sklearn.cluster import KMeans
+
 # --- START: DATABASE PERSISTENCE SETUP ---
 import os
 import base64
@@ -32,6 +33,17 @@ def load_data_from_db():
     # Filter out any corrupted images
     st.session_state.images = [img for img in all_images if img['image_data'] is not None]
 
+    # Load utility images
+    all_utility_images = utilities_table.all()
+    for img in all_utility_images:
+        if 'image_data_b64' in img:
+            try:
+                img['image_data'] = base64.b64decode(img['image_data_b64'])
+            except (base64.binascii.Error, TypeError):
+                # Handle potential corruption or invalid base64 string
+                img['image_data'] = None # Or a placeholder image
+    st.session_state.utility_images = [img for img in all_utility_images if img['image_data'] is not None]
+
     # Load favorites
     favs_doc = favorites_table.get(doc_id=1)
     st.session_state.favorites = favs_doc['ids'] if favs_doc else []
@@ -44,6 +56,15 @@ def save_image_to_db(image_metadata):
     # Remove the raw bytes data before insertion
     del db_record['image_data']
     images_table.insert(db_record)
+
+def save_utility_image_to_db(image_metadata):
+    """Encodes utility image data to Base64 and saves metadata to TinyDB."""
+    db_record = image_metadata.copy()
+    # Encode binary data to a base64 string for JSON compatibility
+    db_record['image_data_b64'] = base64.b64encode(db_record['image_data']).decode('utf-8')
+    # Remove the raw bytes data before insertion
+    del db_record['image_data']
+    utilities_table.insert(db_record)
 
 def save_favorites_to_db():
     """Saves the current list of favorite IDs to TinyDB."""
@@ -67,6 +88,25 @@ def toggle_and_save_favorite(image_id):
     
     save_favorites_to_db()
 
+def add_to_utilities_gallery(utility_metadata):
+    """Adds a utility image to the gallery if it's not already there."""
+    if not any(img['id'] == utility_metadata['id'] for img in st.session_state.utility_images):
+        st.session_state.utility_images.append(utility_metadata)
+        save_utility_image_to_db(utility_metadata)
+        st.toast("✅ Added to Utilities Gallery!")
+        st.rerun()
+    else:
+        st.toast("Image is already in the Utilities Gallery.")
+
+def handle_utility_favorite(utility_metadata):
+    """Ensures a utility image is in the gallery, then toggles its favorite status."""
+    if not any(img['id'] == utility_metadata['id'] for img in st.session_state.utility_images):
+        st.session_state.utility_images.append(utility_metadata)
+        save_utility_image_to_db(utility_metadata)
+        st.toast("✅ Added to Utilities Gallery!")
+    toggle_and_save_favorite(utility_metadata['id'])
+    st.rerun()
+
 # Create a data directory if it doesn't exist
 if not os.path.exists('data'):
     os.makedirs('data')
@@ -74,6 +114,7 @@ if not os.path.exists('data'):
 # Initialize the database and its tables
 db = TinyDB('data/gallery_db.json')
 images_table = db.table('images')
+utilities_table = db.table('utilities_gallery')
 favorites_table = db.table('favorites')
 # --- END: DATABASE PERSISTENCE SETUP ---
 
@@ -109,6 +150,7 @@ if 'initialized' not in st.session_state:
     st.session_state.current_image = st.session_state.images[-1] if st.session_state.images else None
 
     # Initialize non-persistent state variables that reset with each session
+    st.session_state.utility_images = [] # Will be populated by load_data_from_db
     st.session_state.prompt_history = []
     st.session_state.image_chat_history = []
     st.session_state.chat_image = None
@@ -116,6 +158,13 @@ if 'initialized' not in st.session_state:
     st.session_state.analyzed_prompt_text = ""
     st.session_state.current_analysis_file_id = None
     st.session_state.analysis_image = None
+    # Initialize result holders for all utilities
+    st.session_state.upscaled_result_metadata = None
+    st.session_state.outpainting_result_metadata = None
+    st.session_state.colorized_result_metadata = None
+    st.session_state.sketch_art_result_metadata = None
+    st.session_state.glitch_art_result_metadata = None
+    st.session_state.halftone_art_result_metadata = None
 
 # --- END: MODIFIED SESSION STATE INITIALIZATION ---
 
@@ -2295,7 +2344,7 @@ with col2:
             # When a new image is uploaded, clear the previous result
             if 'upscaler_img_bytes' not in st.session_state or upscaler_image.getvalue() != st.session_state.get('upscaler_img_bytes'):
                 st.session_state.upscaler_img_bytes = upscaler_image.getvalue()
-                st.session_state.upscaled_result_data = None
+                st.session_state.upscaled_result_metadata = None
 
             original_pil_upscale = Image.open(BytesIO(st.session_state.upscaler_img_bytes))
             st.image(original_pil_upscale, caption=f"Original Image ({original_pil_upscale.size[0]}x{original_pil_upscale.size[1]})")
@@ -2317,15 +2366,20 @@ with col2:
                             config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
                         
-                        st.session_state.upscaled_result_data = None
+                        st.session_state.upscaled_result_metadata = None
                         for part in response.candidates[0].content.parts:
                             if part.inline_data:
-                                st.session_state.upscaled_result_data = part.inline_data.data
+                                st.session_state.upscaled_result_metadata = {
+                                    'id': str(uuid.uuid4()),
+                                    'image_data': part.inline_data.data,
+                                    'source_utility': 'Upscaler (4x)',
+                                    'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                                    'original_prompt': f"Upscale of {upscaler_image.name}",
+                                    'description': f"4x upscale of original image '{upscaler_image.name}'.",
+                                }
                                 break 
 
-
-
-                        if not st.session_state.upscaled_result_data:
+                        if not st.session:
                             st.error("The model did not return an upscaled image. Please try again.")
                            
                         
@@ -3413,8 +3467,10 @@ with col2:
                 st.info("Your favorite images will appear here. Click the ☆ icon on an image to save it.")
             else:
                 # First, get the list of all favorited image data
+                all_images_combined = st.session_state.images + st.session_state.utility_images
                 favorited_images = [
-                    img for img in st.session_state.images if img['id'] in st.session_state.favorites
+                    img for img in all_images_combined
+                    if img['id'] in st.session_state.favorites
                 ]
 
                 # --- ADVANCED FAVORITES CONTROLS ---
