@@ -2129,6 +2129,7 @@ with col1:
             st.markdown("### 🎨 Saved Variations of this Masterpiece")
 
             # Sort variations by generation time, newest first
+            # Sort variations by generation time, newest first
             sorted_variations = sorted(variations, key=lambda x: x.get('generation_time', ''), reverse=True)
 
             for i, var_data in enumerate(sorted_variations):
@@ -2148,7 +2149,10 @@ with col1:
                             tts_var = gTTS(text=var_data['description'], lang='en', slow=False)
                             tts_var.write_to_fp(audio_buffer_var)
                             audio_buffer_var.seek(0)
-                            st.audio(audio_buffer_var, format='audio/mp3', key=f"tts_var_{var_data['id']}")
+                            
+                            # CORRECTED LINE: The 'key' argument has been removed.
+                            st.audio(audio_buffer_var, format='audio/mp3')
+
                         except Exception as e:
                             st.warning(f"Could not generate audio for the variation description. Error: {e}")
 
