@@ -2816,6 +2816,7 @@ with col2:
             if 'colorizer_img_bytes' not in st.session_state or colorizer_image.getvalue() != st.session_state.get('colorizer_img_bytes'):
                 st.session_state.colorizer_img_bytes = colorizer_image.getvalue()
                 st.session_state.colorized_result_data = None
+                
 
             original_pil_colorize = Image.open(BytesIO(st.session_state.colorizer_img_bytes))
             st.image(original_pil_colorize, caption=f"Original B&W Image ({original_pil_colorize.size[0]}x{original_pil_colorize.size[1]})")
@@ -2847,6 +2848,9 @@ with col2:
                         if not st.session_state.colorized_result_data:
                             st.error("The model did not return a colorized image. Please try again.")
 
+                        else:
+                            st.session_state.colorized_original_name = colorizer_image.name
+
                     except Exception as e:
                         st.error(f"Colorization failed: {e}")
 
@@ -2863,7 +2867,7 @@ with col2:
             st.download_button(
                 label="📥 Download Colorized Image",
                 data=colorized_data,
-                file_name=f"colorized_{colorizer_image.name}",
+                file_name=f"colorized_{st.session_state.get('colorized_original_name', 'image.png')}",
                 mime="image/png",
                 use_container_width=True
             )
