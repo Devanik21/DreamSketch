@@ -2373,7 +2373,7 @@ with col2:
                     st.toast("✅ Added to gallery!")
             with b_col1:
                 is_in_gallery = any(img['id'] == up_id for img in st.session_state.images)
-                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_upscaled_{up_id}"):
+                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_upscaledhhhhg78iig"):
                     add_upscaled_to_gallery()
                     st.rerun()
             with b_col2:
