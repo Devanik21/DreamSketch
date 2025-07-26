@@ -2795,56 +2795,6 @@ with col2:
             )
     # --- END: IMAGE COLORIZER ---
 
-    # --- START: EXIF METADATA VIEWER ---
-    with st.expander("📷 EXIF Metadata Viewer", expanded=False):
-        st.info("Upload a photo (usually a JPG from a camera) to view its hidden metadata (EXIF).")
-        
-        exif_image_file = st.file_uploader(
-            "Upload an image to view its EXIF data",
-            type=["jpg", "jpeg", "tiff"],
-            key="exif_uploader"
-        )
-
-        if exif_image_file:
-            try:
-                img_for_exif = Image.open(exif_image_file)
-                st.image(img_for_exif, caption="Image for EXIF Analysis", use_container_width=True)
-
-                exif_data = img_for_exif._getexif()
-
-                if exif_data:
-                    from PIL.ExifTags import TAGS
-                    exif_info = {}
-                    for tag, value in exif_data.items():
-                        decoded_tag = TAGS.get(tag, tag)
-                        if isinstance(value, bytes):
-                            try:
-                                value = value.decode('utf-8', errors='ignore')
-                            except:
-                                value = repr(value)
-                        exif_info[str(decoded_tag)] = value
-                    
-                    st.markdown("#### 📋 Extracted EXIF Data")
-                    exif_display_data = {
-                        "Tag": list(exif_info.keys()),
-                        "Value": [str(v)[:200] for v in exif_info.values()]
-                    }
-                    st.dataframe(exif_display_data, use_container_width=True)
-
-                    exif_json = json.dumps(exif_info, indent=2, default=str)
-                    st.download_button(
-                        label="💾 Download Full EXIF (JSON)",
-                        data=exif_json,
-                        file_name=f"exif_{exif_image_file.name}.json",
-                        mime="application/json",
-                        use_container_width=True
-                    )
-                else:
-                    st.warning("No EXIF metadata found in this image.")
-            except Exception as e:
-                st.error(f"Could not read image or EXIF data: {e}")
-    # --- END: EXIF METADATA VIEWER ---
-
     # --- START: ASCII ART GENERATOR ---
     with st.expander("📝 ASCII Art Generator", expanded=False):
         st.info("Convert any image into text-based ASCII art.")
