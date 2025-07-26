@@ -2886,7 +2886,7 @@ with col2:
                         resized_image = original_pil_ascii.resize((ascii_width, new_height))
                         grayscale_image = resized_image.convert("L")
                         
-                        pixels = grayscale_image.getdata()
+                        pixels = list(grayscale_image.getdata())
                         ascii_str = "\n".join("".join(ASCII_CHARS[pixel * (len(ASCII_CHARS)-1) // 255] for pixel in pixels[i:i+ascii_width]) for i in range(0, len(pixels), ascii_width))
                         st.session_state.ascii_art_result = ascii_str
                     except Exception as e:
