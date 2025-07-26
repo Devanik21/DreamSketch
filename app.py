@@ -2001,6 +2001,7 @@ with col1:
                         if new_image_data:
                             new_image_metadata = {
                                 'id': str(uuid.uuid4()), 'image_data': new_image_data,
+                                'parent_id': img_data['id'],
                                 'original_prompt': f"Variation of: {img_data['original_prompt']}",
                                 'enhanced_prompt': variation_prompt, 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
                                 'style_used': img_data.get('style_used'), 'color_mood': img_data.get('color_mood'),
@@ -2105,6 +2106,7 @@ with col1:
             )
         
         # Image info
+        # Image info
         st.markdown(f"""
         <div class="download-container">
         <strong>📊 Image Details:</strong><br>
@@ -2115,6 +2117,54 @@ with col1:
         </div>
         """, unsafe_allow_html=True)
 
+        # =====================================================================
+        # --- DISPLAY PERSISTENT VARIATIONS ---
+        # =====================================================================
+        st.markdown("---")
+
+        # Find all variations in the gallery that belong to the current image
+        variations = [v for v in st.session_state.images if v.get('parent_id') == img_data['id']]
+
+        if variations:
+            st.markdown("### 🎨 Saved Variations of this Masterpiece")
+
+            # Sort variations by generation time, newest first
+            sorted_variations = sorted(variations, key=lambda x: x.get('generation_time', ''), reverse=True)
+
+            for i, var_data in enumerate(sorted_variations):
+                with st.container(border=True):
+                    st.image(
+                        var_data['image_data'],
+                        caption=f"Variation created at: {var_data.get('generation_time', 'N/A')}",
+                        use_container_width=True
+                    )
+
+                    # --- AI Description and TTS for Variation ---
+                    if var_data.get('description'):
+                        st.markdown("##### 📝 AI Description (Variation)")
+                        st.info(var_data['description'])
+                        try:
+                            audio_buffer_var = BytesIO()
+                            tts_var = gTTS(text=var_data['description'], lang='en', slow=False)
+                            tts_var.write_to_fp(audio_buffer_var)
+                            audio_buffer_var.seek(0)
+                            st.audio(audio_buffer_var, format='audio/mp3', key=f"tts_var_{var_data['id']}")
+                        except Exception as e:
+                            st.warning(f"Could not generate audio for the variation description. Error: {e}")
+
+                    # --- Favorite Button for Variation ---
+                    is_favorited_var = var_data['id'] in st.session_state.favorites
+                    star_icon_var = "★" if is_favorited_var else "☆"
+                    st.button(
+                        f"{star_icon_var} {'Favorited' if is_favorited_var else 'Favorite'}",
+                        on_click=toggle_and_save_favorite,
+                        args=(var_data['id'],),
+                        key=f"fav_var_{var_data['id']}",
+                        use_container_width=True
+                    )
+        # =====================================================================
+        # --- END OF VARIATIONS DISPLAY ---
+        # =====================================================================
         
                 # --- START: DISPLAY NEW VARIATION ---
         if 'newly_generated_variations' in st.session_state and st.session_state.newly_generated_variations:
