@@ -51,6 +51,21 @@ def save_favorites_to_db():
     # Then, insert the new, updated list as the only document.
     favorites_table.insert({'ids': st.session_state.favorites})
 
+
+def toggle_and_save_favorite(image_id):
+    """
+    Universal function to add or remove an image ID from favorites
+    and immediately save the entire updated list to the database.
+    """
+    if image_id in st.session_state.favorites:
+        st.session_state.favorites.remove(image_id)
+        st.toast("💔 Removed from favorites.")
+    else:
+        st.session_state.favorites.append(image_id)
+        st.toast("⭐ Added to favorites!")
+    
+    save_favorites_to_db()
+
 # Create a data directory if it doesn't exist
 if not os.path.exists('data'):
     os.makedirs('data')
