@@ -1,7 +1,7 @@
 import streamlit as st
 from google import genai
 from google.genai import types
-from PIL import Image, ImageFilter, ImageOps
+from PIL import Image, ImageFilter, ImageOps, ImageDraw
 from io import BytesIO
 import base64
 import json
@@ -2989,6 +2989,86 @@ with col2:
                 use_container_width=True
             )
     # --- END: GLITCH ART GENERATOR ---
+
+    # --- START: HALFTONE PRINT EFFECT ---
+    with st.expander("📰 Halftone Print Effect", expanded=False):
+        st.info("Recreate the classic dotted print effect seen in newspapers and comics. Color mode works best with larger dot scales.")
+
+        halftone_image_file = st.file_uploader(
+            "Upload an image to apply the halftone effect",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="halftone_uploader"
+        )
+
+        if halftone_image_file:
+            if 'halftone_img_bytes' not in st.session_state or halftone_image_file.getvalue() != st.session_state.get('halftone_img_bytes'):
+                st.session_state.halftone_img_bytes = halftone_image_file.getvalue()
+                st.session_state.halftone_art_result = None
+
+            original_pil_halftone = Image.open(BytesIO(st.session_state.halftone_img_bytes))
+            st.image(original_pil_halftone, caption="Original Image for Halftone Effect", use_container_width=True)
+
+            st.markdown("##### ⚙️ Halftone Settings")
+
+            cols_ht = st.columns(2)
+            with cols_ht[0]:
+                halftone_scale = st.slider("Dot Scale (Grid Size)", 4, 32, 10, key="halftone_scale", help="The size of the grid cells. Smaller values mean more, smaller dots.")
+            with cols_ht[1]:
+                halftone_mode = st.selectbox("Mode", ["Color", "Monochrome"], key="halftone_mode")
+
+            if st.button("📰 Generate Halftone Effect", use_container_width=True):
+                with st.spinner("Arranging dots into your image... This can take a moment for large images."):
+                    try:
+                        source_img = original_pil_halftone.convert("RGB")
+                        output_img = Image.new("RGB", source_img.size, (255, 255, 255))
+                        draw = ImageDraw.Draw(output_img)
+                        width, height = source_img.size
+                        source_pixels = source_img.load()
+
+                        for y in range(0, height, halftone_scale):
+                            for x in range(0, width, halftone_scale):
+                                r_total, g_total, b_total, num_pixels = 0, 0, 0, 0
+                                for i in range(x, min(x + halftone_scale, width)):
+                                    for j in range(y, min(y + halftone_scale, height)):
+                                        r, g, b = source_pixels[i, j]
+                                        r_total += r; g_total += g; b_total += b
+                                        num_pixels += 1
+                                
+                                if num_pixels == 0: continue
+
+                                avg_r, avg_g, avg_b = r_total / num_pixels, g_total / num_pixels, b_total / num_pixels
+                                center_x, center_y = x + halftone_scale / 2, y + halftone_scale / 2
+
+                                if halftone_mode == "Monochrome":
+                                    brightness = (avg_r + avg_g + avg_b) / 3
+                                    dot_radius_factor = 1.0 - (brightness / 255.0)
+                                    max_dot_radius = halftone_scale / 2 * 1.4
+                                    dot_radius = dot_radius_factor * max_dot_radius
+                                    box = [center_x - dot_radius, center_y - dot_radius, center_x + dot_radius, center_y + dot_radius]
+                                    draw.ellipse(box, fill=(0, 0, 0))
+                                else: # Color mode (CMY approximation)
+                                    c, m, y_c = 1.0 - (avg_r / 255.0), 1.0 - (avg_g / 255.0), 1.0 - (avg_b / 255.0)
+                                    max_dot_radius, offset = halftone_scale / 2 * 1.4, halftone_scale / 3
+                                    
+                                    c_radius = c * max_dot_radius
+                                    draw.ellipse([center_x - c_radius - offset, center_y - c_radius - offset, center_x + c_radius - offset, center_y + c_radius - offset], fill=(0, 255, 255))
+                                    m_radius = m * max_dot_radius
+                                    draw.ellipse([center_x - m_radius + offset, center_y - m_radius, center_x + m_radius + offset, center_y + m_radius], fill=(255, 0, 255))
+                                    y_radius = y_c * max_dot_radius
+                                    draw.ellipse([center_x - y_radius, center_y - y_radius + offset, center_x + y_radius, center_y + y_radius + offset], fill=(255, 255, 0))
+
+                        output_buffer = BytesIO()
+                        output_img.save(output_buffer, format="PNG")
+                        st.session_state.halftone_art_result = output_buffer.getvalue()
+                    except Exception as e:
+                        st.error(f"Halftone effect failed: {e}")
+
+        if 'halftone_art_result' in st.session_state and st.session_state.halftone_art_result:
+            st.markdown("---")
+            st.markdown("#### ✨ Halftone Result")
+            st.image(st.session_state.halftone_art_result, use_container_width=True, caption="Your generated halftone print")
+            st.download_button(label="💾 Download as .png file", data=st.session_state.halftone_art_result, file_name=f"halftone_art_{int(time.time())}.png", mime="image/png", use_container_width=True)
+    # --- END: HALFTONE PRINT EFFECT ---
 
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # This container is now outside the 'if' condition, so it appears on startup.
