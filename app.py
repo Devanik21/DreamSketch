@@ -1917,8 +1917,10 @@ with col1:
         def toggle_favorite(image_id):
             if image_id in st.session_state.favorites:
                 st.session_state.favorites.remove(image_id)
+                st.toast("💔 Removed from favorites.")
             else:
                 st.session_state.favorites.append(image_id)
+                st.toast("⭐ Added to favorites!")
 
             save_favorites_to_db()
 
@@ -1933,7 +1935,7 @@ with col1:
         
         st.button(
             f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", 
-            on_click=toggle_favorite, 
+            on_click=toggle_and_save_favorite, 
             args=(img_data['id'],),
             use_container_width=True
         )
@@ -2125,7 +2127,7 @@ with col1:
             
             st.button(
                 f"{star_icon_var} {'Favorited' if is_favorited_var else 'Favorite'}", 
-                on_click=toggle_favorite_variation, 
+                on_click=toggle_and_save_favorite,
                 args=(variation_data['id'],),
                 key=f"fav_btn_variation_{variation_data['id']}",
                 use_container_width=True
@@ -2437,6 +2439,7 @@ with col2:
                     st.toast("✅ Added to gallery!")
 
             with b_col1:
+                is_in_gallery = any(img['id'] == outpainted_data['id'] for img in st.session_state.images)
                 if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_outpainted_{outpainted_data['id']}"):
                     add_outpainted_to_gallery()
                     st.rerun()
@@ -2446,19 +2449,21 @@ with col2:
                 star_icon = "★" if is_favorited else "☆"
                 fav_text = "Favorited" if is_favorited else "Favorite"
 
-                def toggle_outpainted_favorite():
+                # This new handler ensures the image is in the gallery BEFORE favoriting
+                def handle_outpainted_favorite():
+                    # First, ensure the image exists in the main gallery
                     if not any(img['id'] == outpainted_data['id'] for img in st.session_state.images):
                         add_outpainted_to_gallery()
+                    
+                    # Now, call the universal favorite function you created earlier
+                    toggle_and_save_favorite(outpainted_data['id'])
 
-                    if outpainted_data['id'] in st.session_state.favorites:
-                        st.session_state.favorites.remove(outpainted_data['id'])
-                        st.toast("💔 Removed from favorites.")
-                    else:
-                        st.session_state.favorites.append(outpainted_data['id'])
-                        st.toast("⭐ Added to favorites!")
-                
-                # ▼▼▼ THIS IS THE CORRECTED LINE ▼▼▼
-                st.button(f"{star_icon} {fav_text}", on_click=toggle_outpainted_favorite, use_container_width=True, key=f"fav_outpainted_{outpainted_data['id']}")
+                st.button(
+                    f"{star_icon} {fav_text}",
+                    on_click=handle_outpainted_favorite, # Use our new handler
+                    use_container_width=True,
+                    key=f"fav_outpainted_{outpainted_data['id']}"
+                )
                 
     with st.expander("🖼️ Analyze Image to Create a Prompt", expanded=False):
 
