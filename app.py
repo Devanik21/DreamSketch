@@ -2351,6 +2351,58 @@ with col2:
                 mime="image/png",
                 use_container_width=True
             )
+            
+            # Add to Gallery and Favorites buttons
+            col1_upscale, col2_upscale = st.columns(2)
+            
+            with col1_upscale:
+                if st.button("🖼️ Add to Gallery", key=f"add_to_gallery_upscaled_{int(time.time())}", use_container_width=True):
+                    gallery_metadata = {
+                        'id': str(uuid.uuid4()),
+                        'image_data': upscaled_data,
+                        'original_prompt': f"Upscaled version of {upscaler_image.name}",
+                        'enhanced_prompt': "4x upscaled image using AI",
+                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                        'style_used': 'Upscaled',
+                        'color_mood': 'N/A', 
+                        'lighting': 'N/A',
+                        'description': 'Image upscaled using the 4X Upscaler tool.',
+                        'aspect_ratio': f"{result_img_upscaled.size[0]}x{result_img_upscaled.size[1]}", 
+                        'quality_level': 'High'
+                    }
+                    st.session_state.images.append(gallery_metadata)
+                    save_image_to_db(gallery_metadata)
+                    st.toast("✅ Added to gallery!")
+            
+            with col2_upscale:
+                # Create a unique ID for this upscaled image
+                upscaled_id = f"upscaled_{int(time.time())}"
+                is_favorited = upscaled_id in st.session_state.favorites
+                star_icon = "★" if is_favorited else "☆"
+                fav_text = "Favorited" if is_favorited else "Favorite"
+                
+                if st.button(f"{star_icon} {fav_text}", key=f"favorite_upscaled_{upscaled_id}", use_container_width=True):
+                    # First ensure it's in the gallery
+                    if not any(img.get('id') == upscaled_id for img in st.session_state.images):
+                        gallery_metadata = {
+                            'id': upscaled_id,
+                            'image_data': upscaled_data,
+                            'original_prompt': f"Upscaled version of {upscaler_image.name}",
+                            'enhanced_prompt': "4x upscaled image using AI",
+                            'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                            'style_used': 'Upscaled',
+                            'color_mood': 'N/A', 
+                            'lighting': 'N/A',
+                            'description': 'Image upscaled using the 4X Upscaler tool.',
+                            'aspect_ratio': f"{result_img_upscaled.size[0]}x{result_img_upscaled.size[1]}", 
+                            'quality_level': 'High'
+                        }
+                        st.session_state.images.append(gallery_metadata)
+                        save_image_to_db(gallery_metadata)
+                    
+                    # Toggle favorite status
+                    toggle_and_save_favorite(upscaled_id)
+                    st.rerun()
     # --- END: 4X UPSCALER TOOL ---
 
     # The existing Outpainting expander should follow right after this block
@@ -2716,14 +2768,80 @@ with col2:
 
                 img_buffer = BytesIO()
                 palette_img.save(img_buffer, format="PNG")
+                palette_img_data = img_buffer.getvalue()
                 
                 st.download_button(
                     label="🖼️ Download Image",
-                    data=img_buffer.getvalue(),
+                    data=palette_img_data,
                     file_name=f"palette_{int(time.time())}.png",
                     mime="image/png",
                     use_container_width=True
                 )
+            
+            # Add to Gallery and Favorites buttons
+            st.markdown("##### 🎨 Save Palette")
+            col1_palette, col2_palette = st.columns(2)
+            
+            with col1_palette:
+                if st.button("🖼️ Add to Gallery", key=f"add_to_gallery_palette_{int(time.time())}", use_container_width=True):
+                    # Convert the palette image back to bytes for storage
+                    img_buffer = BytesIO()
+                    palette_img.save(img_buffer, format="PNG")
+                    palette_img_bytes = img_buffer.getvalue()
+                    
+                    gallery_metadata = {
+                        'id': str(uuid.uuid4()),
+                        'image_data': palette_img_bytes,
+                        'original_prompt': f"Color palette from {palette_image.name}",
+                        'enhanced_prompt': f"Extracted {len(hex_colors)}-color palette",
+                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                        'style_used': 'Color Palette',
+                        'color_mood': 'N/A',
+                        'lighting': 'N/A',
+                        'description': f'Color palette extracted from image using K-means clustering. Contains {len(hex_colors)} colors.',
+                        'aspect_ratio': f"{len(hex_colors)}:1",
+                        'quality_level': 'High',
+                        'palette_colors': hex_colors  # Store the hex colors for reference
+                    }
+                    st.session_state.images.append(gallery_metadata)
+                    save_image_to_db(gallery_metadata)
+                    st.toast("✅ Added to gallery!")
+            
+            with col2_palette:
+                # Create a unique ID for this palette
+                palette_id = f"palette_{int(time.time())}"
+                is_favorited = palette_id in st.session_state.favorites
+                star_icon = "★" if is_favorited else "☆"
+                fav_text = "Favorited" if is_favorited else "Favorite"
+                
+                if st.button(f"{star_icon} {fav_text}", key=f"favorite_palette_{palette_id}", use_container_width=True):
+                    # First ensure it's in the gallery
+                    if not any(img.get('id') == palette_id for img in st.session_state.images):
+                        # Convert the palette image back to bytes for storage
+                        img_buffer = BytesIO()
+                        palette_img.save(img_buffer, format="PNG")
+                        palette_img_bytes = img_buffer.getvalue()
+                        
+                        gallery_metadata = {
+                            'id': palette_id,
+                            'image_data': palette_img_bytes,
+                            'original_prompt': f"Color palette from {palette_image.name}",
+                            'enhanced_prompt': f"Extracted {len(hex_colors)}-color palette",
+                            'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                            'style_used': 'Color Palette',
+                            'color_mood': 'N/A',
+                            'lighting': 'N/A',
+                            'description': f'Color palette extracted from image using K-means clustering. Contains {len(hex_colors)} colors.',
+                            'aspect_ratio': f"{len(hex_colors)}:1",
+                            'quality_level': 'High',
+                            'palette_colors': hex_colors  # Store the hex colors for reference
+                        }
+                        st.session_state.images.append(gallery_metadata)
+                        save_image_to_db(gallery_metadata)
+                    
+                    # Toggle favorite status
+                    toggle_and_save_favorite(palette_id)
+                    st.rerun()
             # --- END: ADDED DOWNLOAD OPTIONS ---
     # --- END: COLOR PALETTE GENERATOR ---
 
@@ -2793,6 +2911,58 @@ with col2:
                 mime="image/png",
                 use_container_width=True
             )
+            
+            # Add to Gallery and Favorites buttons
+            col1_colorize, col2_colorize = st.columns(2)
+            
+            with col1_colorize:
+                if st.button("🖼️ Add to Gallery", key=f"add_to_gallery_colorized_{int(time.time())}", use_container_width=True):
+                    gallery_metadata = {
+                        'id': str(uuid.uuid4()),
+                        'image_data': colorized_data,
+                        'original_prompt': f"Colorized version of {colorizer_image.name}",
+                        'enhanced_prompt': "AI-colorized image",
+                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                        'style_used': 'Colorized',
+                        'color_mood': 'N/A', 
+                        'lighting': 'N/A',
+                        'description': 'Image colorized using the AI Colorizer tool.',
+                        'aspect_ratio': f"{result_img_colorized.size[0]}x{result_img_colorized.size[1]}", 
+                        'quality_level': 'High'
+                    }
+                    st.session_state.images.append(gallery_metadata)
+                    save_image_to_db(gallery_metadata)
+                    st.toast("✅ Added to gallery!")
+            
+            with col2_colorize:
+                # Create a unique ID for this colorized image
+                colorized_id = f"colorized_{int(time.time())}"
+                is_favorited = colorized_id in st.session_state.favorites
+                star_icon = "★" if is_favorited else "☆"
+                fav_text = "Favorited" if is_favorited else "Favorite"
+                
+                if st.button(f"{star_icon} {fav_text}", key=f"favorite_colorized_{colorized_id}", use_container_width=True):
+                    # First ensure it's in the gallery
+                    if not any(img.get('id') == colorized_id for img in st.session_state.images):
+                        gallery_metadata = {
+                            'id': colorized_id,
+                            'image_data': colorized_data,
+                            'original_prompt': f"Colorized version of {colorizer_image.name}",
+                            'enhanced_prompt': "AI-colorized image",
+                            'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                            'style_used': 'Colorized',
+                            'color_mood': 'N/A', 
+                            'lighting': 'N/A',
+                            'description': 'Image colorized using the AI Colorizer tool.',
+                            'aspect_ratio': f"{result_img_colorized.size[0]}x{result_img_colorized.size[1]}", 
+                            'quality_level': 'High'
+                        }
+                        st.session_state.images.append(gallery_metadata)
+                        save_image_to_db(gallery_metadata)
+                    
+                    # Toggle favorite status
+                    toggle_and_save_favorite(colorized_id)
+                    st.rerun()
     # --- END: IMAGE COLORIZER ---
 
     # --- START: ASCII ART GENERATOR ---
@@ -2924,6 +3094,58 @@ with col2:
                 mime="image/png",
                 use_container_width=True
             )
+            
+            # Add to Gallery and Favorites buttons
+            col1_sketch, col2_sketch = st.columns(2)
+            
+            with col1_sketch:
+                if st.button("🖼️ Add to Gallery", key=f"add_to_gallery_sketch_{int(time.time())}", use_container_width=True):
+                    gallery_metadata = {
+                        'id': str(uuid.uuid4()),
+                        'image_data': result_sketch_data,
+                        'original_prompt': f"Pencil sketch of {sketch_image_file.name}",
+                        'enhanced_prompt': "AI-generated pencil sketch",
+                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                        'style_used': 'Pencil Sketch',
+                        'color_mood': 'Grayscale', 
+                        'lighting': 'N/A',
+                        'description': 'Pencil sketch created using the Pencil Sketch Converter tool.',
+                        'aspect_ratio': f"{original_pil_sketch.size[0]}x{original_pil_sketch.size[1]}", 
+                        'quality_level': 'High'
+                    }
+                    st.session_state.images.append(gallery_metadata)
+                    save_image_to_db(gallery_metadata)
+                    st.toast("✅ Added to gallery!")
+            
+            with col2_sketch:
+                # Create a unique ID for this sketch
+                sketch_id = f"sketch_{int(time.time())}"
+                is_favorited = sketch_id in st.session_state.favorites
+                star_icon = "★" if is_favorited else "☆"
+                fav_text = "Favorited" if is_favorited else "Favorite"
+                
+                if st.button(f"{star_icon} {fav_text}", key=f"favorite_sketch_{sketch_id}", use_container_width=True):
+                    # First ensure it's in the gallery
+                    if not any(img.get('id') == sketch_id for img in st.session_state.images):
+                        gallery_metadata = {
+                            'id': sketch_id,
+                            'image_data': result_sketch_data,
+                            'original_prompt': f"Pencil sketch of {sketch_image_file.name}",
+                            'enhanced_prompt': "AI-generated pencil sketch",
+                            'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                            'style_used': 'Pencil Sketch',
+                            'color_mood': 'Grayscale', 
+                            'lighting': 'N/A',
+                            'description': 'Pencil sketch created using the Pencil Sketch Converter tool.',
+                            'aspect_ratio': f"{original_pil_sketch.size[0]}x{original_pil_sketch.size[1]}", 
+                            'quality_level': 'High'
+                        }
+                        st.session_state.images.append(gallery_metadata)
+                        save_image_to_db(gallery_metadata)
+                    
+                    # Toggle favorite status
+                    toggle_and_save_favorite(sketch_id)
+                    st.rerun()
     # --- END: PENCIL SKETCH CONVERTER ---
 
     # --- START: GLITCH ART GENERATOR ---
@@ -2988,6 +3210,58 @@ with col2:
                 mime="image/png",
                 use_container_width=True
             )
+            
+            # Add to Gallery and Favorites buttons
+            col1_glitch, col2_glitch = st.columns(2)
+            
+            with col1_glitch:
+                if st.button("🖼️ Add to Gallery", key=f"add_to_gallery_glitch_{int(time.time())}", use_container_width=True):
+                    gallery_metadata = {
+                        'id': str(uuid.uuid4()),
+                        'image_data': result_glitch_data,
+                        'original_prompt': f"Glitch art from {glitch_image_file.name}",
+                        'enhanced_prompt': "AI-generated glitch art effect",
+                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                        'style_used': 'Glitch Art',
+                        'color_mood': 'Digital', 
+                        'lighting': 'N/A',
+                        'description': 'Glitch art created using the Glitch Art Generator tool.',
+                        'aspect_ratio': f"{original_pil_glitch.size[0]}x{original_pil_glitch.size[1]}", 
+                        'quality_level': 'Medium'
+                    }
+                    st.session_state.images.append(gallery_metadata)
+                    save_image_to_db(gallery_metadata)
+                    st.toast("✅ Added to gallery!")
+            
+            with col2_glitch:
+                # Create a unique ID for this glitch art
+                glitch_id = f"glitch_{int(time.time())}"
+                is_favorited = glitch_id in st.session_state.favorites
+                star_icon = "★" if is_favorited else "☆"
+                fav_text = "Favorited" if is_favorited else "Favorite"
+                
+                if st.button(f"{star_icon} {fav_text}", key=f"favorite_glitch_{glitch_id}", use_container_width=True):
+                    # First ensure it's in the gallery
+                    if not any(img.get('id') == glitch_id for img in st.session_state.images):
+                        gallery_metadata = {
+                            'id': glitch_id,
+                            'image_data': result_glitch_data,
+                            'original_prompt': f"Glitch art from {glitch_image_file.name}",
+                            'enhanced_prompt': "AI-generated glitch art effect",
+                            'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                            'style_used': 'Glitch Art',
+                            'color_mood': 'Digital', 
+                            'lighting': 'N/A',
+                            'description': 'Glitch art created using the Glitch Art Generator tool.',
+                            'aspect_ratio': f"{original_pil_glitch.size[0]}x{original_pil_glitch.size[1]}", 
+                            'quality_level': 'Medium'
+                        }
+                        st.session_state.images.append(gallery_metadata)
+                        save_image_to_db(gallery_metadata)
+                    
+                    # Toggle favorite status
+                    toggle_and_save_favorite(glitch_id)
+                    st.rerun()
     # --- END: GLITCH ART GENERATOR ---
 
     # --- START: HALFTONE PRINT EFFECT ---
@@ -3068,6 +3342,58 @@ with col2:
             st.markdown("#### ✨ Halftone Result")
             st.image(st.session_state.halftone_art_result, use_container_width=True, caption="Your generated halftone print")
             st.download_button(label="💾 Download as .png file", data=st.session_state.halftone_art_result, file_name=f"halftone_art_{int(time.time())}.png", mime="image/png", use_container_width=True)
+            
+            # Add to Gallery and Favorites buttons
+            col1_halftone, col2_halftone = st.columns(2)
+            
+            with col1_halftone:
+                if st.button("🖼️ Add to Gallery", key=f"add_to_gallery_halftone_{int(time.time())}", use_container_width=True):
+                    gallery_metadata = {
+                        'id': str(uuid.uuid4()),
+                        'image_data': st.session_state.halftone_art_result,
+                        'original_prompt': f"Halftone print from {halftone_image_file.name}",
+                        'enhanced_prompt': f"AI-generated {halftone_mode.lower()} halftone effect",
+                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                        'style_used': 'Halftone',
+                        'color_mood': 'Monochrome' if halftone_mode == 'Monochrome' else 'Colorful', 
+                        'lighting': 'N/A',
+                        'description': f'Halftone print created using the Halftone Print Effect tool ({halftone_mode} mode, scale: {halftone_scale}).',
+                        'aspect_ratio': f"{original_pil_halftone.size[0]}x{original_pil_halftone.size[1]}", 
+                        'quality_level': 'Medium'
+                    }
+                    st.session_state.images.append(gallery_metadata)
+                    save_image_to_db(gallery_metadata)
+                    st.toast("✅ Added to gallery!")
+            
+            with col2_halftone:
+                # Create a unique ID for this halftone art
+                halftone_id = f"halftone_{int(time.time())}"
+                is_favorited = halftone_id in st.session_state.favorites
+                star_icon = "★" if is_favorited else "☆"
+                fav_text = "Favorited" if is_favorited else "Favorite"
+                
+                if st.button(f"{star_icon} {fav_text}", key=f"favorite_halftone_{halftone_id}", use_container_width=True):
+                    # First ensure it's in the gallery
+                    if not any(img.get('id') == halftone_id for img in st.session_state.images):
+                        gallery_metadata = {
+                            'id': halftone_id,
+                            'image_data': st.session_state.halftone_art_result,
+                            'original_prompt': f"Halftone print from {halftone_image_file.name}",
+                            'enhanced_prompt': f"AI-generated {halftone_mode.lower()} halftone effect",
+                            'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                            'style_used': 'Halftone',
+                            'color_mood': 'Monochrome' if halftone_mode == 'Monochrome' else 'Colorful', 
+                            'lighting': 'N/A',
+                            'description': f'Halftone print created using the Halftone Print Effect tool ({halftone_mode} mode, scale: {halftone_scale}).',
+                            'aspect_ratio': f"{original_pil_halftone.size[0]}x{original_pil_halftone.size[1]}", 
+                            'quality_level': 'Medium'
+                        }
+                        st.session_state.images.append(gallery_metadata)
+                        save_image_to_db(gallery_metadata)
+                    
+                    # Toggle favorite status
+                    toggle_and_save_favorite(halftone_id)
+                    st.rerun()
     # --- END: HALFTONE PRINT EFFECT ---
 
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
