@@ -10,6 +10,7 @@ import time
 import random
 import uuid
 import numpy as np
+from sklearn.cluster import KMeans
 # --- START: DATABASE PERSISTENCE SETUP ---
 import os
 import base64
@@ -2632,6 +2633,61 @@ with col2:
 
     # --- END: CHAT WITH YOUR IMAGE ---
     # --- END: IMAGE-TO-PROMPT (REVERSE IMAGE SEARCH) ---
+
+    # --- START: COLOR PALETTE GENERATOR ---
+    with st.expander("🎨 Color Palette Generator", expanded=False):
+        st.info("Upload an image to extract its dominant color palette.")
+        
+        palette_image = st.file_uploader(
+            "Upload your image for color extraction",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="palette_uploader"
+        )
+
+        if palette_image:
+            # Reset results if a new image is uploaded
+            if 'palette_img_bytes' not in st.session_state or palette_image.getvalue() != st.session_state.get('palette_img_bytes'):
+                st.session_state.palette_img_bytes = palette_image.getvalue()
+                st.session_state.palette_result = None
+
+            original_pil_palette = Image.open(BytesIO(st.session_state.palette_img_bytes))
+            st.image(original_pil_palette, caption="Image for Palette Extraction", use_container_width=True)
+
+            num_colors = st.slider("Number of Colors to Extract", 2, 16, 5, key="palette_num_colors")
+
+            if st.button("🎨 Extract Palette", use_container_width=True):
+                with st.spinner("Analyzing colors..."):
+                    try:
+                        # Resize for performance
+                        img_resized = original_pil_palette.resize((100, 100))
+                        # Convert to numpy array
+                        img_array = np.array(img_resized.convert("RGB"))
+                        # Reshape to a list of pixels
+                        pixels = img_array.reshape(-1, 3)
+                        
+                        # Use KMeans to find dominant colors
+                        kmeans = KMeans(n_clusters=num_colors, random_state=42, n_init='auto').fit(pixels)
+                        dominant_colors = kmeans.cluster_centers_.astype(int)
+                        
+                        # Convert RGB to Hex
+                        hex_colors = [f"#{r:02x}{g:02x}{b:02x}" for r, g, b in dominant_colors]
+                        
+                        st.session_state.palette_result = hex_colors
+                    except Exception as e:
+                        st.error(f"Color extraction failed: {e}")
+
+        # Display the palette result if it exists
+        if 'palette_result' in st.session_state and st.session_state.palette_result:
+            st.markdown("---")
+            st.markdown("#### ✨ Extracted Palette")
+            
+            hex_colors = st.session_state.palette_result
+            cols = st.columns(len(hex_colors))
+            for i, hex_color in enumerate(hex_colors):
+                with cols[i]:
+                    st.markdown(f'<div style="background-color: {hex_color}; height: 80px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);"></div>', unsafe_allow_html=True)
+                    st.code(hex_color, language=None)
+    # --- END: COLOR PALETTE GENERATOR ---
 
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # This container is now outside the 'if' condition, so it appears on startup.
