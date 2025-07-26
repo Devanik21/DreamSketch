@@ -3,4 +3,5 @@ google-genai
 tinydb 
 pillow
 gTTS
+scikit-learn
 numpy
