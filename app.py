@@ -2295,7 +2295,7 @@ with col2:
             # When a new image is uploaded, clear the previous result
             if 'upscaler_img_bytes' not in st.session_state or upscaler_image.getvalue() != st.session_state.get('upscaler_img_bytes'):
                 st.session_state.upscaler_img_bytes = upscaler_image.getvalue()
-                st.session_state.upscaled_result_dict = None
+                st.session_state.upscaled_result_data = None
 
             original_pil_upscale = Image.open(BytesIO(st.session_state.upscaler_img_bytes))
             st.image(original_pil_upscale, caption=f"Original Image ({original_pil_upscale.size[0]}x{original_pil_upscale.size[1]})")
@@ -2317,18 +2317,15 @@ with col2:
                             config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
                         
-                        st.session_state.upscaled_result_dict = None
+                        st.session_state.upscaled_result_data = None
                         for part in response.candidates[0].content.parts:
                             if part.inline_data:
-                                st.session_state.upscaled_result_dict = {
-                                    "id": str(uuid.uuid4()),
-                                    "image_data": part.inline_data.data
-                                }
+                                st.session_state.upscaled_result_data = part.inline_data.data
                                 break 
 
 
 
-                        if not st.session_state.upscaled_result_dict:
+                        if not st.session_state.upscaled_result_data:
                             st.error("The model did not return an upscaled image. Please try again.")
                            
                         
@@ -2338,12 +2335,11 @@ with col2:
                         st.error(f"Upscaling failed: {e}")
 
         # Display the upscaled result if it exists
-        if 'upscaled_result_dict' in st.session_state and st.session_state.upscaled_result_dict:
+        if 'upscaled_result_data' in st.session_state and st.session_state.upscaled_result_data:
             st.markdown("---")
             st.markdown("#### ✨ Upscaled Result")
 
-            upscaled_dict = st.session_state.upscaled_result_dict
-            upscaled_data = upscaled_dict['image_data']
+            upscaled_data = st.session_state.upscaled_result_data
             result_img_upscaled = Image.open(BytesIO(upscaled_data))
             
             st.image(result_img_upscaled, use_container_width=True, caption=f"Upscaled Image ({result_img_upscaled.size[0]}x{result_img_upscaled.size[1]})")
@@ -2355,46 +2351,6 @@ with col2:
                 mime="image/png",
                 use_container_width=True
             )
-
-            b_col1, b_col2 = st.columns(2)
-
-            def add_upscaled_to_gallery():
-                if not any(img['id'] == upscaled_dict['id'] for img in st.session_state.images):
-                    gallery_metadata = {
-                        'id': upscaled_dict['id'],
-                        'image_data': upscaled_dict['image_data'],
-                        'original_prompt': f"Upscale of an uploaded image",
-                        'enhanced_prompt': "Image created with the Upscaler (4x) utility.",
-                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                        'style_used': 'Upscaler (4x)',
-                        'color_mood': 'N/A', 'lighting': 'N/A',
-                        'description': 'Image created with the Upscaler (4x) feature.',
-                        'aspect_ratio': 'N/A', 'quality_level': 'N/A'
-                    }
-                    st.session_state.images.append(gallery_metadata)
-                    save_image_to_db(gallery_metadata)
-                    st.toast("✅ Added to gallery!")
-
-            with b_col1:
-                is_in_gallery = any(img['id'] == upscaled_dict['id'] for img in st.session_state.images)
-                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_upscaled_{upscaled_dict['id']}"):
-                    add_upscaled_to_gallery()
-                    st.rerun()
-
-            with b_col2:
-                is_favorited = upscaled_dict['id'] in st.session_state.favorites
-                star_icon = "★" if is_favorited else "☆"
-                fav_text = "Favorited" if is_favorited else "Favorite"
-
-                def handle_upscaled_favorite():
-                    if not any(img['id'] == upscaled_dict['id'] for img in st.session_state.images):
-                        add_upscaled_to_gallery()
-                    toggle_and_save_favorite(upscaled_dict['id'])
-
-                st.button(
-                    f"{star_icon} {fav_text}", on_click=handle_upscaled_favorite,
-                    use_container_width=True, key=f"fav_upscaled_{upscaled_dict['id']}"
-                )
     # --- END: 4X UPSCALER TOOL ---
 
     # The existing Outpainting expander should follow right after this block
@@ -2692,7 +2648,7 @@ with col2:
             # Reset results if a new image is uploaded
             if 'palette_img_bytes' not in st.session_state or palette_image.getvalue() != st.session_state.get('palette_img_bytes'):
                 st.session_state.palette_img_bytes = palette_image.getvalue()
-                st.session_state.palette_result_dict = None
+                st.session_state.palette_result = None
 
             original_pil_palette = Image.open(BytesIO(st.session_state.palette_img_bytes))
             st.image(original_pil_palette, caption="Image for Palette Extraction", use_container_width=True)
