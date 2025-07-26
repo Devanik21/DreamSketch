@@ -2164,20 +2164,21 @@ with col1:
                     st.warning(f"Could not generate audio for the variation description. Error: {e}")
 
             # --- START: EXPORT BUTTONS FOR VARIATION ---
+                        # --- START: EXPORT BUTTONS FOR VARIATION ---
             st.markdown("### 💾 Export Your Variation Masterpiece")
             
             # Open the image data once for reuse
             variation_img = Image.open(BytesIO(variation_data['image_data']))
             
-            # Create two columns for the buttons
-            dl_col1, dl_col2 = st.columns(2)
+            # Create four columns for the buttons
+            dl_col1, dl_col2, dl_col3, dl_col4 = st.columns(4)
 
+            # PNG download
             with dl_col1:
-                # PNG download logic
                 png_buffer = BytesIO()
                 variation_img.save(png_buffer, format="PNG", optimize=True)
                 st.download_button(
-                    label="📥 Download PNG",
+                    label="📥 PNG",
                     data=png_buffer.getvalue(),
                     file_name=f"variation_{int(time.time())}.png",
                     mime="image/png",
@@ -2185,8 +2186,8 @@ with col1:
                     use_container_width=True
                 )
 
+            # JPG download
             with dl_col2:
-                # JPG download logic
                 jpg_buffer = BytesIO()
                 # Handle transparency for JPG conversion
                 if variation_img.mode == 'RGBA':
@@ -2196,31 +2197,41 @@ with col1:
                     jpg_img = variation_img
                 jpg_img.save(jpg_buffer, format="JPEG", quality=95, optimize=True)
                 st.download_button(
-                    label="📥 Download JPG",
+                    label="📥 JPG",
                     data=jpg_buffer.getvalue(),
                     file_name=f"variation_{int(time.time())}.jpg",
                     mime="image/jpeg",
                     key=f"dl_var_jpg_{variation_data['id']}",
                     use_container_width=True
                 )
+
+            # WebP download
+            with dl_col3:
+                webp_buffer = BytesIO()
+                variation_img.save(webp_buffer, format="WEBP", quality=90, optimize=True)
+                st.download_button(
+                    label="📥 WebP",
+                    data=webp_buffer.getvalue(),
+                    file_name=f"variation_{int(time.time())}.webp",
+                    mime="image/webp",
+                    key=f"dl_var_webp_{variation_data['id']}",
+                    use_container_width=True
+                )
+        
+            # Metadata download
+            with dl_col4:
+                # Exclude the raw image data from the JSON file
+                metadata = {k: v for k, v in variation_data.items() if k != 'image_data'}
+                st.download_button(
+                    label="📄 Info",
+                    data=json.dumps(metadata, indent=2),
+                    file_name=f"variation_metadata_{int(time.time())}.json",
+                    mime="application/json",
+                    key=f"dl_var_json_{variation_data['id']}",
+                    use_container_width=True
+                )
             # --- END: EXPORT BUTTONS FOR VARIATION ---
 
-            #if st.button("Clear Variation Display", use_container_width=True):
-             #    st.session_state.newly_generated_variations = None
-               #  st.rerun()
-
-            
-                        # --- ADDED: Image Details for Variation ---
-            st.markdown(f"""
-            <div class="download-container">
-            <strong>📊 Image Details:</strong><br>
-            • Size: {variation_img.size[0]} × {variation_img.size[1]} pixels<br>
-            • Format: {variation_img.format or 'N/A'}<br>
-            • Mode: {variation_img.mode}<br>
-            • Generated: {variation_data['generation_time']}
-            </div>
-            """, unsafe_allow_html=True)    
-        # --- END: DISPLAY NEW VARIATION ---
 
             
 
