@@ -2687,6 +2687,44 @@ with col2:
                 with cols[i]:
                     st.markdown(f'<div style="background-color: {hex_color}; height: 80px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);"></div>', unsafe_allow_html=True)
                     st.code(hex_color, language=None)
+            
+            # --- START: ADDED DOWNLOAD OPTIONS ---
+            st.markdown("---")
+            st.markdown("##### 💾 Download Palette")
+            
+            dl_col1, dl_col2 = st.columns(2)
+
+            # 1. Download as JSON
+            with dl_col1:
+                palette_json = json.dumps({"colors": hex_colors}, indent=2)
+                st.download_button(
+                    label="📄 Download JSON",
+                    data=palette_json,
+                    file_name=f"palette_{int(time.time())}.json",
+                    mime="application/json",
+                    use_container_width=True
+                )
+
+            # 2. Download as Image
+            with dl_col2:
+                # Create a palette image
+                swatch_size = 100
+                palette_img = Image.new('RGB', (len(hex_colors) * swatch_size, swatch_size))
+                for i, color in enumerate(hex_colors):
+                    color_swatch = Image.new('RGB', (swatch_size, swatch_size), color)
+                    palette_img.paste(color_swatch, (i * swatch_size, 0))
+
+                img_buffer = BytesIO()
+                palette_img.save(img_buffer, format="PNG")
+                
+                st.download_button(
+                    label="🖼️ Download Image",
+                    data=img_buffer.getvalue(),
+                    file_name=f"palette_{int(time.time())}.png",
+                    mime="image/png",
+                    use_container_width=True
+                )
+            # --- END: ADDED DOWNLOAD OPTIONS ---
     # --- END: COLOR PALETTE GENERATOR ---
 
     # --- START: IMAGE COLORIZER ---
