@@ -3027,6 +3027,12 @@ with col2:
                                 st.rerun()
                             st.image(thumb, use_container_width=True)
 
+                st.markdown("---")
+                if st.button("🗑️ Clear All Favorites", use_container_width=True, key="clear_favorites"):
+                    st.session_state.favorites = []
+                    save_favorites_to_db()
+                    st.rerun()
+
 
 
         
