@@ -2814,7 +2814,8 @@ with col2:
                         st.toast("✅ Added to gallery!")
                 with b_col1:
                     is_in_gallery = any(img['id'] == pal_id for img in st.session_state.images)
-                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_palette_{pal_id}"):
+                    unique_key = f"gallery_palette_{pal_id}_{int(time.time())}"
+                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=unique_key):
                         add_palette_to_gallery()
                         st.rerun()
                 with b_col2:
@@ -2829,7 +2830,7 @@ with col2:
                         f"{star_icon} {fav_text}",
                         on_click=handle_palette_favorite,
                         use_container_width=True,
-                        key=f"fav_palette_{pal_id}"
+                        key=f"fav_palette_{pal_id}_{int(time.time())}"
                     )
             # --- END: ADDED DOWNLOAD OPTIONS ---
     # --- END: COLOR PALETTE GENERATOR ---
