@@ -19,31 +19,94 @@ from tinydb import TinyDB, Query
 
 def load_data_from_db():
     """Loads images and favorites from TinyDB into session state."""
-    # Load images
-    all_images = images_table.all()
-    # Decode image data from base64 to bytes
-    for img in all_images:
-        if 'image_data_b64' in img:
+    try:
+        # Ensure images table exists
+        if 'images' not in st.session_state:
+            st.session_state.images = []
+            
+        # Load images from database
+        all_images = images_table.all()
+        
+        # Decode image data from base64 to bytes
+        valid_images = []
+        for img in all_images:
             try:
-                img['image_data'] = base64.b64decode(img['image_data_b64'])
-            except (base64.binascii.Error, TypeError):
-                # Handle potential corruption or invalid base64 string
-                img['image_data'] = None # Or a placeholder image
-    # Filter out any corrupted images
-    st.session_state.images = [img for img in all_images if img['image_data'] is not None]
-
-    # Load favorites
-    favs_doc = favorites_table.get(doc_id=1)
-    st.session_state.favorites = favs_doc['ids'] if favs_doc else []
+                if 'image_data_b64' in img:
+                    img_copy = img.copy()  # Create a copy to avoid modifying the original
+                    img_copy['image_data'] = base64.b64decode(img_copy['image_data_b64'])
+                    valid_images.append(img_copy)
+            except (base64.binascii.Error, TypeError) as e:
+                print(f"Error decoding image data: {e}")
+                continue
+        
+        # Update session state
+        st.session_state.images = valid_images
+        
+        # Ensure favorites exist in session state
+        if 'favorites' not in st.session_state:
+            st.session_state.favorites = []
+            
+        # Load favorites from database
+        favs_doc = favorites_table.get(doc_id=1)
+        if favs_doc and 'ids' in favs_doc:
+            st.session_state.favorites = favs_doc['ids']
+            
+    except Exception as e:
+        print(f"Error in load_data_from_db: {e}")
+        # Initialize empty defaults on error
+        if 'images' not in st.session_state:
+            st.session_state.images = []
+        if 'favorites' not in st.session_state:
+            st.session_state.favorites = []
 
 def save_image_to_db(image_metadata):
     """Encodes image data to Base64 and saves metadata to TinyDB."""
-    db_record = image_metadata.copy()
-    # Encode binary data to a base64 string for JSON compatibility
-    db_record['image_data_b64'] = base64.b64encode(db_record['image_data']).decode('utf-8')
-    # Remove the raw bytes data before insertion
-    del db_record['image_data']
-    images_table.insert(db_record)
+    try:
+        # Make a copy to avoid modifying the original
+        db_record = image_metadata.copy()
+        
+        # Ensure the image has an ID
+        if 'id' not in db_record or not db_record['id']:
+            db_record['id'] = str(uuid.uuid4())
+            
+        # Encode binary data to a base64 string for JSON compatibility
+        if 'image_data' in db_record and db_record['image_data'] is not None:
+            db_record['image_data_b64'] = base64.b64encode(db_record['image_data']).decode('utf-8')
+            
+            # Create a copy without the raw bytes for database storage
+            db_record_copy = db_record.copy()
+            if 'image_data' in db_record_copy:
+                del db_record_copy['image_data']
+                
+            # Insert or update the record
+            ImageQuery = Query()
+            existing = images_table.get(ImageQuery.id == db_record['id'])
+            
+            if existing:
+                # Update existing record
+                images_table.update(db_record_copy, doc_ids=[existing.doc_id])
+            else:
+                # Insert new record
+                images_table.insert(db_record_copy)
+                
+            # Update session state
+            if 'images' not in st.session_state:
+                st.session_state.images = []
+                
+            # Check if image already exists in session state
+            existing_idx = next((i for i, img in enumerate(st.session_state.images) 
+                              if img.get('id') == db_record['id']), -1)
+                              
+            if existing_idx >= 0:
+                st.session_state.images[existing_idx] = db_record
+            else:
+                st.session_state.images.append(db_record)
+                
+            return True
+        return False
+    except Exception as e:
+        print(f"Error in save_image_to_db: {e}")
+        return False
 
 def save_favorites_to_db():
     """Saves the current list of favorite IDs to TinyDB."""
@@ -58,14 +121,33 @@ def toggle_and_save_favorite(image_id):
     Universal function to add or remove an image ID from favorites
     and immediately save the entire updated list to the database.
     """
-    if image_id in st.session_state.favorites:
-        st.session_state.favorites.remove(image_id)
-        st.toast("💔 Removed from favorites.")
-    else:
-        st.session_state.favorites.append(image_id)
-        st.toast("⭐ Added to favorites!")
-    
-    save_favorites_to_db()
+    try:
+        # Ensure favorites is a list
+        if 'favorites' not in st.session_state:
+            st.session_state.favorites = []
+            
+        # Toggle favorite status
+        if image_id in st.session_state.favorites:
+            st.session_state.favorites.remove(image_id)
+            st.toast("💔 Removed from favorites.")
+        else:
+            st.session_state.favorites.append(image_id)
+            st.toast("⭐ Added to favorites!")
+            
+        # Make sure we're working with a list of strings
+        if not isinstance(st.session_state.favorites, list):
+            st.session_state.favorites = []
+            
+        # Save to database
+        favorites_table.truncate()  # Clear existing favorites
+        favorites_table.insert({'ids': st.session_state.favorites})
+        
+        # Force a rerun to update the UI
+        st.rerun()
+        
+    except Exception as e:
+        print(f"Error in toggle_and_save_favorite: {e}")
+        st.toast("❌ Error updating favorites. Please try again.")
 
 # Create a data directory if it doesn't exist
 if not os.path.exists('data'):
@@ -100,22 +182,31 @@ st.sidebar.image("k5.jpg", use_container_width=True)
 
 # Initialize session state and load data only on the first run of a new session
 if 'initialized' not in st.session_state:
-    st.session_state.initialized = True # Mark as initialized immediately
+    st.session_state.initialized = True  # Mark as initialized immediately
+    
+    # Initialize images and favorites in session state
+    if 'images' not in st.session_state:
+        st.session_state.images = []
+    if 'favorites' not in st.session_state:
+        st.session_state.favorites = []
 
     # Load all persistent data from the database
     load_data_from_db()
 
     # Set the current image to the last one in the gallery if it exists
-    st.session_state.current_image = st.session_state.images[-1] if st.session_state.images else None
+    if 'images' in st.session_state and st.session_state.images:
+        st.session_state.current_image = st.session_state.images[-1]
+    else:
+        st.session_state.current_image = None
 
     # Initialize non-persistent state variables that reset with each session
-    st.session_state.prompt_history = []
-    st.session_state.image_chat_history = []
-    st.session_state.chat_image = None
-    st.session_state.current_chat_file_id = None
-    st.session_state.analyzed_prompt_text = ""
-    st.session_state.current_analysis_file_id = None
-    st.session_state.analysis_image = None
+    st.session_state.prompt_history = st.session_state.get('prompt_history', [])
+    st.session_state.image_chat_history = st.session_state.get('image_chat_history', [])
+    st.session_state.chat_image = st.session_state.get('chat_image', None)
+    st.session_state.current_chat_file_id = st.session_state.get('current_chat_file_id', None)
+    st.session_state.analyzed_prompt_text = st.session_state.get('analyzed_prompt_text', "")
+    st.session_state.current_analysis_file_id = st.session_state.get('current_analysis_file_id', None)
+    st.session_state.analysis_image = st.session_state.get('analysis_image', None)
 
 # --- END: MODIFIED SESSION STATE INITIALIZATION ---
 
