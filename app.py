@@ -1,7 +1,7 @@
 import streamlit as st
 from google import genai
 from google.genai import types
-from PIL import Image
+from PIL import Image, ImageFilter, ImageOps
 from io import BytesIO
 import base64
 import json
@@ -2855,6 +2855,140 @@ with col2:
                 use_container_width=True
             )
     # --- END: ASCII ART GENERATOR ---
+
+    # --- START: PENCIL SKETCH CONVERTER ---
+    with st.expander("✏️ Pencil Sketch Converter", expanded=False):
+        st.info("Convert a color photo into a beautiful, artistic pencil sketch.")
+        
+        sketch_image_file = st.file_uploader(
+            "Upload an image to convert to a sketch",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="sketch_uploader"
+        )
+
+        if sketch_image_file:
+            if 'sketch_img_bytes' not in st.session_state or sketch_image_file.getvalue() != st.session_state.get('sketch_img_bytes'):
+                st.session_state.sketch_img_bytes = sketch_image_file.getvalue()
+                st.session_state.sketch_art_result = None
+
+            original_pil_sketch = Image.open(BytesIO(st.session_state.sketch_img_bytes))
+            st.image(original_pil_sketch, caption="Original Image for Sketching", use_container_width=True)
+
+            st.markdown("##### ⚙️ Sketch Settings")
+            blur_radius = st.slider("Blur Intensity (for line thickness)", 1, 25, 5, key="sketch_blur")
+
+            if st.button("✏️ Generate Sketch", use_container_width=True):
+                with st.spinner("Sketching your image..."):
+                    try:
+                        # 1. Convert to grayscale
+                        grayscale_image = original_pil_sketch.convert("L")
+                        
+                        # 2. Invert the grayscale image
+                        inverted_image = ImageOps.invert(grayscale_image)
+                        
+                        # 3. Apply Gaussian blur
+                        blurred_image = inverted_image.filter(ImageFilter.GaussianBlur(radius=blur_radius))
+                        
+                        # 4. Blend using Color Dodge
+                        # Convert to numpy arrays for calculations
+                        grayscale_np = np.array(grayscale_image, dtype=np.float32)
+                        blurred_np = np.array(blurred_image, dtype=np.float32)
+                        
+                        # To avoid division by zero, add a small epsilon
+                        epsilon = 1e-6
+                        sketch_np = (grayscale_np * 255.0) / (255.0 - blurred_np + epsilon)
+                        
+                        # Clip values to be in the 0-255 range
+                        sketch_np = np.clip(sketch_np, 0, 255)
+                        
+                        # Convert back to an image
+                        sketch_image = Image.fromarray(sketch_np.astype('uint8'))
+                        
+                        # Save result to session state
+                        output_buffer = BytesIO()
+                        sketch_image.save(output_buffer, format="PNG")
+                        st.session_state.sketch_art_result = output_buffer.getvalue()
+
+                    except Exception as e:
+                        st.error(f"Sketch conversion failed: {e}")
+
+        if 'sketch_art_result' in st.session_state and st.session_state.sketch_art_result:
+            st.markdown("---")
+            st.markdown("#### ✨ Sketch Result")
+            result_sketch_data = st.session_state.sketch_art_result
+            st.image(result_sketch_data, use_container_width=True, caption="Your generated sketch")
+            st.download_button(
+                label="💾 Download as .png file",
+                data=result_sketch_data,
+                file_name=f"sketch_art_{int(time.time())}.png",
+                mime="image/png",
+                use_container_width=True
+            )
+    # --- END: PENCIL SKETCH CONVERTER ---
+
+    # --- START: GLITCH ART GENERATOR ---
+    with st.expander("👾 Glitch Art Generator", expanded=False):
+        st.info("Add a cool, retro, digital glitch effect to your images.")
+        
+        glitch_image_file = st.file_uploader(
+            "Upload an image to apply a glitch effect",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="glitch_uploader"
+        )
+
+        if glitch_image_file:
+            if 'glitch_img_bytes' not in st.session_state or glitch_image_file.getvalue() != st.session_state.get('glitch_img_bytes'):
+                st.session_state.glitch_img_bytes = glitch_image_file.getvalue()
+                st.session_state.glitch_art_result = None
+
+            original_pil_glitch = Image.open(BytesIO(st.session_state.glitch_img_bytes))
+            st.image(original_pil_glitch, caption="Original Image for Glitching", use_container_width=True)
+
+            st.markdown("##### ⚙️ Glitch Settings")
+            glitch_amount = st.slider("Glitch Intensity", 1, 10, 3, key="glitch_amount", help="How many times to apply a random glitch.")
+            glitch_seed = st.number_input("Glitch Seed (for reproducibility)", value=42, key="glitch_seed")
+            
+            if st.button("👾 Generate Glitch Art", use_container_width=True):
+                with st.spinner("Corrupting data streams..."):
+                    try:
+                        random.seed(glitch_seed)
+                        np.random.seed(glitch_seed)
+                        img_np = np.array(original_pil_glitch.convert("RGB"))
+                        h, w, c = img_np.shape
+                        for _ in range(glitch_amount):
+                            glitch_type = random.choice(['shift', 'color_block', 'channel_swap'])
+                            if glitch_type == 'shift':
+                                line_to_shift, shift_amount = random.randint(0, h - 1), random.randint(-w // 4, w // 4)
+                                img_np[line_to_shift, :, :] = np.roll(img_np[line_to_shift, :, :], shift_amount, axis=0)
+                            elif glitch_type == 'color_block':
+                                x1, y1 = random.randint(0, w-20), random.randint(0, h-20)
+                                x2, y2 = x1 + random.randint(10, 50), y1 + random.randint(10, 50)
+                                img_np[y1:y2, x1:x2, :] = np.random.randint(0, 255, size=3)
+                            elif glitch_type == 'channel_swap':
+                                start_row, end_row = random.randint(0, h - 20), random.randint(5, 20)
+                                channels = random.sample([0, 1, 2], 2)
+                                img_np[start_row:start_row+end_row, :, channels[0]], img_np[start_row:start_row+end_row, :, channels[1]] = \
+                                    img_np[start_row:start_row+end_row, :, channels[1]].copy(), img_np[start_row:start_row+end_row, :, channels[0]].copy()
+                        glitch_image = Image.fromarray(img_np)
+                        output_buffer = BytesIO()
+                        glitch_image.save(output_buffer, format="PNG")
+                        st.session_state.glitch_art_result = output_buffer.getvalue()
+                    except Exception as e:
+                        st.error(f"Glitch effect failed: {e}")
+
+        if 'glitch_art_result' in st.session_state and st.session_state.glitch_art_result:
+            st.markdown("---")
+            st.markdown("#### ✨ Glitch Art Result")
+            result_glitch_data = st.session_state.glitch_art_result
+            st.image(result_glitch_data, use_container_width=True, caption="Your glitched masterpiece")
+            st.download_button(
+                label="💾 Download as .png file",
+                data=result_glitch_data,
+                file_name=f"glitch_art_{int(time.time())}.png",
+                mime="image/png",
+                use_container_width=True
+            )
+    # --- END: GLITCH ART GENERATOR ---
 
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # This container is now outside the 'if' condition, so it appears on startup.
