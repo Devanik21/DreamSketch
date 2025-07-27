@@ -56,6 +56,35 @@ def save_favorites_to_db():
     favorites_table.insert({'ids': st.session_state.favorites})
 
 
+
+def remove_image_from_gallery(image_id):
+    """Removes a single image from the gallery and favorites, and updates the DB."""
+    # Remove from the main image list in session state
+    st.session_state.images = [img for img in st.session_state.images if img['id'] != image_id]
+
+    # If the image was a favorite, remove it from there too
+    if image_id in st.session_state.favorites:
+        st.session_state.favorites.remove(image_id)
+        save_favorites_to_db()
+
+    # If the removed image is the one currently being viewed, update the view
+    if st.session_state.current_image and st.session_state.current_image['id'] == image_id:
+        st.session_state.current_image = st.session_state.images[-1] if st.session_state.images else None
+
+    # Remove the image record from the database
+    ImageQuery = Query()
+    images_table.remove(ImageQuery.id == image_id)
+    st.toast("🗑️ Image removed from gallery.")
+    st.rerun()
+
+def remove_prompt_from_history(prompt_to_remove):
+    """Removes a single prompt from the history and updates the DB."""
+    st.session_state.prompt_history = [p for p in st.session_state.prompt_history if p != prompt_to_remove]
+    save_prompt_history_to_db()
+    st.toast("🗑️ Prompt removed from history.")
+    st.rerun()
+
+
 def toggle_and_save_favorite(image_id):
     """
     Universal function to add or remove an image ID from favorites
@@ -1730,9 +1759,9 @@ with st.sidebar:
         else:
             # Display thumbnail gallery
             for img_data in display_list:
-                # Using a unique ID for the key is more robust with filtering
                 img_id = img_data['id']
                 with st.container():
+                    # Main container for image and buttons
                     col1, col2 = st.columns([1, 3])
                     with col1:
                         img = Image.open(BytesIO(img_data['image_data']))
@@ -1740,13 +1769,24 @@ with st.sidebar:
                         st.image(img, use_container_width=True)
                     
                     with col2:
-                        # Display the prompt for context
                         prompt_summary = img_data.get('original_prompt', 'No Prompt')[:50]
                         st.markdown(f"<small>*{prompt_summary}...*</small>", unsafe_allow_html=True)
                         
-                        if st.button("View Image", key=f"view_{img_id}", use_container_width=True):
-                            st.session_state.current_image = img_data
-                            st.rerun()
+                        # Columns for View and Remove buttons
+                        view_col, remove_col = st.columns([3, 1])
+                        with view_col:
+                            if st.button("View Image", key=f"view_{img_id}", use_container_width=True):
+                                st.session_state.current_image = img_data
+                                st.rerun()
+                        with remove_col:
+                            st.button(
+                                "🗑️", 
+                                key=f"remove_gallery_{img_id}", 
+                                on_click=remove_image_from_gallery, 
+                                args=(img_id,), 
+                                use_container_width=True, 
+                                help="Remove image permanently"
+                            )
 
         st.markdown("---")
 
@@ -3699,17 +3739,31 @@ with col2:
                         st.session_state.main_prompt = prompt_text
                     
                     # Display the filtered and sorted prompts
+                    # Display the filtered and sorted prompts
                     for prompt in display_list:
                         with st.container(border=True):
                             st.markdown(f"<small>{prompt[:100]}...</small>", unsafe_allow_html=True)
-                            # Use a hash of the prompt for a unique, stable key
-                            st.button(
-                                "✍️ Use This Prompt", 
-                                key=f"hist_use_{hash(prompt)}", 
-                                on_click=apply_historical_prompt, 
-                                args=(prompt,), 
-                                use_container_width=True
-                            )
+                            
+                            # Create columns for "Use" and "Remove" buttons
+                            use_col, remove_col = st.columns([3, 1])
+
+                            with use_col:
+                                st.button(
+                                    "✍️ Use This Prompt", 
+                                    key=f"hist_use_{hash(prompt)}", 
+                                    on_click=apply_historical_prompt, 
+                                    args=(prompt,), 
+                                    use_container_width=True
+                                )
+                            with remove_col:
+                                st.button(
+                                    "🗑️",
+                                    key=f"hist_remove_{hash(prompt)}",
+                                    on_click=remove_prompt_from_history,
+                                    args=(prompt,),
+                                    use_container_width=True,
+                                    help="Remove this prompt"
+                                )
                 
                 st.markdown("---")
                 if st.button("Clear Entire History", use_container_width=True):
@@ -3787,17 +3841,28 @@ with col2:
                     st.info("No favorites match your current filter criteria.")
                 else:
                     # Create a grid for thumbnails
+                    # Create a grid for thumbnails
                     cols = st.columns(3)
                     for i, fav_img_data in enumerate(display_list):
                         with cols[i % 3]:
                             thumb = Image.open(BytesIO(fav_img_data['image_data']))
                             thumb.thumbnail((150, 150))
                             
-                            # Use the unique image ID for the key to prevent errors
-                            if st.button(f"{i+1}", key=f"fav_view_{fav_img_data['id']}", use_container_width=True):
+                            # Make the image itself clickable to view
+                            if st.button(f"view_fav_container_{fav_img_data['id']}", key=f"fav_view_{fav_img_data['id']}", use_container_width=True):
                                 st.session_state.current_image = fav_img_data
                                 st.rerun()
+                            # Display the image inside the button area by targeting the container
                             st.image(thumb, use_container_width=True)
+                            
+                            # Add a dedicated unfavorite button below the image
+                            st.button(
+                                "💔 Unfavorite", 
+                                key=f"unfav_sidebar_{fav_img_data['id']}", 
+                                on_click=toggle_and_save_favorite, 
+                                args=(fav_img_data['id'],),
+                                use_container_width=True
+                            )
 
                 st.markdown("---")
                 if st.button("🗑️ Clear All Favorites", use_container_width=True, key="clear_favorites"):
