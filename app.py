@@ -2307,7 +2307,7 @@ with col2:
                         upscale_prompt = (
                             "Perform a 4x photorealistic upscale of the provided image. "
                             "It is critically important to not change the content, style, composition, or colors of the original image. "
-                            "The output must be a high-resolution, high-detail, and faithful version of the original. "
+                            "The output must be a very high contrast , high-resolution, high-detail, and faithful version of the original. "
                             "Do not add, remove, or alter any elements."
                         )
 
