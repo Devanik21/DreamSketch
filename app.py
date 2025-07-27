@@ -1777,7 +1777,7 @@ with st.sidebar:
                         with view_col:
                             if st.button(f"{i}", key=f"view_{img_id}", use_container_width=True):
                                 st.session_state.current_image = img_data
-                                st.rerun()
+                               # st.rerun()
                         with remove_col:
                             st.button(
                                 "🗑️", 
