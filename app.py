@@ -75,7 +75,7 @@ def remove_image_from_gallery(image_id):
     ImageQuery = Query()
     images_table.remove(ImageQuery.id == image_id)
     st.toast("🗑️ Image removed from gallery.")
-    st.rerun()
+   # st.rerun()
 
 def remove_prompt_from_history(prompt_to_remove):
     """Removes a single prompt from the history and updates the DB."""
