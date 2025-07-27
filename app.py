@@ -1775,7 +1775,7 @@ with st.sidebar:
                         # Columns for View and Remove buttons
                         view_col, remove_col = st.columns([3, 1])
                         with view_col:
-                            if st.button("View Image", key=f"view_{img_id}", use_container_width=True):
+                            if st.button("{i}", key=f"view_{img_id}", use_container_width=True):
                                 st.session_state.current_image = img_data
                                 st.rerun()
                         with remove_col:
