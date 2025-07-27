@@ -2605,6 +2605,45 @@ with col2:
                     key=f"fav_outpainted_{outpainted_data['id']}"
                 )
                 
+    with st.expander("🖌️ Inpainting (Magic Erase & Fill)", expanded=False):
+        st.info("Erase a part of your image and fill it with something new, guided by a prompt.")
+
+        inpainting_image_file = st.file_uploader(
+            "Upload your source image for inpainting",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="inpainting_uploader"
+        )
+
+        if inpainting_image_file:
+            # Session state management for the uploaded image and result
+            if 'inpainting_img_bytes' not in st.session_state or inpainting_image_file.getvalue() != st.session_state.get('inpainting_img_bytes'):
+                st.session_state.inpainting_img_bytes = inpainting_image_file.getvalue()
+                st.session_state.inpainting_result_dict = None
+
+            original_pil_inpaint = Image.open(BytesIO(st.session_state.inpainting_img_bytes))
+            st.image(original_pil_inpaint, caption="Original Image. Note the dimensions for masking.")
+            st.markdown(f"Image Dimensions: `{original_pil_inpaint.width} x {original_pil_inpaint.height}`")
+
+            inpainting_prompt = st.text_input("Describe what to fill the erased area with", placeholder="e.g., a majestic eagle, a futuristic car...", key="inpainting_prompt_text")
+
+            st.markdown("##### ⬜ Define Erase Area (Mask)")
+            mask_cols = st.columns(4)
+            with mask_cols[0]:
+                mask_x = st.number_input("X (left)", min_value=0, max_value=original_pil_inpaint.width - 1, value=original_pil_inpaint.width // 4, key="inpaint_x")
+            with mask_cols[1]:
+                mask_y = st.number_input("Y (top)", min_value=0, max_value=original_pil_inpaint.height - 1, value=original_pil_inpaint.height // 4, key="inpaint_y")
+            with mask_cols[2]:
+                mask_w = st.number_input("Width", min_value=1, max_value=original_pil_inpaint.width, value=original_pil_inpaint.width // 2, key="inpaint_w")
+            with mask_cols[3]:
+                mask_h = st.number_input("Height", min_value=1, max_value=original_pil_inpaint.height, value=original_pil_inpaint.height // 2, key="inpaint_h")
+
+            # Create a preview of the mask
+            preview_img = original_pil_inpaint.copy()
+            draw_preview = ImageDraw.Draw(preview_img, "RGBA")
+            # Ensure coordinates are within bounds
+            x1, y1 = mask_x, mask_y
+            x2, y2 = min(mask_x + mask_w, original_pil_inpaint.width), min(mask_y + mask_h, original_pil_inpaint.height)
+                
     with st.expander("🖼️ Analyze Image to Create a Prompt", expanded=False):
 
         analysis_uploaded_image = st.file_uploader(
