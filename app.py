@@ -35,6 +35,9 @@ def load_data_from_db():
     # Load favorites
     favs_doc = favorites_table.get(doc_id=1)
     st.session_state.favorites = favs_doc['ids'] if favs_doc else []
+    
+    history_doc = prompt_history_table.get(doc_id=1)
+    st.session_state.prompt_history = history_doc['prompts'] if history_doc else []
 
 def save_image_to_db(image_metadata):
     """Encodes image data to Base64 and saves metadata to TinyDB."""
@@ -67,6 +70,14 @@ def toggle_and_save_favorite(image_id):
     
     save_favorites_to_db()
 
+
+def save_prompt_history_to_db():
+    """Saves the current prompt history list to TinyDB."""
+    # First, remove any existing list of prompts.
+    prompt_history_table.truncate()
+    # Then, insert the new, updated list as the only document.
+    prompt_history_table.insert({'prompts': st.session_state.prompt_history})
+
 # Create a data directory if it doesn't exist
 if not os.path.exists('data'):
     os.makedirs('data')
@@ -74,6 +85,7 @@ if not os.path.exists('data'):
 # Initialize the database and its tables
 db = TinyDB('data/gallery_db.json')
 images_table = db.table('images')
+prompt_history_table = db.table('prompt_history')
 favorites_table = db.table('favorites')
 # --- END: DATABASE PERSISTENCE SETUP ---
 
@@ -1799,6 +1811,7 @@ with col1:
                 # --- ADDED: Step 2 - Add the new prompt to history ---
                 if enhanced_prompt not in st.session_state.prompt_history:
                     st.session_state.prompt_history.insert(0, enhanced_prompt)
+                    save_prompt_history_to_db()
                 # ---
                 
                 # Show enhanced prompt
@@ -3701,6 +3714,7 @@ with col2:
                 st.markdown("---")
                 if st.button("Clear Entire History", use_container_width=True):
                     st.session_state.prompt_history = []
+                    save_prompt_history_to_db()
                     st.rerun()
 
         # 2. Favorites
