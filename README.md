@@ -1,7 +1,7 @@
 # 🌈 DreamCanvas • Powered by Imagination
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/your-username/your-repo-name/main/k11.jpg?raw=true" alt="DreamCanvas Banner" width="800"/>
+ 
   <br/>
   <h1 style="font-size: 4rem; font-weight: bold; text-align: center; background: linear-gradient(90deg, #7fa4ff 0%, #4cd9c0 33%, #ffea5d 66%, #ff8a65 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">DreamCanvas</h1>
   <p><strong>An extraordinarily advanced AI image generation suite powered by Google Gemini.</strong><br/><em>Transforming imagination into reality, one masterpiece at a time.</em></p>
@@ -18,7 +18,7 @@
 DreamCanvas is more than just a text-to-image app—it's a creative partner. As my **first project using the Google Gemini API**, it began as a learning experiment and grew into a feature-rich, artist-friendly AI art studio with an ethereal cosmic aesthetic.
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/your-username/your-repo-name/main/k19.jpg?raw=true" alt="DreamCanvas Showcase" width="800"/>
+  
 </div>
 
 ## ✨ Key Features
