@@ -2696,6 +2696,7 @@ with col2:
             if 'palette_img_bytes' not in st.session_state or palette_image.getvalue() != st.session_state.get('palette_img_bytes'):
                 st.session_state.palette_img_bytes = palette_image.getvalue()
                 st.session_state.palette_result = None
+                st.session_state.palette_image_dict = None
 
             original_pil_palette = Image.open(BytesIO(st.session_state.palette_img_bytes))
             st.image(original_pil_palette, caption="Image for Palette Extraction", use_container_width=True)
@@ -2740,8 +2741,7 @@ with col2:
 
         # Display the palette result if it exists
         # Display the palette result if it exists
-        if 'palette_result' in st.session_state and st.session_state.palette_result:
-            st.markdown("---")
+        if 'palette_image_dict' in st.session_state and st.session_state.palette_image_dict:
             st.markdown("#### ✨ Extracted Palette")
             
             hex_colors = st.session_state.palette_result
