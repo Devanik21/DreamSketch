@@ -144,5 +144,5 @@ This project is under the [MIT License](LICENSE.md).
 ---
 
 <div align="center">
-  <em>Made with ❤️ and a lot of imagination.</em>
+  <em>Made with AI and a lot of imagination.</em>
 </div>
