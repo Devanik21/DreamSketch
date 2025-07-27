@@ -2867,8 +2867,8 @@ with col2:
                                 }
                                 break
 
-                        if not st.session_state.colorized_result_data:
-                            st.error("The model did not return a colorized image. Please try again.")
+#                        if not st.session_state.colorized_result_data:
+ #                           st.error("The model did not return a colorized image. Please try again.")
 
                     except Exception as e:
                         st.error(f"Colorization failed: {e}")
