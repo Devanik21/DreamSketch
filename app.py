@@ -3420,6 +3420,116 @@ with col2:
                 )
     # --- END: HALFTONE PRINT EFFECT ---
 
+    # --- START: BACKGROUND REMOVAL TOOL ---
+    with st.expander("✂️ Background Remover", expanded=False):
+        st.info("Automatically remove the background from an image, leaving only the main subject.")
+        
+        bg_remover_image_file = st.file_uploader(
+            "Upload an image to remove its background",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="bg_remover_uploader"
+        )
+
+        if bg_remover_image_file:
+            # When a new image is uploaded, clear the previous result
+            if 'bg_remover_img_bytes' not in st.session_state or bg_remover_image_file.getvalue() != st.session_state.get('bg_remover_img_bytes'):
+                st.session_state.bg_remover_img_bytes = bg_remover_image_file.getvalue()
+                st.session_state.bg_remover_result_dict = None
+
+            original_pil_bg = Image.open(BytesIO(st.session_state.bg_remover_img_bytes))
+            st.image(original_pil_bg, caption="Original Image", use_container_width=True)
+
+            if st.button("✂️ Remove Background", use_container_width=True):
+                with st.spinner("Isolating the subject from its background..."):
+                    try:
+                        # This prompt is crucial for telling the model to remove the background
+                        bg_removal_prompt = (
+                            "You are an expert image editor. Your task is to accurately remove the background from the provided image. "
+                            "The output must be the main subject with a fully transparent background. "
+                            "Do not alter the subject itself. The final image should be a PNG with an alpha channel."
+                        )
+
+                        response = client.models.generate_content(
+                            model="gemini-2.0-flash-exp-image-generation",
+                            contents=[bg_removal_prompt, original_pil_bg],
+                            config=types.GenerateContentConfig(response_modalities=["text", "image"])
+                        )
+                        
+                        st.session_state.bg_remover_result_dict = None
+                        for part in response.candidates[0].content.parts:
+                            if part.inline_data:
+                                st.session_state.bg_remover_result_dict = {
+                                    "id": str(uuid.uuid4()),
+                                    "data": part.inline_data.data,
+                                    "original_filename": bg_remover_image_file.name
+                                }
+                                break
+
+                        if not st.session_state.bg_remover_result_dict:
+                            st.error("The model did not return an image. Please try again.")
+
+                    except Exception as e:
+                        st.error(f"Background removal failed: {e}")
+
+        # Display the result if it exists
+        if 'bg_remover_result_dict' in st.session_state and st.session_state.bg_remover_result_dict:
+            st.markdown("---")
+            st.markdown("#### ✨ Background Removed Result")
+
+            result_dict = st.session_state.bg_remover_result_dict
+            result_data = result_dict['data']
+            image_id = result_dict['id']
+            original_filename = result_dict.get('original_filename', f"image_{int(time.time())}.png")
+            
+            st.image(result_data, use_container_width=True, caption="Image with background removed")
+            
+            st.download_button(
+                label="📥 Download Image (PNG)",
+                data=result_data,
+                file_name=f"no_bg_{original_filename}",
+                mime="image/png",
+                use_container_width=True,
+                key=f"download_bg_removed_{image_id}"
+            )
+
+            # Add to Gallery and Favorite buttons
+            b_col1, b_col2 = st.columns(2)
+            
+            def add_bg_removed_to_gallery():
+                if not any(img['id'] == image_id for img in st.session_state.images):
+                    gallery_metadata = {
+                        'id': image_id, 'image_data': result_data,
+                        'original_prompt': f"Background removed from: {original_filename}",
+                        'enhanced_prompt': "Image created with the Background Remover utility.",
+                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                        'style_used': 'Background Remover', 'color_mood': 'N/A', 'lighting': 'N/A',
+                        'description': 'Image created using the Background Remover feature.',
+                        'aspect_ratio': 'N/A', 'quality_level': 'N/A'
+                    }
+                    st.session_state.images.append(gallery_metadata)
+                    save_image_to_db(gallery_metadata)
+                    st.toast("✅ Added to gallery!")
+
+            with b_col1:
+                is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_bg_removed_{image_id}"):
+                    add_bg_removed_to_gallery()
+                    st.rerun()
+
+            with b_col2:
+                is_favorited = image_id in st.session_state.favorites
+                star_icon = "★" if is_favorited else "☆"
+                def handle_favorite_bg_removed():
+                    add_bg_removed_to_gallery()
+                    toggle_and_save_favorite(image_id)
+                st.button(
+                    f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}",
+                    on_click=handle_favorite_bg_removed,
+                    use_container_width=True,
+                    key=f"fav_bg_removed_{image_id}"
+                )
+    # --- END: BACKGROUND REMOVAL TOOL ---
+
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # This container is now outside the 'if' condition, so it appears on startup.
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
