@@ -3857,7 +3857,7 @@ with col2:
                             
                             # Add a dedicated unfavorite button below the image
                             st.button(
-                                "💔 Unfavorite", 
+                                "🗑️", 
                                 key=f"unfav_sidebar_{fav_img_data['id']}", 
                                 on_click=toggle_and_save_favorite, 
                                 args=(fav_img_data['id'],),
