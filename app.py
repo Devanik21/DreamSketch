@@ -121,7 +121,7 @@ if 'initialized' not in st.session_state:
     st.session_state.current_image = st.session_state.images[-1] if st.session_state.images else None
 
     # Initialize non-persistent state variables that reset with each session
-    st.session_state.prompt_history = []
+    #st.session_state.prompt_history = []
     st.session_state.image_chat_history = []
     st.session_state.chat_image = None
     st.session_state.current_chat_file_id = None
