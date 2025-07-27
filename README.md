@@ -50,6 +50,7 @@ DreamCanvas is more than just a text-to-image app—it's a creative partner. As 
 | 👾 Glitch Art Generator    | Apply custom glitch effects for a retro vibe.                       |
 | 📰 Halftone Effect         | Recreate a classic newspaper print effect.                          |
 | 📝 ASCII Art Generator     | Convert images into mesmerizing ASCII art.                          |
+| ✂️ Background Remover       | Automatically remove the background from an image.                 |
 
 ### 🚀 Gallery & User Experience
 
