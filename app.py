@@ -3849,7 +3849,7 @@ with col2:
                             thumb.thumbnail((150, 150))
                             
                             # Make the image itself clickable to view
-                            if st.button(f"view_fav_container_{fav_img_data['id']}", key=f"fav_view_{fav_img_data['id']}", use_container_width=True):
+                            if st.button(f"{i}+1", key=f"fav_view_{fav_img_data['id']}", use_container_width=True):
                                 st.session_state.current_image = fav_img_data
                                 st.rerun()
                             # Display the image inside the button area by targeting the container
