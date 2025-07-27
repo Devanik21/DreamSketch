@@ -82,7 +82,7 @@ def remove_prompt_from_history(prompt_to_remove):
     st.session_state.prompt_history = [p for p in st.session_state.prompt_history if p != prompt_to_remove]
     save_prompt_history_to_db()
     st.toast("🗑️ Prompt removed from history.")
-    st.rerun()
+    
 
 
 def toggle_and_save_favorite(image_id):
