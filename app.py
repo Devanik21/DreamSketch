@@ -1758,7 +1758,7 @@ with st.sidebar:
             st.info("No images match your current filter criteria.")
         else:
             # Display thumbnail gallery
-            for img_data in display_list:
+            for i, img_data in enumerate(display_list):
                 img_id = img_data['id']
                 with st.container():
                     # Main container for image and buttons
