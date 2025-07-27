@@ -2329,8 +2329,8 @@ with col2:
 
 
 
-                        if not st.session_state.upscaled_result_data:
-                            st.error("The model did not return an upscaled image. Please try again.")
+                        #if not st.session_state.upscaled_result_data:
+                        #    st.error("The model did not return an upscaled image. Please try again.")
                            
                         
                            
