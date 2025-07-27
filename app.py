@@ -2855,7 +2855,7 @@ with col2:
     # --- END: COLOR PALETTE GENERATOR ---
 
     # --- START: IMAGE COLORIZER ---
-    with st.expander("🖼️ Image Colorizer", expanded=False):
+    with st.expander("🏞️ Image Colorizer", expanded=False):
         st.info("Bring black and white photos to life by adding realistic color.")
         
         colorizer_image = st.file_uploader(
