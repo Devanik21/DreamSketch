@@ -2720,56 +2720,102 @@ with col2:
                         hex_colors = [f"#{r:02x}{g:02x}{b:02x}" for r, g, b in dominant_colors]
                         
                         st.session_state.palette_result = hex_colors
+                        # Create and save the palette image data to session state
+                        swatch_size = 100
+                        palette_img_obj = Image.new('RGB', (len(hex_colors) * swatch_size, swatch_size))
+                        draw = ImageDraw.Draw(palette_img_obj)
+                        for i, color in enumerate(hex_colors):
+                            color_swatch = Image.new('RGB', (swatch_size, swatch_size), color)
+                            palette_img_obj.paste(color_swatch, (i * swatch_size, 0))
+                        
+                        img_buffer = BytesIO()
+                        palette_img_obj.save(img_buffer, format="PNG")
+                        
+                        st.session_state.palette_image_dict = {
+                            "id": str(uuid.uuid4()),
+                            "data": img_buffer.getvalue()
+                        }
                     except Exception as e:
                         st.error(f"Color extraction failed: {e}")
 
+        # Display the palette result if it exists
         # Display the palette result if it exists
         if 'palette_result' in st.session_state and st.session_state.palette_result:
             st.markdown("---")
             st.markdown("#### ✨ Extracted Palette")
             
             hex_colors = st.session_state.palette_result
+            result_dict = st.session_state.palette_image_dict
+            result_data = result_dict['data']
+            image_id = result_dict['id']
+
             cols = st.columns(len(hex_colors))
             for i, hex_color in enumerate(hex_colors):
                 with cols[i]:
                     st.markdown(f'<div style="background-color: {hex_color}; height: 80px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);"></div>', unsafe_allow_html=True)
                     st.code(hex_color, language=None)
             
-            # --- START: ADDED DOWNLOAD OPTIONS ---
             st.markdown("---")
             st.markdown("##### 💾 Download Palette")
             
             dl_col1, dl_col2 = st.columns(2)
 
-            # 1. Download as JSON
             with dl_col1:
                 palette_json = json.dumps({"colors": hex_colors}, indent=2)
                 st.download_button(
                     label="📄 Download JSON",
                     data=palette_json,
-                    file_name=f"palette_{int(time.time())}.json",
+                    file_name=f"palette_info_{int(time.time())}.json",
                     mime="application/json",
-                    use_container_width=True
+                    use_container_width=True,
+                    key=f"download_palette_json_{image_id}"
                 )
 
-            # 2. Download as Image
             with dl_col2:
-                # Create a palette image
-                swatch_size = 100
-                palette_img = Image.new('RGB', (len(hex_colors) * swatch_size, swatch_size))
-                for i, color in enumerate(hex_colors):
-                    color_swatch = Image.new('RGB', (swatch_size, swatch_size), color)
-                    palette_img.paste(color_swatch, (i * swatch_size, 0))
-
-                img_buffer = BytesIO()
-                palette_img.save(img_buffer, format="PNG")
-                
                 st.download_button(
                     label="🖼️ Download Image",
-                    data=img_buffer.getvalue(),
-                    file_name=f"palette_{int(time.time())}.png",
+                    data=result_data,
+                    file_name=f"palette_image_{int(time.time())}.png",
                     mime="image/png",
-                    use_container_width=True
+                    use_container_width=True,
+                    key=f"download_palette_image_{image_id}"
+                )
+            
+            # Add to Gallery and Favorite buttons for the palette image
+            b_col1, b_col2 = st.columns(2)
+            
+            def add_palette_to_gallery():
+                if not any(img['id'] == image_id for img in st.session_state.images):
+                    gallery_metadata = {
+                        'id': image_id, 'image_data': result_data,
+                        'original_prompt': "Color Palette Image",
+                        'enhanced_prompt': "Image created with the Color Palette Generator utility.",
+                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                        'style_used': 'Color Palette', 'color_mood': 'N/A', 'lighting': 'N/A',
+                        'description': 'Image of a color palette extracted from another image.',
+                        'aspect_ratio': 'N/A', 'quality_level': 'N/A'
+                    }
+                    st.session_state.images.append(gallery_metadata)
+                    save_image_to_db(gallery_metadata)
+                    st.toast("✅ Added to gallery!")
+
+            with b_col1:
+                is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_palette_{image_id}"):
+                    add_palette_to_gallery()
+                    st.rerun()
+
+            with b_col2:
+                is_favorited = image_id in st.session_state.favorites
+                star_icon = "★" if is_favorited else "☆"
+                def handle_favorite_palette():
+                    add_palette_to_gallery()
+                    toggle_and_save_favorite(image_id)
+                st.button(
+                    f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}",
+                    on_click=handle_favorite_palette,
+                    use_container_width=True,
+                    key=f"fav_palette_{image_id}"
                 )
             # --- END: ADDED DOWNLOAD OPTIONS ---
     # --- END: COLOR PALETTE GENERATOR ---
@@ -2811,10 +2857,14 @@ with col2:
                             config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
                         
-                        st.session_state.colorized_result_data = None
+                        st.session_state.colorized_result_dict = None
                         for part in response.candidates[0].content.parts:
                             if part.inline_data:
-                                st.session_state.colorized_result_data = part.inline_data.data
+                                st.session_state.colorized_result_dict = {
+                                    "id": str(uuid.uuid4()),
+                                    "data": part.inline_data.data,
+                                    "original_filename": colorizer_image.name
+                                }
                                 break
 
                         if not st.session_state.colorized_result_data:
@@ -2824,11 +2874,16 @@ with col2:
                         st.error(f"Colorization failed: {e}")
 
         # Display the colorized result if it exists
-        if 'colorized_result_data' in st.session_state and st.session_state.colorized_result_data:
+        # Display the colorized result if it exists
+        if 'colorized_result_dict' in st.session_state and st.session_state.colorized_result_dict:
             st.markdown("---")
             st.markdown("#### ✨ Colorized Result")
 
-            colorized_data = st.session_state.colorized_result_data
+            result_dict = st.session_state.colorized_result_dict
+            colorized_data = result_dict['data']
+            image_id = result_dict['id']
+            original_filename = result_dict.get('original_filename', f"image_{int(time.time())}.png")
+
             result_img_colorized = Image.open(BytesIO(colorized_data))
             
             st.image(result_img_colorized, use_container_width=True, caption=f"Colorized Image ({result_img_colorized.size[0]}x{result_img_colorized.size[1]})")
@@ -2836,10 +2891,48 @@ with col2:
             st.download_button(
                 label="📥 Download Colorized Image",
                 data=colorized_data,
-                file_name=f"colorized_{colorizer_image.name}",
+                file_name=f"colorized_{original_filename}",
                 mime="image/png",
-                use_container_width=True
+                use_container_width=True,
+                key=f"download_colorized_{image_id}"
             )
+
+            # Add to Gallery and Favorite buttons
+            b_col1, b_col2 = st.columns(2)
+            
+            def add_colorized_to_gallery():
+                if not any(img['id'] == image_id for img in st.session_state.images):
+                    gallery_metadata = {
+                        'id': image_id, 'image_data': colorized_data,
+                        'original_prompt': f"Colorized: {original_filename}",
+                        'enhanced_prompt': "Image created with the Image Colorizer utility.",
+                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                        'style_used': 'Colorizer', 'color_mood': 'N/A', 'lighting': 'N/A',
+                        'description': 'Image created using the Image Colorizer feature.',
+                        'aspect_ratio': 'N/A', 'quality_level': 'N/A'
+                    }
+                    st.session_state.images.append(gallery_metadata)
+                    save_image_to_db(gallery_metadata)
+                    st.toast("✅ Added to gallery!")
+
+            with b_col1:
+                is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_colorized_{image_id}"):
+                    add_colorized_to_gallery()
+                    st.rerun()
+
+            with b_col2:
+                is_favorited = image_id in st.session_state.favorites
+                star_icon = "★" if is_favorited else "☆"
+                def handle_favorite_colorized():
+                    add_colorized_to_gallery()
+                    toggle_and_save_favorite(image_id)
+                st.button(
+                    f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}",
+                    on_click=handle_favorite_colorized,
+                    use_container_width=True,
+                    key=f"fav_colorized_{image_id}"
+                )
     # --- END: IMAGE COLORIZER ---
 
     # --- START: ASCII ART GENERATOR ---
@@ -2954,23 +3047,66 @@ with col2:
                         # Save result to session state
                         output_buffer = BytesIO()
                         sketch_image.save(output_buffer, format="PNG")
-                        st.session_state.sketch_art_result = output_buffer.getvalue()
+                        st.session_state.sketch_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
 
                     except Exception as e:
                         st.error(f"Sketch conversion failed: {e}")
 
-        if 'sketch_art_result' in st.session_state and st.session_state.sketch_art_result:
+        if 'sketch_art_dict' in st.session_state and st.session_state.sketch_art_dict:
             st.markdown("---")
             st.markdown("#### ✨ Sketch Result")
-            result_sketch_data = st.session_state.sketch_art_result
-            st.image(result_sketch_data, use_container_width=True, caption="Your generated sketch")
+
+            result_dict = st.session_state.sketch_art_dict
+            result_data = result_dict['data']
+            image_id = result_dict['id']
+            
+            st.image(result_data, use_container_width=True, caption="Your generated sketch")
+            
             st.download_button(
                 label="💾 Download as .png file",
-                data=result_sketch_data,
+                data=result_data,
                 file_name=f"sketch_art_{int(time.time())}.png",
                 mime="image/png",
-                use_container_width=True
+                use_container_width=True,
+                key=f"download_sketch_{image_id}"
             )
+
+            # Add to Gallery and Favorite buttons
+            b_col1, b_col2 = st.columns(2)
+            
+            def add_sketch_to_gallery():
+                if not any(img['id'] == image_id for img in st.session_state.images):
+                    gallery_metadata = {
+                        'id': image_id, 'image_data': result_data,
+                        'original_prompt': "Image from Pencil Sketch Converter",
+                        'enhanced_prompt': "Image created with the Pencil Sketch utility.",
+                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                        'style_used': 'Pencil Sketch', 'color_mood': 'N/A', 'lighting': 'N/A',
+                        'description': 'Image created using the Pencil Sketch feature.',
+                        'aspect_ratio': 'N/A', 'quality_level': 'N/A'
+                    }
+                    st.session_state.images.append(gallery_metadata)
+                    save_image_to_db(gallery_metadata)
+                    st.toast("✅ Added to gallery!")
+
+            with b_col1:
+                is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_sketch_{image_id}"):
+                    add_sketch_to_gallery()
+                    st.rerun()
+
+            with b_col2:
+                is_favorited = image_id in st.session_state.favorites
+                star_icon = "★" if is_favorited else "☆"
+                def handle_favorite_sketch():
+                    add_sketch_to_gallery()
+                    toggle_and_save_favorite(image_id)
+                st.button(
+                    f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}",
+                    on_click=handle_favorite_sketch,
+                    use_container_width=True,
+                    key=f"fav_sketch_{image_id}"
+                )
     # --- END: PENCIL SKETCH CONVERTER ---
 
     # --- START: GLITCH ART GENERATOR ---
@@ -3019,22 +3155,65 @@ with col2:
                         glitch_image = Image.fromarray(img_np)
                         output_buffer = BytesIO()
                         glitch_image.save(output_buffer, format="PNG")
-                        st.session_state.glitch_art_result = output_buffer.getvalue()
+                        st.session_state.glitch_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
                     except Exception as e:
                         st.error(f"Glitch effect failed: {e}")
 
-        if 'glitch_art_result' in st.session_state and st.session_state.glitch_art_result:
+        if 'glitch_art_dict' in st.session_state and st.session_state.glitch_art_dict:
             st.markdown("---")
             st.markdown("#### ✨ Glitch Art Result")
-            result_glitch_data = st.session_state.glitch_art_result
-            st.image(result_glitch_data, use_container_width=True, caption="Your glitched masterpiece")
+            
+            result_dict = st.session_state.glitch_art_dict
+            result_data = result_dict['data']
+            image_id = result_dict['id']
+
+            st.image(result_data, use_container_width=True, caption="Your glitched masterpiece")
+            
             st.download_button(
                 label="💾 Download as .png file",
-                data=result_glitch_data,
+                data=result_data,
                 file_name=f"glitch_art_{int(time.time())}.png",
                 mime="image/png",
-                use_container_width=True
+                use_container_width=True,
+                key=f"download_glitch_{image_id}"
             )
+
+            # Add to Gallery and Favorite buttons
+            b_col1, b_col2 = st.columns(2)
+            
+            def add_glitch_to_gallery():
+                if not any(img['id'] == image_id for img in st.session_state.images):
+                    gallery_metadata = {
+                        'id': image_id, 'image_data': result_data,
+                        'original_prompt': "Image from Glitch Art Generator",
+                        'enhanced_prompt': "Image created with the Glitch Art utility.",
+                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                        'style_used': 'Glitch Art', 'color_mood': 'N/A', 'lighting': 'N/A',
+                        'description': 'Image created using the Glitch Art feature.',
+                        'aspect_ratio': 'N/A', 'quality_level': 'N/A'
+                    }
+                    st.session_state.images.append(gallery_metadata)
+                    save_image_to_db(gallery_metadata)
+                    st.toast("✅ Added to gallery!")
+
+            with b_col1:
+                is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_glitch_{image_id}"):
+                    add_glitch_to_gallery()
+                    st.rerun()
+
+            with b_col2:
+                is_favorited = image_id in st.session_state.favorites
+                star_icon = "★" if is_favorited else "☆"
+                def handle_favorite_glitch():
+                    add_glitch_to_gallery()
+                    toggle_and_save_favorite(image_id)
+                st.button(
+                    f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}",
+                    on_click=handle_favorite_glitch,
+                    use_container_width=True,
+                    key=f"fav_glitch_{image_id}"
+                )
     # --- END: GLITCH ART GENERATOR ---
 
     # --- START: HALFTONE PRINT EFFECT ---
@@ -3106,15 +3285,65 @@ with col2:
 
                         output_buffer = BytesIO()
                         output_img.save(output_buffer, format="PNG")
-                        st.session_state.halftone_art_result = output_buffer.getvalue()
+                        st.session_state.halftone_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
                     except Exception as e:
                         st.error(f"Halftone effect failed: {e}")
 
-        if 'halftone_art_result' in st.session_state and st.session_state.halftone_art_result:
+        if 'halftone_art_dict' in st.session_state and st.session_state.halftone_art_dict:
             st.markdown("---")
             st.markdown("#### ✨ Halftone Result")
-            st.image(st.session_state.halftone_art_result, use_container_width=True, caption="Your generated halftone print")
-            st.download_button(label="💾 Download as .png file", data=st.session_state.halftone_art_result, file_name=f"halftone_art_{int(time.time())}.png", mime="image/png", use_container_width=True)
+
+            result_dict = st.session_state.halftone_art_dict
+            result_data = result_dict['data']
+            image_id = result_dict['id']
+
+            st.image(result_data, use_container_width=True, caption="Your generated halftone print")
+            
+            st.download_button(
+                label="💾 Download as .png file", 
+                data=result_data, 
+                file_name=f"halftone_art_{int(time.time())}.png", 
+                mime="image/png", 
+                use_container_width=True,
+                key=f"download_halftone_{image_id}"
+            )
+
+            # Add to Gallery and Favorite buttons
+            b_col1, b_col2 = st.columns(2)
+            
+            def add_halftone_to_gallery():
+                if not any(img['id'] == image_id for img in st.session_state.images):
+                    gallery_metadata = {
+                        'id': image_id, 'image_data': result_data,
+                        'original_prompt': "Image from Halftone Print Effect",
+                        'enhanced_prompt': "Image created with the Halftone Print utility.",
+                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                        'style_used': 'Halftone', 'color_mood': 'N/A', 'lighting': 'N/A',
+                        'description': 'Image created using the Halftone Print feature.',
+                        'aspect_ratio': 'N/A', 'quality_level': 'N/A'
+                    }
+                    st.session_state.images.append(gallery_metadata)
+                    save_image_to_db(gallery_metadata)
+                    st.toast("✅ Added to gallery!")
+
+            with b_col1:
+                is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_halftone_{image_id}"):
+                    add_halftone_to_gallery()
+                    st.rerun()
+
+            with b_col2:
+                is_favorited = image_id in st.session_state.favorites
+                star_icon = "★" if is_favorited else "☆"
+                def handle_favorite_halftone():
+                    add_halftone_to_gallery()
+                    toggle_and_save_favorite(image_id)
+                st.button(
+                    f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}",
+                    on_click=handle_favorite_halftone,
+                    use_container_width=True,
+                    key=f"fav_halftone_{image_id}"
+                )
     # --- END: HALFTONE PRINT EFFECT ---
 
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
