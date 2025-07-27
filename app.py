@@ -2637,17 +2637,38 @@ with col2:
         if st.session_state.chat_image:
             st.image(st.session_state.chat_image, caption="Image for Conversation", use_container_width=True)
 
-            # --- CORRECTED: CLEAR CHAT BUTTON LOGIC ---
-            if st.button("🗑️ Clear Conversation", use_container_width=True):
-                # Only reset the chat history, keeping the image
-                st.session_state.image_chat_history = []
-                st.rerun() # Rerun to update the UI immediately
+            # --- Action Buttons: Clear and Download ---
+            action_col1, action_col2 = st.columns(2)
+
+            with action_col1:
+                if st.button("🗑️ Clear Conversation", use_container_width=True):
+                    st.session_state.image_chat_history = []
+                    st.rerun()
+
+            with action_col2:
+                # The download button will only appear if there's a chat history
+                if st.session_state.image_chat_history:
+                    # Format the chat history into a downloadable text string
+                    chat_log = ""
+                    for message in st.session_state.image_chat_history:
+                        role = "You" if message["role"] == "user" else "AI"
+                        chat_log += f"{role}:\n{message['content']}\n\n"
+                    
+                    st.download_button(
+                        label="💾 Download Chat",
+                        data=chat_log.encode('utf-8'),
+                        file_name=f"image_chat_{int(time.time())}.txt",
+                        mime="text/plain",
+                        use_container_width=True,
+                        key=f"download_chat_{st.session_state.current_chat_file_id}"
+                    )
 
             # Display the chat history
             for message in st.session_state.image_chat_history:
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
 
+            # Chat input remains the same
             if question := st.chat_input("Ask a question about the image..."):
                 st.session_state.image_chat_history.append({"role": "user", "content": question})
                 with st.chat_message("user"):
