@@ -2317,11 +2317,15 @@ with col2:
                             config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
                         
-                        st.session_state.upscaled_result_data = None
+                        st.session_state.upscaled_result_dict = None
                         for part in response.candidates[0].content.parts:
                             if part.inline_data:
-                                st.session_state.upscaled_result_data = part.inline_data.data
-                                break 
+                                st.session_state.upscaled_result_dict = {
+                                    "id": str(uuid.uuid4()),
+                                    "data": part.inline_data.data,
+                                    "original_filename": upscaler_image.name
+                                }
+                                break
 
 
 
@@ -2335,11 +2339,16 @@ with col2:
                         st.error(f"Upscaling failed: {e}")
 
         # Display the upscaled result if it exists
-        if 'upscaled_result_data' in st.session_state and st.session_state.upscaled_result_data:
+        # Display the upscaled result if it exists
+        if 'upscaled_result_dict' in st.session_state and st.session_state.upscaled_result_dict:
             st.markdown("---")
             st.markdown("#### ✨ Upscaled Result")
 
-            upscaled_data = st.session_state.upscaled_result_data
+            result_dict = st.session_state.upscaled_result_dict
+            upscaled_data = result_dict['data']
+            image_id = result_dict['id']
+            original_filename = result_dict.get('original_filename', f"image_{int(time.time())}.png")
+            
             result_img_upscaled = Image.open(BytesIO(upscaled_data))
             
             st.image(result_img_upscaled, use_container_width=True, caption=f"Upscaled Image ({result_img_upscaled.size[0]}x{result_img_upscaled.size[1]})")
@@ -2347,10 +2356,48 @@ with col2:
             st.download_button(
                 label="📥 Download Upscaled Image",
                 data=upscaled_data,
-                file_name=f"upscaled_4x_{upscaler_image.name}",
+                file_name=f"upscaled_4x_{original_filename}",
                 mime="image/png",
-                use_container_width=True
+                use_container_width=True,
+                key=f"download_upscaled_{image_id}"
             )
+
+            # Add to Gallery and Favorite buttons
+            b_col1, b_col2 = st.columns(2)
+            
+            def add_upscaled_to_gallery():
+                if not any(img['id'] == image_id for img in st.session_state.images):
+                    gallery_metadata = {
+                        'id': image_id, 'image_data': upscaled_data,
+                        'original_prompt': f"Upscaled: {original_filename}",
+                        'enhanced_prompt': "Image created with the 4x Upscaler utility.",
+                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                        'style_used': 'Upscaler', 'color_mood': 'N/A', 'lighting': 'N/A',
+                        'description': 'Image enhanced using the 4x Upscaler feature.',
+                        'aspect_ratio': 'N/A', 'quality_level': 'N/A'
+                    }
+                    st.session_state.images.append(gallery_metadata)
+                    save_image_to_db(gallery_metadata)
+                    st.toast("✅ Added to gallery!")
+
+            with b_col1:
+                is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_upscaled_{image_id}"):
+                    add_upscaled_to_gallery()
+                    st.rerun()
+
+            with b_col2:
+                is_favorited = image_id in st.session_state.favorites
+                star_icon = "★" if is_favorited else "☆"
+                def handle_favorite_upscaled():
+                    add_upscaled_to_gallery()
+                    toggle_and_save_favorite(image_id)
+                st.button(
+                    f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}",
+                    on_click=handle_favorite_upscaled,
+                    use_container_width=True,
+                    key=f"fav_upscaled_{image_id}"
+                )
     # --- END: 4X UPSCALER TOOL ---
 
     # The existing Outpainting expander should follow right after this block
