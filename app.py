@@ -140,8 +140,8 @@ def save_prompt_history_to_db():
     prompt_history_table.insert({'prompts': st.session_state.prompt_history})
 
 # Create a data directory if it doesn't exist
-if not os.path.exists('data'):
-    os.makedirs('data')
+os.makedirs("data", exist_ok=True)
+
 
 # Initialize the database and its tables
 db = TinyDB('data/gallery_db.json')
