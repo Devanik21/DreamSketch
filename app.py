@@ -3565,6 +3565,20 @@ with col2:
         "🎨 Duotone Effect",
         "👾 Pixelate Effect"
     ]
+    
+    # Add 10 more tools to reach 30 total options
+    misc_tool_options.extend([
+        "🌈 Saturation Control",
+        "🔳 Auto Contrast",
+        "📊 Equalize Histogram",
+        "💧 Gaussian Blur",
+        "🔪 Unsharp Mask",
+        "🔤 Add Watermark",
+        "🌃 Vignette Effect",
+        "🎨 Cartoon Effect",
+        "💡 Gamma Correction",
+        "🖌️ Median Filter (Smudge)"
+    ])
     selected_misc_tool = st.selectbox("Select a tool from the toolkit:", misc_tool_options, key="misc_tool_selector")
 
     if selected_misc_tool == "🎲 Surprise Me! (Random Prompt)":
@@ -4342,6 +4356,421 @@ with col2:
                     is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
                     def handle_favorite_pixelate(): add_pixelate_to_gallery(); toggle_and_save_favorite(image_id)
                     st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_pixelate, use_container_width=True, key=f"fav_pixelate_{image_id}")
+
+    elif selected_misc_tool == "🌈 Saturation Control":
+        with st.expander("🌈 Saturation Control", expanded=True):
+            st.info("Adjust the color saturation of your image. 0 is grayscale, 1 is original, >1 is more vibrant.")
+            
+            saturation_image_file = st.file_uploader("Upload an image to adjust saturation", type=["png", "jpg", "jpeg", "webp"], key="saturation_uploader")
+
+            if saturation_image_file:
+                if 'saturation_img_bytes' not in st.session_state or saturation_image_file.getvalue() != st.session_state.get('saturation_img_bytes'):
+                    st.session_state.saturation_img_bytes = saturation_image_file.getvalue()
+                    st.session_state.saturation_art_dict = None
+
+                original_pil_saturation = Image.open(BytesIO(st.session_state.saturation_img_bytes))
+                st.image(original_pil_saturation, caption="Original Image", use_container_width=True)
+
+                saturation_factor = st.slider("Saturation Factor", 0.0, 3.0, 1.0, 0.1, key="saturation_factor")
+
+                if st.button("🌈 Apply Saturation", width='stretch'):
+                    with st.spinner("Adjusting saturation..."):
+                        try:
+                            enhancer = ImageEnhance.Color(original_pil_saturation)
+                            saturated_image = enhancer.enhance(saturation_factor)
+                            
+                            output_buffer = BytesIO()
+                            saturated_image.save(output_buffer, format="PNG")
+                            st.session_state.saturation_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Saturation adjustment failed: {e}")
+
+            if 'saturation_art_dict' in st.session_state and st.session_state.saturation_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Saturation Result")
+                result_dict = st.session_state.saturation_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your saturated image")
+                st.download_button("💾 Download as .png", result_data, f"saturated_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_saturation_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_saturation_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Saturation Control", 'enhanced_prompt': "Image created with the Saturation Control utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Saturation Control', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Saturation Control feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_saturation_{image_id}"):
+                        add_saturation_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_saturation(): add_saturation_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_saturation, width='stretch', key=f"fav_saturation_{image_id}")
+
+    elif selected_misc_tool in ["🔳 Auto Contrast", "📊 Equalize Histogram"]:
+        tool_configs = {
+            "🔳 Auto Contrast": {"name": "Auto Contrast", "op": ImageOps.autocontrast, "spinner_text": "Applying auto contrast..."},
+            "📊 Equalize Histogram": {"name": "Equalize", "op": ImageOps.equalize, "spinner_text": "Equalizing histogram..."}
+        }
+        config = tool_configs[selected_misc_tool]
+        tool_name_lower = config['name'].lower().replace(" ", "_")
+
+        with st.expander(selected_misc_tool, expanded=True):
+            st.info(f"Automatically enhance contrast using the {config['name']} method.")
+            
+            image_file = st.file_uploader(f"Upload an image to apply {config['name']}", type=["png", "jpg", "jpeg", "webp"], key=f"{tool_name_lower}_uploader")
+
+            if image_file:
+                if f'{tool_name_lower}_img_bytes' not in st.session_state or image_file.getvalue() != st.session_state.get(f'{tool_name_lower}_img_bytes'):
+                    st.session_state[f'{tool_name_lower}_img_bytes'] = image_file.getvalue()
+                    st.session_state[f'{tool_name_lower}_art_dict'] = None
+
+                original_pil = Image.open(BytesIO(st.session_state[f'{tool_name_lower}_img_bytes']))
+                st.image(original_pil, caption="Original Image", use_container_width=True)
+
+                if st.button(f"{selected_misc_tool.split(' ')[0]} Apply {config['name']}", width='stretch'):
+                    with st.spinner(config['spinner_text']):
+                        try:
+                            processed_image = config['op'](original_pil.convert("RGB"))
+                            output_buffer = BytesIO()
+                            processed_image.save(output_buffer, format="PNG")
+                            st.session_state[f'{tool_name_lower}_art_dict'] = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"{config['name']} failed: {e}")
+
+            if f'{tool_name_lower}_art_dict' in st.session_state and st.session_state[f'{tool_name_lower}_art_dict']:
+                st.markdown(f"---"); st.markdown(f"#### ✨ {config['name']} Result")
+                result_dict = st.session_state[f'{tool_name_lower}_art_dict']
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption=f"Your {tool_name_lower} image")
+                st.download_button("💾 Download as .png", result_data, f"{tool_name_lower}_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_{tool_name_lower}_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': f"Image from {config['name']}", 'enhanced_prompt': f"Image created with the {config['name']} utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': f"{config['name']}", 'color_mood': 'N/A', 'lighting': 'N/A', 'description': f"Image created using the {config['name']} feature.", 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_{tool_name_lower}_{image_id}"):
+                        add_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite(): add_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite, width='stretch', key=f"fav_{tool_name_lower}_{image_id}")
+
+    elif selected_misc_tool in ["💧 Gaussian Blur", "🔪 Unsharp Mask", "🖌️ Median Filter (Smudge)"]:
+        tool_configs = {
+            "💧 Gaussian Blur": {"name": "Gaussian Blur", "spinner_text": "Applying Gaussian blur..."},
+            "🔪 Unsharp Mask": {"name": "Unsharp Mask", "spinner_text": "Applying unsharp mask..."},
+            "🖌️ Median Filter (Smudge)": {"name": "Median Filter", "spinner_text": "Applying median filter..."}
+        }
+        config = tool_configs[selected_misc_tool]
+        tool_name_lower = config['name'].lower().replace(" ", "_")
+
+        with st.expander(selected_misc_tool, expanded=True):
+            st.info(f"Apply the {config['name']} filter to your image.")
+            
+            image_file = st.file_uploader(f"Upload an image for {config['name']}", type=["png", "jpg", "jpeg", "webp"], key=f"{tool_name_lower}_uploader")
+
+            if image_file:
+                if f'{tool_name_lower}_img_bytes' not in st.session_state or image_file.getvalue() != st.session_state.get(f'{tool_name_lower}_img_bytes'):
+                    st.session_state[f'{tool_name_lower}_img_bytes'] = image_file.getvalue()
+                    st.session_state[f'{tool_name_lower}_art_dict'] = None
+
+                original_pil = Image.open(BytesIO(st.session_state[f'{tool_name_lower}_img_bytes']))
+                st.image(original_pil, caption="Original Image", use_container_width=True)
+
+                radius, percent, threshold, size = 2, 150, 3, 3 # Defaults
+                if config['name'] == "Gaussian Blur":
+                    radius = st.slider("Blur Radius", 0, 50, 2, key="gblur_radius")
+                elif config['name'] == "Unsharp Mask":
+                    radius = st.slider("Radius", 0, 50, 2, key="unsharp_radius")
+                    percent = st.slider("Percent", 0, 300, 150, key="unsharp_percent")
+                    threshold = st.slider("Threshold", 0, 255, 3, key="unsharp_threshold")
+                elif config['name'] == "Median Filter":
+                    size = st.select_slider("Filter Size", options=[3, 5, 7, 9], value=3, key="median_size", help="Must be an odd number.")
+
+                if st.button(f"{selected_misc_tool.split(' ')[0]} Apply Filter", width='stretch'):
+                    with st.spinner(config['spinner_text']):
+                        try:
+                            if config['name'] == "Gaussian Blur":
+                                processed_image = original_pil.filter(ImageFilter.GaussianBlur(radius=radius))
+                            elif config['name'] == "Unsharp Mask":
+                                processed_image = original_pil.filter(ImageFilter.UnsharpMask(radius=radius, percent=percent, threshold=threshold))
+                            elif config['name'] == "Median Filter":
+                                processed_image = original_pil.filter(ImageFilter.MedianFilter(size=size))
+
+                            output_buffer = BytesIO()
+                            processed_image.save(output_buffer, format="PNG")
+                            st.session_state[f'{tool_name_lower}_art_dict'] = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Filter application failed: {e}")
+
+            if f'{tool_name_lower}_art_dict' in st.session_state and st.session_state[f'{tool_name_lower}_art_dict']:
+                st.markdown(f"---"); st.markdown(f"#### ✨ {config['name']} Result")
+                result_dict = st.session_state[f'{tool_name_lower}_art_dict']
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption=f"Your {tool_name_lower} image")
+                st.download_button("💾 Download as .png", result_data, f"{tool_name_lower}_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_{tool_name_lower}_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': f"Image from {config['name']}", 'enhanced_prompt': f"Image created with the {config['name']} utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': f"{config['name']}", 'color_mood': 'N/A', 'lighting': 'N/A', 'description': f"Image created using the {config['name']} feature.", 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_{tool_name_lower}_{image_id}"):
+                        add_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite(): add_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite, width='stretch', key=f"fav_{tool_name_lower}_{image_id}")
+
+    elif selected_misc_tool == "🔤 Add Watermark":
+        with st.expander("🔤 Add Watermark", expanded=True):
+            st.info("Add a text watermark to your image.")
+            
+            watermark_image_file = st.file_uploader("Upload an image to watermark", type=["png", "jpg", "jpeg", "webp"], key="watermark_uploader")
+
+            if watermark_image_file:
+                if 'watermark_img_bytes' not in st.session_state or watermark_image_file.getvalue() != st.session_state.get('watermark_img_bytes'):
+                    st.session_state.watermark_img_bytes = watermark_image_file.getvalue()
+                    st.session_state.watermark_art_dict = None
+
+                original_pil_watermark = Image.open(BytesIO(st.session_state.watermark_img_bytes)).convert("RGBA")
+                st.image(original_pil_watermark, caption="Original Image", use_container_width=True)
+
+                c1, c2 = st.columns(2)
+                text = c1.text_input("Watermark Text", "© DreamCanvas")
+                opacity = c2.slider("Opacity", 0, 255, 128)
+                c3, c4 = st.columns(2)
+                position = c3.selectbox("Position", ["Bottom Right", "Bottom Left", "Top Left", "Top Right", "Center"])
+                text_color = c4.color_picker("Text Color", "#FFFFFF")
+
+                if st.button("🔤 Add Watermark", width='stretch'):
+                    with st.spinner("Adding watermark..."):
+                        try:
+                            txt_img = Image.new("RGBA", original_pil_watermark.size, (255, 255, 255, 0))
+                            draw = ImageDraw.Draw(txt_img)
+                            font_size = int(original_pil_watermark.width / 20)
+                            try:
+                                font = ImageFont.truetype("arial.ttf", font_size)
+                            except IOError:
+                                font = ImageFont.load_default()
+
+                            r, g, b = tuple(int(text_color.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
+                            
+                            bbox = draw.textbbox((0,0), text, font=font)
+                            text_w, text_h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+                            margin = 10
+                            pos_map = {
+                                "Bottom Right": (original_pil_watermark.width - text_w - margin, original_pil_watermark.height - text_h - margin),
+                                "Bottom Left": (margin, original_pil_watermark.height - text_h - margin),
+                                "Top Left": (margin, margin),
+                                "Top Right": (original_pil_watermark.width - text_w - margin, margin),
+                                "Center": ((original_pil_watermark.width - text_w) / 2, (original_pil_watermark.height - text_h) / 2)
+                            }
+                            draw.text(pos_map[position], text, font=font, fill=(r, g, b, opacity))
+                            watermarked_image = Image.alpha_composite(original_pil_watermark, txt_img)
+
+                            output_buffer = BytesIO()
+                            watermarked_image.convert("RGB").save(output_buffer, format="PNG")
+                            st.session_state.watermark_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Watermark failed: {e}")
+
+            if 'watermark_art_dict' in st.session_state and st.session_state.watermark_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Watermarked Result")
+                result_dict = st.session_state.watermark_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your watermarked image")
+                st.download_button("💾 Download as .png", result_data, f"watermarked_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_watermark_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_watermark_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Add Watermark", 'enhanced_prompt': "Image created with the Add Watermark utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Add Watermark', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Add Watermark feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_watermark_{image_id}"):
+                        add_watermark_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_watermark(): add_watermark_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_watermark, width='stretch', key=f"fav_watermark_{image_id}")
+
+    elif selected_misc_tool == "🌃 Vignette Effect":
+        with st.expander("🌃 Vignette Effect", expanded=True):
+            st.info("Add a dark, circular border to focus attention on the center of the image.")
+            
+            vignette_image_file = st.file_uploader("Upload an image for a vignette effect", type=["png", "jpg", "jpeg", "webp"], key="vignette_uploader")
+
+            if vignette_image_file:
+                if 'vignette_img_bytes' not in st.session_state or vignette_image_file.getvalue() != st.session_state.get('vignette_img_bytes'):
+                    st.session_state.vignette_img_bytes = vignette_image_file.getvalue()
+                    st.session_state.vignette_art_dict = None
+
+                original_pil_vignette = Image.open(BytesIO(st.session_state.vignette_img_bytes)).convert("RGB")
+                st.image(original_pil_vignette, caption="Original Image", use_container_width=True)
+
+                strength = st.slider("Vignette Strength", 0.1, 1.0, 0.5, 0.1, key="vignette_strength")
+
+                if st.button("🌃 Apply Vignette", width='stretch'):
+                    with st.spinner("Adding vignette..."):
+                        try:
+                            w, h = original_pil_vignette.size
+                            gradient = Image.new('L', (w, h), 0)
+                            draw = ImageDraw.Draw(gradient)
+                            
+                            for i in range(w):
+                                for j in range(h):
+                                    dist_x = (i - w / 2) ** 2
+                                    dist_y = (j - h / 2) ** 2
+                                    dist = (dist_x + dist_y) ** 0.5
+                                    max_dist = ((w/2)**2 + (h/2)**2)**0.5
+                                    val = int(255 * (dist / max_dist) ** strength)
+                                    gradient.putpixel((i, j), val)
+
+                            alpha = gradient.point(lambda p: 255 - p)
+                            black_img = Image.new('RGB', (w, h), (0, 0, 0))
+                            vignette_image = Image.composite(original_pil_vignette, black_img, alpha)
+
+                            output_buffer = BytesIO()
+                            vignette_image.save(output_buffer, format="PNG")
+                            st.session_state.vignette_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Vignette effect failed: {e}")
+
+            if 'vignette_art_dict' in st.session_state and st.session_state.vignette_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Vignette Result")
+                result_dict = st.session_state.vignette_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your vignetted image")
+                st.download_button("💾 Download as .png", result_data, f"vignette_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_vignette_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_vignette_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Vignette Effect", 'enhanced_prompt': "Image created with the Vignette Effect utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Vignette Effect', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Vignette Effect feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_vignette_{image_id}"):
+                        add_vignette_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_vignette(): add_vignette_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_vignette, width='stretch', key=f"fav_vignette_{image_id}")
+
+    elif selected_misc_tool == "🎨 Cartoon Effect":
+        with st.expander("🎨 Cartoon Effect", expanded=True):
+            st.info("Transform your photo into a simplified, cartoon-like image.")
+            
+            cartoon_image_file = st.file_uploader("Upload an image to cartoonify", type=["png", "jpg", "jpeg", "webp"], key="cartoon_uploader")
+
+            if cartoon_image_file:
+                if 'cartoon_img_bytes' not in st.session_state or cartoon_image_file.getvalue() != st.session_state.get('cartoon_img_bytes'):
+                    st.session_state.cartoon_img_bytes = cartoon_image_file.getvalue()
+                    st.session_state.cartoon_art_dict = None
+
+                original_pil_cartoon = Image.open(BytesIO(st.session_state.cartoon_img_bytes))
+                st.image(original_pil_cartoon, caption="Original Image", use_container_width=True)
+
+                if st.button("🎨 Apply Cartoon Effect", width='stretch'):
+                    with st.spinner("Cartoonifying..."):
+                        try:
+                            img_np = np.array(original_pil_cartoon.convert("RGB"))
+                            # Edge detection
+                            gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
+                            gray = cv2.medianBlur(gray, 5)
+                            edges = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 9)
+                            # Color quantization
+                            color = cv2.bilateralFilter(img_np, 9, 300, 300)
+                            # Combine
+                            cartoon = cv2.bitwise_and(color, color, mask=edges)
+                            cartoon_image = Image.fromarray(cartoon)
+
+                            output_buffer = BytesIO()
+                            cartoon_image.save(output_buffer, format="PNG")
+                            st.session_state.cartoon_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except NameError:
+                            st.error("This tool requires the 'opencv-python' library. Please install it by running: pip install opencv-python")
+                        except Exception as e:
+                            st.error(f"Cartoon effect failed: {e}")
+
+            if 'cartoon_art_dict' in st.session_state and st.session_state.cartoon_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Cartoon Result")
+                result_dict = st.session_state.cartoon_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your cartoon image")
+                st.download_button("💾 Download as .png", result_data, f"cartoon_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_cartoon_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_cartoon_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Cartoon Effect", 'enhanced_prompt': "Image created with the Cartoon Effect utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Cartoon Effect', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Cartoon Effect feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_cartoon_{image_id}"):
+                        add_cartoon_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_cartoon(): add_cartoon_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_cartoon, width='stretch', key=f"fav_cartoon_{image_id}")
+
+    elif selected_misc_tool == "💡 Gamma Correction":
+        with st.expander("💡 Gamma Correction", expanded=True):
+            st.info("Adjust the gamma to lighten or darken the mid-tones of the image.")
+            
+            gamma_image_file = st.file_uploader("Upload an image for gamma correction", type=["png", "jpg", "jpeg", "webp"], key="gamma_uploader")
+
+            if gamma_image_file:
+                if 'gamma_img_bytes' not in st.session_state or gamma_image_file.getvalue() != st.session_state.get('gamma_img_bytes'):
+                    st.session_state.gamma_img_bytes = gamma_image_file.getvalue()
+                    st.session_state.gamma_art_dict = None
+
+                original_pil_gamma = Image.open(BytesIO(st.session_state.gamma_img_bytes))
+                st.image(original_pil_gamma, caption="Original Image", use_container_width=True)
+
+                gamma_value = st.slider("Gamma Value", 0.1, 5.0, 1.0, 0.1, key="gamma_value", help=">1 will lighten, <1 will darken.")
+
+                if st.button("💡 Apply Gamma", width='stretch'):
+                    with st.spinner("Correcting gamma..."):
+                        try:
+                            inv_gamma = 1.0 / gamma_value
+                            table = [((i / 255.0) ** inv_gamma) * 255 for i in range(256)]
+                            gamma_image = original_pil_gamma.convert("L").point(table)
+                            if original_pil_gamma.mode == 'RGB':
+                                r, g, b = original_pil_gamma.split()
+                                r = r.point(table)
+                                g = g.point(table)
+                                b = b.point(table)
+                                gamma_image = Image.merge('RGB', (r, g, b))
+                            else:
+                                gamma_image = original_pil_gamma.point(table)
+
+                            output_buffer = BytesIO()
+                            gamma_image.save(output_buffer, format="PNG")
+                            st.session_state.gamma_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Gamma correction failed: {e}")
+
+            if 'gamma_art_dict' in st.session_state and st.session_state.gamma_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Gamma Corrected Result")
+                result_dict = st.session_state.gamma_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your gamma corrected image")
+                st.download_button("💾 Download as .png", result_data, f"gamma_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_gamma_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_gamma_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Gamma Correction", 'enhanced_prompt': "Image created with the Gamma Correction utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Gamma Correction', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Gamma Correction feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_gamma_{image_id}"):
+                        add_gamma_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_gamma(): add_gamma_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_gamma, width='stretch', key=f"fav_gamma_{image_id}")
 
     # --- END: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # --- END: SURPRISE ME - RANDOM PROMPT GENERATOR ---
