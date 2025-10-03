@@ -165,7 +165,7 @@ st.set_page_config(
 
 
 
-st.sidebar.image("k5.jpg", use_container_width=True)
+#st.sidebar.image("k5.jpg", use_container_width=True)
 
 
 
