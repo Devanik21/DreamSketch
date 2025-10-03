@@ -5,3 +5,4 @@ pillow
 gTTS
 scikit-learn
 numpy
+opencv-python
