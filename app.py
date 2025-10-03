@@ -3546,7 +3546,12 @@ with col2:
     misc_tool_options = [
         "--- Select a Tool ---",
         "🎲 Surprise Me! (Random Prompt)",
-        "🎨 Image Inverter"
+        "🎨 Image Inverter",
+        "🎞️ Sepia Tone Filter",
+        "⚫ Grayscale Converter",
+        "↔️ Image Flipper",
+        "✒️ Edge Detection",
+        "🖼️ Posterize Effect"
     ]
     selected_misc_tool = st.selectbox("Select a tool from the toolkit:", misc_tool_options, key="misc_tool_selector")
 
@@ -3669,6 +3674,240 @@ with col2:
                         use_container_width=True,
                         key=f"fav_inverted_{image_id}"
                     )
+    
+    elif selected_misc_tool == "🎞️ Sepia Tone Filter":
+        with st.expander("🎞️ Sepia Tone Filter", expanded=True):
+            st.info("Apply a classic, brownish sepia tone to your image for a vintage look.")
+            
+            sepia_image_file = st.file_uploader("Upload an image to apply sepia tone", type=["png", "jpg", "jpeg", "webp"], key="sepia_uploader")
+
+            if sepia_image_file:
+                if 'sepia_img_bytes' not in st.session_state or sepia_image_file.getvalue() != st.session_state.get('sepia_img_bytes'):
+                    st.session_state.sepia_img_bytes = sepia_image_file.getvalue()
+                    st.session_state.sepia_art_dict = None
+
+                original_pil_sepia = Image.open(BytesIO(st.session_state.sepia_img_bytes))
+                st.image(original_pil_sepia, caption="Original Image", use_container_width=True)
+
+                if st.button("🎞️ Apply Sepia Filter", use_container_width=True):
+                    with st.spinner("Applying vintage filter..."):
+                        try:
+                            img = original_pil_sepia.convert("RGB")
+                            img_np = np.array(img, dtype=np.float32)
+                            sepia_matrix = np.array([[0.393, 0.769, 0.189], [0.349, 0.686, 0.168], [0.272, 0.534, 0.131]])
+                            sepia_img_np = img_np.dot(sepia_matrix.T)
+                            sepia_img_np = np.clip(sepia_img_np, 0, 255)
+                            sepia_image = Image.fromarray(sepia_img_np.astype('uint8'))
+                            
+                            output_buffer = BytesIO()
+                            sepia_image.save(output_buffer, format="PNG")
+                            st.session_state.sepia_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Sepia conversion failed: {e}")
+
+            if 'sepia_art_dict' in st.session_state and st.session_state.sepia_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Sepia Result")
+                result_dict = st.session_state.sepia_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your sepia image")
+                st.download_button("💾 Download as .png", result_data, f"sepia_art_{int(time.time())}.png", "image/png", use_container_width=True, key=f"download_sepia_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_sepia_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Sepia Filter", 'enhanced_prompt': "Image created with the Sepia Filter utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Sepia Filter', 'color_mood': 'Vintage', 'lighting': 'N/A', 'description': 'Image created using the Sepia Filter feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_sepia_{image_id}"):
+                        add_sepia_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_sepia(): add_sepia_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_sepia, use_container_width=True, key=f"fav_sepia_{image_id}")
+
+    elif selected_misc_tool == "⚫ Grayscale Converter":
+        with st.expander("⚫ Grayscale Converter", expanded=True):
+            st.info("Convert any color image to black and white.")
+            
+            grayscale_image_file = st.file_uploader("Upload an image to convert to grayscale", type=["png", "jpg", "jpeg", "webp"], key="grayscale_uploader")
+
+            if grayscale_image_file:
+                if 'grayscale_img_bytes' not in st.session_state or grayscale_image_file.getvalue() != st.session_state.get('grayscale_img_bytes'):
+                    st.session_state.grayscale_img_bytes = grayscale_image_file.getvalue()
+                    st.session_state.grayscale_art_dict = None
+
+                original_pil_grayscale = Image.open(BytesIO(st.session_state.grayscale_img_bytes))
+                st.image(original_pil_grayscale, caption="Original Image", use_container_width=True)
+
+                if st.button("⚫ Convert to Grayscale", use_container_width=True):
+                    with st.spinner("Removing colors..."):
+                        try:
+                            grayscale_image = original_pil_grayscale.convert("L")
+                            output_buffer = BytesIO()
+                            grayscale_image.save(output_buffer, format="PNG")
+                            st.session_state.grayscale_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Grayscale conversion failed: {e}")
+
+            if 'grayscale_art_dict' in st.session_state and st.session_state.grayscale_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Grayscale Result")
+                result_dict = st.session_state.grayscale_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your grayscale image")
+                st.download_button("💾 Download as .png", result_data, f"grayscale_art_{int(time.time())}.png", "image/png", use_container_width=True, key=f"download_grayscale_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_grayscale_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Grayscale Converter", 'enhanced_prompt': "Image created with the Grayscale Converter utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Grayscale', 'color_mood': 'Monochrome', 'lighting': 'N/A', 'description': 'Image created using the Grayscale Converter feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_grayscale_{image_id}"):
+                        add_grayscale_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_grayscale(): add_grayscale_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_grayscale, use_container_width=True, key=f"fav_grayscale_{image_id}")
+
+    elif selected_misc_tool == "↔️ Image Flipper":
+        with st.expander("↔️ Image Flipper", expanded=True):
+            st.info("Flip an image horizontally (mirror) or vertically.")
+            
+            flipper_image_file = st.file_uploader("Upload an image to flip", type=["png", "jpg", "jpeg", "webp"], key="flipper_uploader")
+
+            if flipper_image_file:
+                if 'flipper_img_bytes' not in st.session_state or flipper_image_file.getvalue() != st.session_state.get('flipper_img_bytes'):
+                    st.session_state.flipper_img_bytes = flipper_image_file.getvalue()
+                    st.session_state.flipper_art_dict = None
+
+                original_pil_flipper = Image.open(BytesIO(st.session_state.flipper_img_bytes))
+                st.image(original_pil_flipper, caption="Original Image", use_container_width=True)
+
+                flip_mode = st.radio("Flip Direction", ["Horizontal (Mirror)", "Vertical"], key="flip_mode_selector", horizontal=True)
+
+                if st.button("↔️ Flip Image", use_container_width=True):
+                    with st.spinner("Flipping image..."):
+                        try:
+                            if flip_mode == "Horizontal (Mirror)":
+                                flipped_image = ImageOps.mirror(original_pil_flipper)
+                            else: # Vertical
+                                flipped_image = ImageOps.flip(original_pil_flipper)
+                            
+                            output_buffer = BytesIO()
+                            flipped_image.save(output_buffer, format="PNG")
+                            st.session_state.flipper_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Image flip failed: {e}")
+
+            if 'flipper_art_dict' in st.session_state and st.session_state.flipper_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Flipped Result")
+                result_dict = st.session_state.flipper_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your flipped image")
+                st.download_button("💾 Download as .png", result_data, f"flipped_art_{int(time.time())}.png", "image/png", use_container_width=True, key=f"download_flipper_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_flipper_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Image Flipper", 'enhanced_prompt': "Image created with the Image Flipper utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Image Flipper', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Image Flipper feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_flipper_{image_id}"):
+                        add_flipper_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_flipper(): add_flipper_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_flipper, use_container_width=True, key=f"fav_flipper_{image_id}")
+
+    elif selected_misc_tool == "✒️ Edge Detection":
+        with st.expander("✒️ Edge Detection", expanded=True):
+            st.info("Create a stylized image that highlights the edges and outlines.")
+            
+            edge_image_file = st.file_uploader("Upload an image to detect its edges", type=["png", "jpg", "jpeg", "webp"], key="edge_uploader")
+
+            if edge_image_file:
+                if 'edge_img_bytes' not in st.session_state or edge_image_file.getvalue() != st.session_state.get('edge_img_bytes'):
+                    st.session_state.edge_img_bytes = edge_image_file.getvalue()
+                    st.session_state.edge_art_dict = None
+
+                original_pil_edge = Image.open(BytesIO(st.session_state.edge_img_bytes))
+                st.image(original_pil_edge, caption="Original Image", use_container_width=True)
+
+                if st.button("✒️ Find Edges", use_container_width=True):
+                    with st.spinner("Scanning for edges..."):
+                        try:
+                            edge_image = original_pil_edge.convert("L").filter(ImageFilter.FIND_EDGES)
+                            output_buffer = BytesIO()
+                            edge_image.save(output_buffer, format="PNG")
+                            st.session_state.edge_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Edge detection failed: {e}")
+
+            if 'edge_art_dict' in st.session_state and st.session_state.edge_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Edge Detection Result")
+                result_dict = st.session_state.edge_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your edge-detected image")
+                st.download_button("💾 Download as .png", result_data, f"edge_art_{int(time.time())}.png", "image/png", use_container_width=True, key=f"download_edge_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_edge_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Edge Detection", 'enhanced_prompt': "Image created with the Edge Detection utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Edge Detection', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Edge Detection feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_edge_{image_id}"):
+                        add_edge_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_edge(): add_edge_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_edge, use_container_width=True, key=f"fav_edge_{image_id}")
+
+    elif selected_misc_tool == "🖼️ Posterize Effect":
+        with st.expander("🖼️ Posterize Effect", expanded=True):
+            st.info("Reduce the number of colors in the image to create a 'poster' look.")
+            
+            posterize_image_file = st.file_uploader("Upload an image to posterize", type=["png", "jpg", "jpeg", "webp"], key="posterize_uploader")
+
+            if posterize_image_file:
+                if 'posterize_img_bytes' not in st.session_state or posterize_image_file.getvalue() != st.session_state.get('posterize_img_bytes'):
+                    st.session_state.posterize_img_bytes = posterize_image_file.getvalue()
+                    st.session_state.posterize_art_dict = None
+
+                original_pil_posterize = Image.open(BytesIO(st.session_state.posterize_img_bytes))
+                st.image(original_pil_posterize, caption="Original Image", use_container_width=True)
+
+                bits = st.slider("Color Depth (Bits per channel)", 1, 8, 4, key="posterize_bits", help="Fewer bits mean fewer colors and a stronger effect.")
+
+                if st.button("🖼️ Apply Posterize Effect", use_container_width=True):
+                    with st.spinner("Reducing color palette..."):
+                        try:
+                            posterized_image = ImageOps.posterize(original_pil_posterize.convert("RGB"), bits)
+                            output_buffer = BytesIO()
+                            posterized_image.save(output_buffer, format="PNG")
+                            st.session_state.posterize_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Posterize effect failed: {e}")
+
+            if 'posterize_art_dict' in st.session_state and st.session_state.posterize_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Posterized Result")
+                result_dict = st.session_state.posterize_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your posterized image")
+                st.download_button("💾 Download as .png", result_data, f"poster_art_{int(time.time())}.png", "image/png", use_container_width=True, key=f"download_posterize_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_posterize_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Posterize Effect", 'enhanced_prompt': "Image created with the Posterize Effect utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Posterize', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Posterize Effect feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_posterize_{image_id}"):
+                        add_posterize_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_posterize(): add_posterize_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_posterize, use_container_width=True, key=f"fav_posterize_{image_id}")
 
     # --- END: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # --- END: SURPRISE ME - RANDOM PROMPT GENERATOR ---
