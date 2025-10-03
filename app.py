@@ -1,7 +1,7 @@
 import streamlit as st
 from google import genai
 from google.genai import types
-from PIL import Image, ImageFilter, ImageOps, ImageDraw
+from PIL import Image, ImageFilter, ImageOps, ImageDraw, ImageEnhance
 from io import BytesIO
 import base64
 import json
@@ -3551,7 +3551,19 @@ with col2:
         "⚫ Grayscale Converter",
         "↔️ Image Flipper",
         "✒️ Edge Detection",
-        "🖼️ Posterize Effect"
+        "🖼️ Posterize Effect",
+        "☀️ Brightness & Contrast",
+        "✨ Sharpen Filter",
+        "💧 Blur Filter",
+        "🌞 Solarize Effect",
+        "🗿 Emboss Filter",
+        "🗺️ Contour Filter",
+        "🔲 Add Border",
+        "🔄 Image Rotator",
+        "🚦 Channel Splitter",
+        "🔳 Threshold Filter",
+        "🎨 Duotone Effect",
+        "👾 Pixelate Effect"
     ]
     selected_misc_tool = st.selectbox("Select a tool from the toolkit:", misc_tool_options, key="misc_tool_selector")
 
@@ -3908,6 +3920,428 @@ with col2:
                     is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
                     def handle_favorite_posterize(): add_posterize_to_gallery(); toggle_and_save_favorite(image_id)
                     st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_posterize, use_container_width=True, key=f"fav_posterize_{image_id}")
+
+    elif selected_misc_tool == "☀️ Brightness & Contrast":
+        with st.expander("☀️ Brightness & Contrast", expanded=True):
+            st.info("Adjust the brightness and contrast of your image.")
+            
+            bc_image_file = st.file_uploader("Upload an image to adjust", type=["png", "jpg", "jpeg", "webp"], key="bc_uploader")
+
+            if bc_image_file:
+                if 'bc_img_bytes' not in st.session_state or bc_image_file.getvalue() != st.session_state.get('bc_img_bytes'):
+                    st.session_state.bc_img_bytes = bc_image_file.getvalue()
+                    st.session_state.bc_art_dict = None
+
+                original_pil_bc = Image.open(BytesIO(st.session_state.bc_img_bytes))
+                st.image(original_pil_bc, caption="Original Image", use_container_width=True)
+
+                brightness = st.slider("Brightness", 0.5, 1.5, 1.0, 0.05, key="brightness_slider")
+                contrast = st.slider("Contrast", 0.5, 1.5, 1.0, 0.05, key="contrast_slider")
+
+                if st.button("☀️ Apply Adjustments", use_container_width=True):
+                    with st.spinner("Adjusting levels..."):
+                        try:
+                            enhancer_b = ImageEnhance.Brightness(original_pil_bc)
+                            img_bright = enhancer_b.enhance(brightness)
+                            enhancer_c = ImageEnhance.Contrast(img_bright)
+                            img_final = enhancer_c.enhance(contrast)
+                            
+                            output_buffer = BytesIO()
+                            img_final.save(output_buffer, format="PNG")
+                            st.session_state.bc_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Adjustment failed: {e}")
+
+            if 'bc_art_dict' in st.session_state and st.session_state.bc_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Adjusted Result")
+                result_dict = st.session_state.bc_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your adjusted image")
+                st.download_button("💾 Download as .png", result_data, f"adjusted_art_{int(time.time())}.png", "image/png", use_container_width=True, key=f"download_bc_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_bc_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Brightness/Contrast", 'enhanced_prompt': "Image created with the Brightness/Contrast utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Brightness/Contrast', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Brightness/Contrast feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_bc_{image_id}"):
+                        add_bc_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_bc(): add_bc_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_bc, use_container_width=True, key=f"fav_bc_{image_id}")
+
+    elif selected_misc_tool in ["✨ Sharpen Filter", "💧 Blur Filter", "🌞 Solarize Effect", "🗿 Emboss Filter", "🗺️ Contour Filter"]:
+        tool_configs = {
+            "✨ Sharpen Filter": {"name": "Sharpen", "filter": ImageFilter.SHARPEN, "spinner_text": "Sharpening edges..."},
+            "💧 Blur Filter": {"name": "Blur", "filter": ImageFilter.BLUR, "spinner_text": "Applying blur..."},
+            "🌞 Solarize Effect": {"name": "Solarize", "filter": None, "spinner_text": "Solarizing..."}, # Special case
+            "🗿 Emboss Filter": {"name": "Emboss", "filter": ImageFilter.EMBOSS, "spinner_text": "Applying emboss filter..."},
+            "🗺️ Contour Filter": {"name": "Contour", "filter": ImageFilter.CONTOUR, "spinner_text": "Finding contours..."}
+        }
+        config = tool_configs[selected_misc_tool]
+        tool_name_lower = config['name'].lower()
+
+        with st.expander(selected_misc_tool, expanded=True):
+            st.info(f"Apply a {tool_name_lower} effect to your image.")
+            
+            image_file = st.file_uploader(f"Upload an image to apply {tool_name_lower} effect", type=["png", "jpg", "jpeg", "webp"], key=f"{tool_name_lower}_uploader")
+
+            if image_file:
+                if f'{tool_name_lower}_img_bytes' not in st.session_state or image_file.getvalue() != st.session_state.get(f'{tool_name_lower}_img_bytes'):
+                    st.session_state[f'{tool_name_lower}_img_bytes'] = image_file.getvalue()
+                    st.session_state[f'{tool_name_lower}_art_dict'] = None
+
+                original_pil = Image.open(BytesIO(st.session_state[f'{tool_name_lower}_img_bytes']))
+                st.image(original_pil, caption="Original Image", use_container_width=True)
+
+                solarize_threshold = None
+                if config['name'] == "Solarize":
+                    solarize_threshold = st.slider("Solarize Threshold", 0, 255, 128)
+
+                if st.button(f"{selected_misc_tool.split(' ')[0]} Apply {config['name']} Filter", use_container_width=True):
+                    with st.spinner(config['spinner_text']):
+                        try:
+                            if config['name'] == "Solarize":
+                                processed_image = ImageOps.solarize(original_pil.convert("RGB"), threshold=solarize_threshold)
+                            else:
+                                processed_image = original_pil.filter(config['filter'])
+                            
+                            output_buffer = BytesIO()
+                            processed_image.save(output_buffer, format="PNG")
+                            st.session_state[f'{tool_name_lower}_art_dict'] = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"{config['name']} effect failed: {e}")
+
+            if f'{tool_name_lower}_art_dict' in st.session_state and st.session_state[f'{tool_name_lower}_art_dict']:
+                st.markdown(f"---"); st.markdown(f"#### ✨ {config['name']} Result")
+                result_dict = st.session_state[f'{tool_name_lower}_art_dict']
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption=f"Your {tool_name_lower} image")
+                st.download_button("💾 Download as .png", result_data, f"{tool_name_lower}_art_{int(time.time())}.png", "image/png", use_container_width=True, key=f"download_{tool_name_lower}_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': f"Image from {config['name']} Filter", 'enhanced_prompt': f"Image created with the {config['name']} Filter utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': f"{config['name']} Filter", 'color_mood': 'N/A', 'lighting': 'N/A', 'description': f"Image created using the {config['name']} Filter feature.", 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_{tool_name_lower}_{image_id}"):
+                        add_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite(): add_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite, use_container_width=True, key=f"fav_{tool_name_lower}_{image_id}")
+
+    elif selected_misc_tool == "🔲 Add Border":
+        with st.expander("🔲 Add Border", expanded=True):
+            st.info("Add a simple, colored border around your image.")
+            
+            border_image_file = st.file_uploader("Upload an image to add a border", type=["png", "jpg", "jpeg", "webp"], key="border_uploader")
+
+            if border_image_file:
+                if 'border_img_bytes' not in st.session_state or border_image_file.getvalue() != st.session_state.get('border_img_bytes'):
+                    st.session_state.border_img_bytes = border_image_file.getvalue()
+                    st.session_state.border_art_dict = None
+
+                original_pil_border = Image.open(BytesIO(st.session_state.border_img_bytes))
+                st.image(original_pil_border, caption="Original Image", use_container_width=True)
+
+                border_size = st.slider("Border Size (pixels)", 1, 100, 10, key="border_size")
+                border_color = st.color_picker("Border Color", "#FFFFFF", key="border_color")
+
+                if st.button("🔲 Add Border", use_container_width=True):
+                    with st.spinner("Framing your image..."):
+                        try:
+                            bordered_image = ImageOps.expand(original_pil_border, border=border_size, fill=border_color)
+                            output_buffer = BytesIO()
+                            bordered_image.save(output_buffer, format="PNG")
+                            st.session_state.border_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Adding border failed: {e}")
+
+            if 'border_art_dict' in st.session_state and st.session_state.border_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Bordered Result")
+                result_dict = st.session_state.border_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your bordered image")
+                st.download_button("💾 Download as .png", result_data, f"bordered_art_{int(time.time())}.png", "image/png", use_container_width=True, key=f"download_border_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_border_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Add Border", 'enhanced_prompt': "Image created with the Add Border utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Add Border', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Add Border feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_border_{image_id}"):
+                        add_border_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_border(): add_border_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_border, use_container_width=True, key=f"fav_border_{image_id}")
+
+    elif selected_misc_tool == "🔄 Image Rotator":
+        with st.expander("🔄 Image Rotator", expanded=True):
+            st.info("Rotate your image by a fixed angle.")
+            
+            rotator_image_file = st.file_uploader("Upload an image to rotate", type=["png", "jpg", "jpeg", "webp"], key="rotator_uploader")
+
+            if rotator_image_file:
+                if 'rotator_img_bytes' not in st.session_state or rotator_image_file.getvalue() != st.session_state.get('rotator_img_bytes'):
+                    st.session_state.rotator_img_bytes = rotator_image_file.getvalue()
+                    st.session_state.rotator_art_dict = None
+
+                original_pil_rotator = Image.open(BytesIO(st.session_state.rotator_img_bytes))
+                st.image(original_pil_rotator, caption="Original Image", use_container_width=True)
+
+                angle = st.selectbox("Rotation Angle", [90, 180, 270], index=0, format_func=lambda x: f"{x}° Clockwise")
+
+                if st.button("🔄 Rotate Image", use_container_width=True):
+                    with st.spinner("Rotating image..."):
+                        try:
+                            # PIL rotates counter-clockwise, so we use negative for clockwise
+                            rotated_image = original_pil_rotator.rotate(-angle, expand=True)
+                            output_buffer = BytesIO()
+                            rotated_image.save(output_buffer, format="PNG")
+                            st.session_state.rotator_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Rotation failed: {e}")
+
+            if 'rotator_art_dict' in st.session_state and st.session_state.rotator_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Rotated Result")
+                result_dict = st.session_state.rotator_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your rotated image")
+                st.download_button("💾 Download as .png", result_data, f"rotated_art_{int(time.time())}.png", "image/png", use_container_width=True, key=f"download_rotator_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_rotator_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Image Rotator", 'enhanced_prompt': "Image created with the Image Rotator utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Image Rotator', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Image Rotator feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_rotator_{image_id}"):
+                        add_rotator_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_rotator(): add_rotator_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_rotator, use_container_width=True, key=f"fav_rotator_{image_id}")
+
+    elif selected_misc_tool == "🚦 Channel Splitter":
+        with st.expander("🚦 Channel Splitter", expanded=True):
+            st.info("Isolate and view the Red, Green, or Blue channels of an image.")
+            
+            channel_image_file = st.file_uploader("Upload an image to split channels", type=["png", "jpg", "jpeg", "webp"], key="channel_uploader")
+
+            if channel_image_file:
+                if 'channel_img_bytes' not in st.session_state or channel_image_file.getvalue() != st.session_state.get('channel_img_bytes'):
+                    st.session_state.channel_img_bytes = channel_image_file.getvalue()
+                    st.session_state.channel_art_dict = None
+
+                original_pil_channel = Image.open(BytesIO(st.session_state.channel_img_bytes)).convert("RGB")
+                st.image(original_pil_channel, caption="Original Image", use_container_width=True)
+
+                channel_to_show = st.radio("Channel to Display", ["Red", "Green", "Blue"], key="channel_selector", horizontal=True)
+
+                if st.button("🚦 Split Channels", use_container_width=True):
+                    with st.spinner(f"Isolating {channel_to_show} channel..."):
+                        try:
+                            r, g, b = original_pil_channel.split()
+                            channel_map = {"Red": r, "Green": g, "Blue": b}
+                            
+                            # Create a black image to paste the channel into
+                            zero_channel = Image.new('L', original_pil_channel.size, 0)
+                            
+                            if channel_to_show == "Red":
+                                processed_image = Image.merge("RGB", (channel_map["Red"], zero_channel, zero_channel))
+                            elif channel_to_show == "Green":
+                                processed_image = Image.merge("RGB", (zero_channel, channel_map["Green"], zero_channel))
+                            else: # Blue
+                                processed_image = Image.merge("RGB", (zero_channel, zero_channel, channel_map["Blue"]))
+
+                            output_buffer = BytesIO()
+                            processed_image.save(output_buffer, format="PNG")
+                            st.session_state.channel_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Channel splitting failed: {e}")
+
+            if 'channel_art_dict' in st.session_state and st.session_state.channel_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Channel Result")
+                result_dict = st.session_state.channel_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption=f"Isolated {channel_to_show} Channel")
+                st.download_button("💾 Download as .png", result_data, f"channel_art_{int(time.time())}.png", "image/png", use_container_width=True, key=f"download_channel_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_channel_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Channel Splitter", 'enhanced_prompt': "Image created with the Channel Splitter utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Channel Splitter', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Channel Splitter feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_channel_{image_id}"):
+                        add_channel_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_channel(): add_channel_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_channel, use_container_width=True, key=f"fav_channel_{image_id}")
+
+    elif selected_misc_tool == "🔳 Threshold Filter":
+        with st.expander("🔳 Threshold Filter", expanded=True):
+            st.info("Convert an image to pure black and white based on a luminance threshold.")
+            
+            threshold_image_file = st.file_uploader("Upload an image to apply threshold", type=["png", "jpg", "jpeg", "webp"], key="threshold_uploader")
+
+            if threshold_image_file:
+                if 'threshold_img_bytes' not in st.session_state or threshold_image_file.getvalue() != st.session_state.get('threshold_img_bytes'):
+                    st.session_state.threshold_img_bytes = threshold_image_file.getvalue()
+                    st.session_state.threshold_art_dict = None
+
+                original_pil_threshold = Image.open(BytesIO(st.session_state.threshold_img_bytes))
+                st.image(original_pil_threshold, caption="Original Image", use_container_width=True)
+
+                threshold_value = st.slider("Luminance Threshold", 0, 255, 128, key="threshold_value")
+
+                if st.button("🔳 Apply Threshold", use_container_width=True):
+                    with st.spinner("Applying threshold..."):
+                        try:
+                            grayscale_image = original_pil_threshold.convert("L")
+                            threshold_image = grayscale_image.point(lambda p: 255 if p > threshold_value else 0, '1')
+                            
+                            output_buffer = BytesIO()
+                            threshold_image.save(output_buffer, format="PNG")
+                            st.session_state.threshold_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Threshold failed: {e}")
+
+            if 'threshold_art_dict' in st.session_state and st.session_state.threshold_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Threshold Result")
+                result_dict = st.session_state.threshold_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your threshold image")
+                st.download_button("💾 Download as .png", result_data, f"threshold_art_{int(time.time())}.png", "image/png", use_container_width=True, key=f"download_threshold_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_threshold_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Threshold Filter", 'enhanced_prompt': "Image created with the Threshold Filter utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Threshold Filter', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Threshold Filter feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_threshold_{image_id}"):
+                        add_threshold_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_threshold(): add_threshold_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_threshold, use_container_width=True, key=f"fav_threshold_{image_id}")
+
+    elif selected_misc_tool == "🎨 Duotone Effect":
+        with st.expander("🎨 Duotone Effect", expanded=True):
+            st.info("Recolor an image using two specified colors for the dark and light tones.")
+            
+            duotone_image_file = st.file_uploader("Upload an image for duotone effect", type=["png", "jpg", "jpeg", "webp"], key="duotone_uploader")
+
+            if duotone_image_file:
+                if 'duotone_img_bytes' not in st.session_state or duotone_image_file.getvalue() != st.session_state.get('duotone_img_bytes'):
+                    st.session_state.duotone_img_bytes = duotone_image_file.getvalue()
+                    st.session_state.duotone_art_dict = None
+
+                original_pil_duotone = Image.open(BytesIO(st.session_state.duotone_img_bytes))
+                st.image(original_pil_duotone, caption="Original Image", use_container_width=True)
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    dark_color = st.color_picker("Dark Color", "#000080", key="duotone_dark")
+                with col2:
+                    light_color = st.color_picker("Light Color", "#FFFF00", key="duotone_light")
+
+                if st.button("🎨 Apply Duotone", use_container_width=True):
+                    with st.spinner("Recoloring image..."):
+                        try:
+                            grayscale_image = original_pil_duotone.convert("L")
+                            duotone_image = ImageOps.colorize(grayscale_image, black=dark_color, white=light_color)
+                            
+                            output_buffer = BytesIO()
+                            duotone_image.save(output_buffer, format="PNG")
+                            st.session_state.duotone_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Duotone effect failed: {e}")
+
+            if 'duotone_art_dict' in st.session_state and st.session_state.duotone_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Duotone Result")
+                result_dict = st.session_state.duotone_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your duotone image")
+                st.download_button("💾 Download as .png", result_data, f"duotone_art_{int(time.time())}.png", "image/png", use_container_width=True, key=f"download_duotone_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_duotone_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Duotone Effect", 'enhanced_prompt': "Image created with the Duotone Effect utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Duotone Effect', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Duotone Effect feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_duotone_{image_id}"):
+                        add_duotone_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_duotone(): add_duotone_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_duotone, use_container_width=True, key=f"fav_duotone_{image_id}")
+
+    elif selected_misc_tool == "👾 Pixelate Effect":
+        with st.expander("👾 Pixelate Effect", expanded=True):
+            st.info("Create a retro, blocky, pixelated version of your image.")
+            
+            pixelate_image_file = st.file_uploader("Upload an image to pixelate", type=["png", "jpg", "jpeg", "webp"], key="pixelate_uploader")
+
+            if pixelate_image_file:
+                if 'pixelate_img_bytes' not in st.session_state or pixelate_image_file.getvalue() != st.session_state.get('pixelate_img_bytes'):
+                    st.session_state.pixelate_img_bytes = pixelate_image_file.getvalue()
+                    st.session_state.pixelate_art_dict = None
+
+                original_pil_pixelate = Image.open(BytesIO(st.session_state.pixelate_img_bytes))
+                st.image(original_pil_pixelate, caption="Original Image", use_container_width=True)
+
+                pixel_size = st.slider("Pixel Size", 2, 32, 8, key="pixelate_size", help="Larger values create a more blocky, abstract effect.")
+
+                if st.button("👾 Pixelate Image", use_container_width=True):
+                    with st.spinner("Downsampling image..."):
+                        try:
+                            img = original_pil_pixelate.copy()
+                            # Resize down to pixelated size
+                            small_img = img.resize(
+                                (img.size[0] // pixel_size, img.size[1] // pixel_size),
+                                resample=Image.Resampling.BILINEAR
+                            )
+                            # Resize back up to original size
+                            pixelated_image = small_img.resize(
+                                img.size,
+                                resample=Image.Resampling.NEAREST
+                            )
+                            
+                            output_buffer = BytesIO()
+                            pixelated_image.save(output_buffer, format="PNG")
+                            st.session_state.pixelate_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Pixelate effect failed: {e}")
+
+            if 'pixelate_art_dict' in st.session_state and st.session_state.pixelate_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Pixelated Result")
+                result_dict = st.session_state.pixelate_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your pixelated image")
+                st.download_button("💾 Download as .png", result_data, f"pixelate_art_{int(time.time())}.png", "image/png", use_container_width=True, key=f"download_pixelate_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_pixelate_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Pixelate Effect", 'enhanced_prompt': "Image created with the Pixelate Effect utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Pixelate Effect', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Pixelate Effect feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", use_container_width=True, disabled=is_in_gallery, key=f"gallery_pixelate_{image_id}"):
+                        add_pixelate_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_pixelate(): add_pixelate_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_pixelate, use_container_width=True, key=f"fav_pixelate_{image_id}")
 
     # --- END: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # --- END: SURPRISE ME - RANDOM PROMPT GENERATOR ---
