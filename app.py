@@ -3541,6 +3541,8 @@ with col2:
     # This container is now outside the 'if' condition, so it appears on startup.
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # This container is now outside the 'if' condition, so it appears on startup.
+    st.markdown("### 🪄 Miscellaneous toolkit ")
+
     with st.container(border=True):
         st.markdown("##### ✨ Feeling Lucky?")
 
