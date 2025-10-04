@@ -3579,9 +3579,10 @@ with col2:
 
     misc_tool_options = [
         "--- Select a Tool ---",
-        "🎲 Surprise Me! (Random Prompt)", # "Image Inverter" will be moved
-        # "🎞️ Sepia Tone Filter" will be moved
-        # "⚫ Grayscale Converter" will be moved
+        "🎲 Surprise Me! (Random Prompt)",
+        "🎨 Image Inverter",
+        "🎞️ Sepia Tone Filter",
+        "⚫ Grayscale Converter",
         "↔️ Image Flipper",
         "✒️ Edge Detection",
         "🖼️ Posterize Effect",
@@ -3671,10 +3672,10 @@ with col2:
                 st.session_state.main_prompt = full_prompt
 
             st.button(
-                "🎲 Generate New Random Prompt",
+                "🎲 Generate Random Prompt",
                 on_click=generate_random_prompt,
-                width='stretch',
-                help="Generate a new random, creative prompt to get you started."
+                use_container_width=True,
+                help="Generate a random, creative prompt to get you started."
             )
 
     elif selected_misc_tool == "🎨 Image Inverter":
@@ -5815,126 +5816,6 @@ with col2:
             </div>
             """, unsafe_allow_html=True)
 
-
-        # --- START: NEW QUICK ACTION TOOLS ---
-        with st.expander("🎨 Image Inverter"):
-            st.info("Quickly invert the colors of any image.")
-            inverter_image_file_qa = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg", "webp"], key="inverter_uploader_qa")
-
-            if inverter_image_file_qa:
-                if 'inverter_img_bytes_qa' not in st.session_state or inverter_image_file_qa.getvalue() != st.session_state.get('inverter_img_bytes_qa'):
-                    st.session_state.inverter_img_bytes_qa = inverter_image_file_qa.getvalue()
-                    st.session_state.inverter_art_dict_qa = None
-
-                original_pil_inverter_qa = Image.open(BytesIO(st.session_state.inverter_img_bytes_qa))
-                
-                if st.button("🎨 Invert Colors", width='stretch', key="invert_btn_qa"):
-                    with st.spinner("Inverting..."):
-                        try:
-                            inverted_image = ImageOps.invert(original_pil_inverter_qa.convert("RGB"))
-                            output_buffer = BytesIO()
-                            inverted_image.save(output_buffer, format="PNG")
-                            st.session_state.inverter_art_dict_qa = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
-                        except Exception as e:
-                            st.error(f"Inversion failed: {e}")
-
-            if 'inverter_art_dict_qa' in st.session_state and st.session_state.inverter_art_dict_qa:
-                st.markdown("---")
-                st.markdown("##### ✨ Inverted Result")
-                result_dict = st.session_state.inverter_art_dict_qa
-                st.image(result_dict['data'], use_container_width=True)
-                if st.button("View in Main Panel", key=f"view_inverted_qa_{result_dict['id']}", width='stretch'):
-                    st.session_state.current_image = {
-                        'id': result_dict['id'], 'image_data': result_dict['data'],
-                        'original_prompt': "Image from Quick Inverter", 'enhanced_prompt': "Image created with the Quick Inverter utility.",
-                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Image Inverter', 'color_mood': 'N/A', 'lighting': 'N/A',
-                        'description': 'Image created using the Quick Image Inverter feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'
-                    }
-                    if not any(img['id'] == result_dict['id'] for img in st.session_state.images):
-                        st.session_state.images.append(st.session_state.current_image)
-                        save_image_to_db(st.session_state.current_image)
-                    st.rerun()
-
-        with st.expander("⚫ Grayscale Converter"):
-            st.info("Quickly convert any image to black and white.")
-            grayscale_image_file_qa = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg", "webp"], key="grayscale_uploader_qa")
-
-            if grayscale_image_file_qa:
-                if 'grayscale_img_bytes_qa' not in st.session_state or grayscale_image_file_qa.getvalue() != st.session_state.get('grayscale_img_bytes_qa'):
-                    st.session_state.grayscale_img_bytes_qa = grayscale_image_file_qa.getvalue()
-                    st.session_state.grayscale_art_dict_qa = None
-
-                if st.button("⚫ Convert to Grayscale", width='stretch', key="grayscale_btn_qa"):
-                    with st.spinner("Converting..."):
-                        try:
-                            original_pil_grayscale_qa = Image.open(BytesIO(st.session_state.grayscale_img_bytes_qa))
-                            grayscale_image = original_pil_grayscale_qa.convert("L")
-                            output_buffer = BytesIO()
-                            grayscale_image.save(output_buffer, format="PNG")
-                            st.session_state.grayscale_art_dict_qa = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
-                        except Exception as e:
-                            st.error(f"Grayscale conversion failed: {e}")
-
-            if 'grayscale_art_dict_qa' in st.session_state and st.session_state.grayscale_art_dict_qa:
-                st.markdown("---")
-                st.markdown("##### ✨ Grayscale Result")
-                result_dict = st.session_state.grayscale_art_dict_qa
-                st.image(result_dict['data'], use_container_width=True)
-                if st.button("View in Main Panel", key=f"view_grayscale_qa_{result_dict['id']}", width='stretch'):
-                    st.session_state.current_image = {
-                        'id': result_dict['id'], 'image_data': result_dict['data'],
-                        'original_prompt': "Image from Quick Grayscale", 'enhanced_prompt': "Image created with the Quick Grayscale utility.",
-                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Grayscale', 'color_mood': 'Monochrome', 'lighting': 'N/A',
-                        'description': 'Image created using the Quick Grayscale Converter feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'
-                    }
-                    if not any(img['id'] == result_dict['id'] for img in st.session_state.images):
-                        st.session_state.images.append(st.session_state.current_image)
-                        save_image_to_db(st.session_state.current_image)
-                    st.rerun()
-
-        with st.expander("🎞️ Sepia Tone Filter"):
-            st.info("Quickly apply a vintage sepia tone.")
-            sepia_image_file_qa = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg", "webp"], key="sepia_uploader_qa")
-
-            if sepia_image_file_qa:
-                if 'sepia_img_bytes_qa' not in st.session_state or sepia_image_file_qa.getvalue() != st.session_state.get('sepia_img_bytes_qa'):
-                    st.session_state.sepia_img_bytes_qa = sepia_image_file_qa.getvalue()
-                    st.session_state.sepia_art_dict_qa = None
-
-                if st.button("🎞️ Apply Sepia Filter", width='stretch', key="sepia_btn_qa"):
-                    with st.spinner("Applying filter..."):
-                        try:
-                            original_pil_sepia_qa = Image.open(BytesIO(st.session_state.sepia_img_bytes_qa))
-                            img = original_pil_sepia_qa.convert("RGB")
-                            img_np = np.array(img, dtype=np.float32)
-                            sepia_matrix = np.array([[0.393, 0.769, 0.189], [0.349, 0.686, 0.168], [0.272, 0.534, 0.131]])
-                            sepia_img_np = img_np.dot(sepia_matrix.T)
-                            sepia_img_np = np.clip(sepia_img_np, 0, 255)
-                            sepia_image = Image.fromarray(sep_img_np.astype('uint8'))
-                            
-                            output_buffer = BytesIO()
-                            sepia_image.save(output_buffer, format="PNG")
-                            st.session_state.sepia_art_dict_qa = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
-                        except Exception as e:
-                            st.error(f"Sepia conversion failed: {e}")
-
-            if 'sepia_art_dict_qa' in st.session_state and st.session_state.sepia_art_dict_qa:
-                st.markdown("---")
-                st.markdown("##### ✨ Sepia Result")
-                result_dict = st.session_state.sepia_art_dict_qa
-                st.image(result_dict['data'], use_container_width=True)
-                if st.button("View in Main Panel", key=f"view_sepia_qa_{result_dict['id']}", width='stretch'):
-                    st.session_state.current_image = {
-                        'id': result_dict['id'], 'image_data': result_dict['data'],
-                        'original_prompt': "Image from Quick Sepia", 'enhanced_prompt': "Image created with the Quick Sepia utility.",
-                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Sepia', 'color_mood': 'Vintage', 'lighting': 'N/A',
-                        'description': 'Image created using the Quick Sepia Filter feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'
-                    }
-                    if not any(img['id'] == result_dict['id'] for img in st.session_state.images):
-                        st.session_state.images.append(st.session_state.current_image)
-                        save_image_to_db(st.session_state.current_image)
-                    st.rerun()
-        # --- END: NEW QUICK ACTION TOOLS ---
 
 
 # Footer
