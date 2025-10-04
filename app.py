@@ -2533,7 +2533,7 @@ with col2:
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
     with st.expander("🪄 Magic Erase & Edit", expanded=False):
-        st.info("Draw a mask over an area of your image and tell the AI what to replace it with.")
+        st.info("Magic edit using nano banana (gemini-2.5-flash-image)")
 
         inpainting_image_file = st.file_uploader(
             "Upload an image to edit",
@@ -2550,9 +2550,9 @@ with col2:
             
             # NOTE: The extra .convert("RGB") line has been removed from here.
             
-            inpainting_prompt = st.text_input("What should replace the masked area?", placeholder="e.g., a majestic eagle, a field of flowers, remove the person", key="inpainting_prompt_text")
+            inpainting_prompt = st.text_input("Works like magic", placeholder="e.g., a majestic eagle, a field of flowers, remove the person", key="inpainting_prompt_text")
 
-            st.markdown("Draw on the image below to create a mask:")
+            
 
             canvas_result = st_canvas(
                 fill_color="rgba(255, 255, 255, 0.5)",
@@ -2580,7 +2580,7 @@ with col2:
                                 "Ensure the new content blends seamlessly with the original image in terms of style, lighting, and texture."
                             )
                             response = client.models.generate_content(
-                                model="gemini-2.0-flash-exp-image-generation",
+                                model="gemini-2.5-flash-image",
                                 contents=[inpaint_api_prompt, original_for_api, mask_pil],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
