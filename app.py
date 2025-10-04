@@ -3600,6 +3600,7 @@ with col2:
     # --- START: INPAINTING (MAGIC ERASE) TOOL ---
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
+# --- START: INPAINTING (MAGIC ERASE) TOOL ---
     with st.expander("🪄 Magic Erase & Inpainting", expanded=False):
         st.info("Draw a mask over an area of your image and tell the AI what to replace it with.")
 
@@ -3616,16 +3617,19 @@ with col2:
 
             original_pil_inpainting = Image.open(BytesIO(st.session_state.inpainting_img_bytes))
             
+            # --- FIX: Convert image to RGB to prevent black canvas issue ---
+            # This removes the transparency layer that can cause rendering problems.
+            original_pil_inpainting = original_pil_inpainting.convert("RGB")
+            
             inpainting_prompt = st.text_input("What should replace the masked area?", placeholder="e.g., a majestic eagle, a field of flowers, remove the person", key="inpainting_prompt_text")
 
             st.markdown("Draw on the image below to create a mask:")
 
-            # This call now works because the monkey-patch from Step 1 restored the needed function.
             canvas_result = st_canvas(
                 fill_color="rgba(255, 255, 255, 0.5)",
                 stroke_width=20,
                 stroke_color="#FFFFFF",
-                background_image=original_pil_inpainting, # Pass the actual image object
+                background_image=original_pil_inpainting,
                 update_streamlit=True,
                 height=original_pil_inpainting.height,
                 width=original_pil_inpainting.width,
