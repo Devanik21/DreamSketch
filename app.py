@@ -5789,6 +5789,91 @@ with col2:
                     save_favorites_to_db()
                     st.rerun()
 
+        # --- START: NEW QUICK ACTION TOOLS ---
+        with st.expander("🎨 Quick Color Palette"):
+            st.info("Quickly extract a color palette from an image.")
+            palette_image_file_qa = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg", "webp"], key="palette_uploader_qa")
+
+            if palette_image_file_qa:
+                if 'palette_img_bytes_qa' not in st.session_state or palette_image_file_qa.getvalue() != st.session_state.get('palette_img_bytes_qa'):
+                    st.session_state.palette_img_bytes_qa = palette_image_file_qa.getvalue()
+                    st.session_state.palette_result_qa = None
+
+                num_colors_qa = st.slider("Number of Colors", 2, 8, 5, key="palette_num_colors_qa")
+
+                if st.button("🎨 Extract Palette", width='stretch', key="palette_btn_qa"):
+                    with st.spinner("Analyzing colors..."):
+                        try:
+                            original_pil_palette_qa = Image.open(BytesIO(st.session_state.palette_img_bytes_qa))
+                            img_resized = original_pil_palette_qa.resize((100, 100))
+                            img_array = np.array(img_resized.convert("RGB"))
+                            pixels = img_array.reshape(-1, 3)
+                            kmeans = KMeans(n_clusters=num_colors_qa, random_state=42, n_init='auto').fit(pixels)
+                            dominant_colors = kmeans.cluster_centers_.astype(int)
+                            hex_colors = [f"#{r:02x}{g:02x}{b:02x}" for r, g, b in dominant_colors]
+                            st.session_state.palette_result_qa = hex_colors
+                        except Exception as e:
+                            st.error(f"Palette extraction failed: {e}")
+
+            if 'palette_result_qa' in st.session_state and st.session_state.palette_result_qa:
+                st.markdown("##### ✨ Extracted Palette")
+                hex_colors_qa = st.session_state.palette_result_qa
+                cols_qa = st.columns(len(hex_colors_qa))
+                for i, hex_color in enumerate(hex_colors_qa):
+                    with cols_qa[i]:
+                        st.markdown(f'<div style="background-color: {hex_color}; height: 40px; width: 100%; border-radius: 4px;"></div>', unsafe_allow_html=True)
+                        st.code(hex_color, language=None)
+
+        with st.expander("✏️ Quick Sketch Converter"):
+            st.info("Quickly convert an image into a pencil sketch.")
+            sketch_image_file_qa = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg", "webp"], key="sketch_uploader_qa")
+
+            if sketch_image_file_qa:
+                if 'sketch_img_bytes_qa' not in st.session_state or sketch_image_file_qa.getvalue() != st.session_state.get('sketch_img_bytes_qa'):
+                    st.session_state.sketch_img_bytes_qa = sketch_image_file_qa.getvalue()
+                    st.session_state.sketch_art_dict_qa = None
+
+                if st.button("✏️ Generate Sketch", width='stretch', key="sketch_btn_qa"):
+                    with st.spinner("Sketching..."):
+                        try:
+                            original_pil_sketch_qa = Image.open(BytesIO(st.session_state.sketch_img_bytes_qa))
+                            grayscale_image = original_pil_sketch_qa.convert("L")
+                            inverted_image = ImageOps.invert(grayscale_image)
+                            blurred_image = inverted_image.filter(ImageFilter.GaussianBlur(radius=5))
+                            
+                            grayscale_np = np.array(grayscale_image, dtype=np.float32)
+                            blurred_np = np.array(blurred_image, dtype=np.float32)
+                            
+                            epsilon = 1e-6
+                            sketch_np = (grayscale_np * 255.0) / (255.0 - blurred_np + epsilon)
+                            sketch_np = np.clip(sketch_np, 0, 255)
+                            
+                            sketch_image = Image.fromarray(sketch_np.astype('uint8'))
+                            
+                            output_buffer = BytesIO()
+                            sketch_image.save(output_buffer, format="PNG")
+                            st.session_state.sketch_art_dict_qa = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Sketch conversion failed: {e}")
+
+            if 'sketch_art_dict_qa' in st.session_state and st.session_state.sketch_art_dict_qa:
+                st.markdown("---")
+                st.markdown("##### ✨ Sketch Result")
+                result_dict = st.session_state.sketch_art_dict_qa
+                st.image(result_dict['data'], use_container_width=True)
+                if st.button("View in Main Panel", key=f"view_sketch_qa_{result_dict['id']}", width='stretch'):
+                    st.session_state.current_image = {
+                        'id': result_dict['id'], 'image_data': result_dict['data'],
+                        'original_prompt': "Image from Quick Sketch", 'enhanced_prompt': "Image created with the Quick Sketch utility.",
+                        'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Pencil Sketch', 'color_mood': 'N/A', 'lighting': 'N/A',
+                        'description': 'Image created using the Quick Sketch Converter feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'
+                    }
+                    if not any(img['id'] == result_dict['id'] for img in st.session_state.images):
+                        st.session_state.images.append(st.session_state.current_image)
+                        save_image_to_db(st.session_state.current_image)
+                    st.rerun()
+        # --- END: NEW QUICK ACTION TOOLS ---
+
 
 
         
