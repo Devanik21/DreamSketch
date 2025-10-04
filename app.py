@@ -5901,6 +5901,35 @@ with col2:
             </div>
             """, unsafe_allow_html=True)
 
+        # --- START: NEW QUICK ACTION BUTTONS ---
+        st.markdown("---")
+
+        def set_random_prompt():
+            """Generates and sets a full random prompt."""
+            subjects = [
+                "A majestic dragon soaring over a volcanic landscape", "An ancient tree spirit with glowing eyes",
+                "A celestial fox with nine tails, leaping through stars", "A forgotten library in the clouds",
+                "A futuristic city skyline at sunset", "A robot gardener tending to glowing alien plants",
+                "A samurai warrior meditating under a cherry blossom tree", "A hidden waterfall oasis in a lush jungle",
+                "A clock melting over a branch, in the style of Dali", "An old watchmaker in his workshop"
+            ]
+            details = [
+                "in the style of a classical oil painting", "as a vibrant watercolor illustration",
+                "in the style of Hayao Miyazaki", "as a detailed charcoal sketch",
+                "with dramatic, cinematic lighting", "with an ethereal, otherworldly glow",
+                "in vibrant, rich, saturated colors", "rendered in Unreal Engine 5, hyperrealistic"
+            ]
+            st.session_state.main_prompt = f"{random.choice(subjects)}, {random.choice(details)}"
+
+        st.button("🎲 Surprise Me! (Full Prompt)", on_click=set_random_prompt, use_container_width=True, help="Generate a completely new random prompt.")
+
+        def reuse_current_prompt():
+            """Copies the prompt from the current image to the main prompt input."""
+            if st.session_state.current_image:
+                st.session_state.main_prompt = st.session_state.current_image.get('original_prompt', '')
+
+        st.button("🔄 Re-use Prompt", on_click=reuse_current_prompt, use_container_width=True, help="Copy the prompt from the currently viewed image back to the input box.")
+        # --- END: NEW QUICK ACTION BUTTONS ---
 
 
 # Footer
