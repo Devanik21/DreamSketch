@@ -3593,6 +3593,20 @@ with col2:
         "↔️ Image Resizer",
         "💧 Create Reflection"
     ])
+    
+    # Add the final 10 tools to reach 50 total options
+    misc_tool_options.extend([
+        "💥 Comic Book Effect",
+        "🪩 Chromatic Aberration",
+        "🤏 Tilt-Shift (Miniature)",
+        "📐 Blueprint Effect",
+        "🕶️ Anaglyph 3D Effect",
+        "🎨 Pop Art Effect",
+        "☀️ Light Leak Effect",
+        "🌙 Night Vision Effect",
+        "📺 Scanlines (CRT) Effect",
+        "🧊 Frosted Glass Effect"
+    ])
     selected_misc_tool = st.selectbox("Select a tool from the toolkit:", misc_tool_options, key="misc_tool_selector")
 
     if selected_misc_tool == "🎲 Surprise Me! (Random Prompt)":
@@ -5195,6 +5209,357 @@ with col2:
                     is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
                     def handle_favorite_reflection(): add_reflection_to_gallery(); toggle_and_save_favorite(image_id)
                     st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_reflection, width='stretch', key=f"fav_reflection_{image_id}")
+
+    elif selected_misc_tool == "💥 Comic Book Effect":
+        with st.expander("💥 Comic Book Effect", expanded=True):
+            st.info("Transform your image into a classic comic book panel with outlines and halftone dots.")
+            
+            comic_image_file = st.file_uploader("Upload an image for the comic book effect", type=["png", "jpg", "jpeg", "webp"], key="comic_uploader")
+
+            if comic_image_file:
+                if 'comic_img_bytes' not in st.session_state or comic_image_file.getvalue() != st.session_state.get('comic_img_bytes'):
+                    st.session_state.comic_img_bytes = comic_image_file.getvalue()
+                    st.session_state.comic_art_dict = None
+
+                original_pil_comic = Image.open(BytesIO(st.session_state.comic_img_bytes)).convert("RGB")
+                st.image(original_pil_comic, caption="Original Image", use_container_width=True)
+
+                if st.button("💥 Apply Comic Book Effect", width='stretch'):
+                    with st.spinner("Inking and coloring..."):
+                        try:
+                            # 1. Edge detection for outlines
+                            edges = original_pil_comic.convert('L').filter(ImageFilter.FIND_EDGES)
+                            edges = ImageOps.invert(edges)
+                            
+                            # 2. Posterize for flat colors
+                            posterized = ImageOps.posterize(original_pil_comic, 3)
+
+                            # 3. Combine outlines and colors
+                            comic_image = Image.blend(posterized, edges.convert('RGB'), alpha=0.3)
+
+                            output_buffer = BytesIO()
+                            comic_image.save(output_buffer, format="PNG")
+                            st.session_state.comic_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Comic book effect failed: {e}")
+
+            if 'comic_art_dict' in st.session_state and st.session_state.comic_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Comic Book Result")
+                result_dict = st.session_state.comic_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your comic book image")
+                st.download_button("💾 Download as .png", result_data, f"comic_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_comic_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_comic_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Comic Book Effect", 'enhanced_prompt': "Image created with the Comic Book Effect utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Comic Book Effect', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Comic Book Effect feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_comic_{image_id}"):
+                        add_comic_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_comic(): add_comic_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_comic, width='stretch', key=f"fav_comic_{image_id}")
+
+    elif selected_misc_tool == "🪩 Chromatic Aberration":
+        with st.expander("🪩 Chromatic Aberration", expanded=True):
+            st.info("Create a retro RGB split effect by shifting the color channels.")
+            
+            ca_image_file = st.file_uploader("Upload an image for chromatic aberration", type=["png", "jpg", "jpeg", "webp"], key="ca_uploader")
+
+            if ca_image_file:
+                if 'ca_img_bytes' not in st.session_state or ca_image_file.getvalue() != st.session_state.get('ca_img_bytes'):
+                    st.session_state.ca_img_bytes = ca_image_file.getvalue()
+                    st.session_state.ca_art_dict = None
+
+                original_pil_ca = Image.open(BytesIO(st.session_state.ca_img_bytes)).convert("RGB")
+                st.image(original_pil_ca, caption="Original Image", use_container_width=True)
+
+                shift_amount = st.slider("Shift Amount (pixels)", 1, 50, 10, key="ca_shift")
+
+                if st.button("🪩 Apply RGB Split", width='stretch'):
+                    with st.spinner("Splitting channels..."):
+                        try:
+                            r, g, b = original_pil_ca.split()
+                            r_shifted = Image.new('L', original_pil_ca.size)
+                            r_shifted.paste(r, (-shift_amount, 0))
+                            b_shifted = Image.new('L', original_pil_ca.size)
+                            b_shifted.paste(b, (shift_amount, 0))
+                            ca_image = Image.merge("RGB", (r_shifted, g, b_shifted))
+
+                            output_buffer = BytesIO()
+                            ca_image.save(output_buffer, format="PNG")
+                            st.session_state.ca_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Chromatic aberration failed: {e}")
+
+            if 'ca_art_dict' in st.session_state and st.session_state.ca_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Chromatic Aberration Result")
+                result_dict = st.session_state.ca_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your RGB split image")
+                st.download_button("💾 Download as .png", result_data, f"ca_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_ca_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_ca_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Chromatic Aberration", 'enhanced_prompt': "Image created with the Chromatic Aberration utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Chromatic Aberration', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Chromatic Aberration feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_ca_{image_id}"):
+                        add_ca_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_ca(): add_ca_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_ca, width='stretch', key=f"fav_ca_{image_id}")
+
+    elif selected_misc_tool == "🤏 Tilt-Shift (Miniature) Effect":
+        with st.expander("🤏 Tilt-Shift (Miniature) Effect", expanded=True):
+            st.info("Create a 'miniature world' effect by blurring the top and bottom of the image.")
+            
+            tilt_image_file = st.file_uploader("Upload an image for tilt-shift effect", type=["png", "jpg", "jpeg", "webp"], key="tilt_uploader")
+
+            if tilt_image_file:
+                if 'tilt_img_bytes' not in st.session_state or tilt_image_file.getvalue() != st.session_state.get('tilt_img_bytes'):
+                    st.session_state.tilt_img_bytes = tilt_image_file.getvalue()
+                    st.session_state.tilt_art_dict = None
+
+                original_pil_tilt = Image.open(BytesIO(st.session_state.tilt_img_bytes)).convert("RGB")
+                st.image(original_pil_tilt, caption="Original Image", use_container_width=True)
+
+                focus_point = st.slider("Focus Point (Vertical %)", 0, 100, 50, key="tilt_focus")
+                focus_width = st.slider("Focus Width (%)", 1, 100, 20, key="tilt_width")
+
+                if st.button("🤏 Apply Tilt-Shift", width='stretch'):
+                    with st.spinner("Creating miniature effect..."):
+                        try:
+                            w, h = original_pil_tilt.size
+                            blurred = original_pil_tilt.filter(ImageFilter.GaussianBlur(5))
+                            mask = Image.new('L', (w, h), 0)
+                            draw = ImageDraw.Draw(mask)
+                            
+                            focus_start = h * (focus_point - focus_width / 2) / 100
+                            focus_end = h * (focus_point + focus_width / 2) / 100
+                            
+                            for y in range(h):
+                                if focus_start <= y <= focus_end:
+                                    val = 255
+                                else:
+                                    dist = min(abs(y - focus_start), abs(y - focus_end))
+                                    val = max(0, 255 - int(dist * 2))
+                                draw.line([(0, y), (w, y)], fill=val)
+
+                            tilt_image = Image.composite(original_pil_tilt, blurred, mask)
+
+                            output_buffer = BytesIO()
+                            tilt_image.save(output_buffer, format="PNG")
+                            st.session_state.tilt_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Tilt-shift effect failed: {e}")
+
+            if 'tilt_art_dict' in st.session_state and st.session_state.tilt_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Tilt-Shift Result")
+                result_dict = st.session_state.tilt_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your tilt-shift image")
+                st.download_button("💾 Download as .png", result_data, f"tilt_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_tilt_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_tilt_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Tilt-Shift Effect", 'enhanced_prompt': "Image created with the Tilt-Shift Effect utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Tilt-Shift Effect', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Tilt-Shift Effect feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_tilt_{image_id}"):
+                        add_tilt_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_tilt(): add_tilt_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_tilt, width='stretch', key=f"fav_tilt_{image_id}")
+
+    elif selected_misc_tool == "📐 Blueprint Effect":
+        with st.expander("📐 Blueprint Effect", expanded=True):
+            st.info("Transform your image into a stylized architectural blueprint.")
+            
+            blueprint_image_file = st.file_uploader("Upload an image for blueprint effect", type=["png", "jpg", "jpeg", "webp"], key="blueprint_uploader")
+
+            if blueprint_image_file:
+                if 'blueprint_img_bytes' not in st.session_state or blueprint_image_file.getvalue() != st.session_state.get('blueprint_img_bytes'):
+                    st.session_state.blueprint_img_bytes = blueprint_image_file.getvalue()
+                    st.session_state.blueprint_art_dict = None
+
+                original_pil_blueprint = Image.open(BytesIO(st.session_state.blueprint_img_bytes)).convert("RGB")
+                st.image(original_pil_blueprint, caption="Original Image", use_container_width=True)
+
+                if st.button("📐 Apply Blueprint Effect", width='stretch'):
+                    with st.spinner("Drafting blueprint..."):
+                        try:
+                            edges = original_pil_blueprint.convert('L').filter(ImageFilter.CONTOUR)
+                            inverted_edges = ImageOps.invert(edges)
+                            blueprint_image = ImageOps.colorize(inverted_edges, black="#002266", white="#FFFFFF")
+
+                            output_buffer = BytesIO()
+                            blueprint_image.save(output_buffer, format="PNG")
+                            st.session_state.blueprint_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Blueprint effect failed: {e}")
+
+            if 'blueprint_art_dict' in st.session_state and st.session_state.blueprint_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Blueprint Result")
+                result_dict = st.session_state.blueprint_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your blueprint image")
+                st.download_button("💾 Download as .png", result_data, f"blueprint_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_blueprint_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_blueprint_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Blueprint Effect", 'enhanced_prompt': "Image created with the Blueprint Effect utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Blueprint Effect', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Blueprint Effect feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_blueprint_{image_id}"):
+                        add_blueprint_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_blueprint(): add_blueprint_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_blueprint, width='stretch', key=f"fav_blueprint_{image_id}")
+
+    elif selected_misc_tool == "🕶️ Anaglyph 3D Effect":
+        with st.expander("🕶️ Anaglyph 3D Effect", expanded=True):
+            st.info("Create a vintage red-cyan 3D effect. (Requires 3D glasses to view properly).")
+            
+            anaglyph_image_file = st.file_uploader("Upload an image for anaglyph effect", type=["png", "jpg", "jpeg", "webp"], key="anaglyph_uploader")
+
+            if anaglyph_image_file:
+                if 'anaglyph_img_bytes' not in st.session_state or anaglyph_image_file.getvalue() != st.session_state.get('anaglyph_img_bytes'):
+                    st.session_state.anaglyph_img_bytes = anaglyph_image_file.getvalue()
+                    st.session_state.anaglyph_art_dict = None
+
+                original_pil_anaglyph = Image.open(BytesIO(st.session_state.anaglyph_img_bytes)).convert("RGB")
+                st.image(original_pil_anaglyph, caption="Original Image", use_container_width=True)
+
+                shift = st.slider("3D Shift Amount (pixels)", 1, 20, 5, key="anaglyph_shift")
+
+                if st.button("🕶️ Apply Anaglyph 3D", width='stretch'):
+                    with st.spinner("Creating 3D effect..."):
+                        try:
+                            r, g, b = original_pil_anaglyph.split()
+                            left_img = Image.merge('RGB', (Image.new('L', r.size, 0), g, b))
+                            right_img = Image.new('RGB', original_pil_anaglyph.size)
+                            right_img.paste(r, (-shift, 0))
+                            anaglyph_image = Image.blend(left_img, right_img, 0.5)
+
+                            output_buffer = BytesIO()
+                            anaglyph_image.save(output_buffer, format="PNG")
+                            st.session_state.anaglyph_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Anaglyph effect failed: {e}")
+
+            if 'anaglyph_art_dict' in st.session_state and st.session_state.anaglyph_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Anaglyph 3D Result")
+                result_dict = st.session_state.anaglyph_art_dict
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption="Your anaglyph 3D image")
+                st.download_button("💾 Download as .png", result_data, f"anaglyph_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_anaglyph_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_anaglyph_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Anaglyph 3D Effect", 'enhanced_prompt': "Image created with the Anaglyph 3D Effect utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Anaglyph 3D', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Anaglyph 3D Effect feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_anaglyph_{image_id}"):
+                        add_anaglyph_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite_anaglyph(): add_anaglyph_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_anaglyph, width='stretch', key=f"fav_anaglyph_{image_id}")
+
+    elif selected_misc_tool in ["🎨 Pop Art Effect", "☀️ Light Leak Effect", "🌙 Night Vision Effect", "📺 Scanlines (CRT) Effect", "🧊 Frosted Glass Effect"]:
+        tool_configs = {
+            "🎨 Pop Art Effect": {"name": "Pop Art", "spinner_text": "Creating Pop Art..."},
+            "☀️ Light Leak Effect": {"name": "Light Leak", "spinner_text": "Adding light leak..."},
+            "🌙 Night Vision Effect": {"name": "Night Vision", "spinner_text": "Enabling night vision..."},
+            "📺 Scanlines (CRT) Effect": {"name": "Scanlines", "spinner_text": "Adding scanlines..."},
+            "🧊 Frosted Glass Effect": {"name": "Frosted Glass", "spinner_text": "Frosting glass..."}
+        }
+        config = tool_configs[selected_misc_tool]
+        tool_name_lower = config['name'].lower().replace(" ", "_")
+
+        with st.expander(selected_misc_tool, expanded=True):
+            st.info(f"Apply a {config['name']} effect to your image.")
+            
+            image_file = st.file_uploader(f"Upload an image for {config['name']} effect", type=["png", "jpg", "jpeg", "webp"], key=f"{tool_name_lower}_uploader")
+
+            if image_file:
+                if f'{tool_name_lower}_img_bytes' not in st.session_state or image_file.getvalue() != st.session_state.get(f'{tool_name_lower}_img_bytes'):
+                    st.session_state[f'{tool_name_lower}_img_bytes'] = image_file.getvalue()
+                    st.session_state[f'{tool_name_lower}_art_dict'] = None
+
+                original_pil = Image.open(BytesIO(st.session_state[f'{tool_name_lower}_img_bytes'])).convert("RGB")
+                st.image(original_pil, caption="Original Image", use_container_width=True)
+
+                if st.button(f"{selected_misc_tool.split(' ')[0]} Apply Effect", width='stretch'):
+                    with st.spinner(config['spinner_text']):
+                        try:
+                            w, h = original_pil.size
+                            if config['name'] == "Pop Art":
+                                colors = [ImageOps.colorize(original_pil.convert('L'), black=c1, white=c2) for c1, c2 in [("#0000FF", "#FFFF00"), ("#FF0000", "#00FFFF"), ("#00FF00", "#FF00FF"), ("#FFFF00", "#0000FF")]]
+                                processed_image = Image.new('RGB', (w*2, h*2))
+                                processed_image.paste(colors[0].resize((w,h)), (0,0))
+                                processed_image.paste(colors[1].resize((w,h)), (w,0))
+                                processed_image.paste(colors[2].resize((w,h)), (0,h))
+                                processed_image.paste(colors[3].resize((w,h)), (w,h))
+                            elif config['name'] == "Light Leak":
+                                gradient = Image.new('L', (w, h), 0)
+                                draw = ImageDraw.Draw(gradient)
+                                for i in range(h):
+                                    draw.line([(0, i), (w, i)], fill=int(255 * (i/h)**2))
+                                leak_color = Image.new('RGB', (w, h), '#FF5733')
+                                leak = Image.composite(leak_color, Image.new('RGB', (w,h), (0,0,0)), gradient)
+                                processed_image = Image.blend(original_pil, leak, alpha=0.3)
+                            elif config['name'] == "Night Vision":
+                                gray = original_pil.convert('L')
+                                processed_image = ImageOps.colorize(gray, black="#0A2A0A", white="#30FF30")
+                                noise = np.random.randint(-20, 20, (h, w, 3), dtype='int16')
+                                processed_image = Image.fromarray(np.clip(np.array(processed_image) + noise, 0, 255).astype('uint8'))
+                            elif config['name'] == "Scanlines":
+                                processed_image = original_pil.copy()
+                                draw = ImageDraw.Draw(processed_image)
+                                for y in range(0, h, 2):
+                                    draw.line([(0, y), (w, y)], fill=(0, 0, 0, 50))
+                            elif config['name'] == "Frosted Glass":
+                                small = original_pil.resize((w//20, h//20), Image.Resampling.BILINEAR)
+                                processed_image = small.resize(original_pil.size, Image.Resampling.NEAREST)
+                                processed_image = processed_image.filter(ImageFilter.GaussianBlur(2))
+
+                            output_buffer = BytesIO()
+                            processed_image.save(output_buffer, format="PNG")
+                            st.session_state[f'{tool_name_lower}_art_dict'] = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
+                        except Exception as e:
+                            st.error(f"Effect application failed: {e}")
+
+            if f'{tool_name_lower}_art_dict' in st.session_state and st.session_state[f'{tool_name_lower}_art_dict']:
+                st.markdown(f"---"); st.markdown(f"#### ✨ {config['name']} Result")
+                result_dict = st.session_state[f'{tool_name_lower}_art_dict']
+                result_data, image_id = result_dict['data'], result_dict['id']
+                st.image(result_data, use_container_width=True, caption=f"Your {tool_name_lower} image")
+                st.download_button("💾 Download as .png", result_data, f"{tool_name_lower}_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_{tool_name_lower}_{image_id}")
+                b_col1, b_col2 = st.columns(2)
+                def add_to_gallery():
+                    if not any(img['id'] == image_id for img in st.session_state.images):
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': f"Image from {config['name']}", 'enhanced_prompt': f"Image created with the {config['name']} utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': f"{config['name']}", 'color_mood': 'N/A', 'lighting': 'N/A', 'description': f"Image created using the {config['name']} feature.", 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
+                with b_col1:
+                    is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
+                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_{tool_name_lower}_{image_id}"):
+                        add_to_gallery(); st.rerun()
+                with b_col2:
+                    is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
+                    def handle_favorite(): add_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite, width='stretch', key=f"fav_{tool_name_lower}_{image_id}")
 
     # --- END: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # --- END: SURPRISE ME - RANDOM PROMPT GENERATOR ---
