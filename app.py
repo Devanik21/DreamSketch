@@ -3573,6 +3573,7 @@ with col2:
     # --- END: BACKGROUND REMOVAL TOOL ---
 
     # --- START: INPAINTING (MAGIC ERASE) TOOL ---
+# --- START: INPAINTING (MAGIC ERASE) TOOL ---
     with st.expander("🪄 Magic Erase & Inpainting", expanded=False):
         st.info("Draw a mask over an area of your image and tell the AI what to replace it with.")
 
