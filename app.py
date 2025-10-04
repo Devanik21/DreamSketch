@@ -5894,7 +5894,7 @@ with col2:
             ]
             st.session_state.main_prompt = f"{random.choice(subjects)}, {random.choice(details)}"
 
-        st.button("🎲 Surprise Me! (Full Prompt)", on_click=set_random_prompt, use_container_width=True, help="Generate a completely new random prompt.")
+        st.button("🎲 Surprise Me! ", on_click=set_random_prompt, use_container_width=True, help="Generate a completely new random prompt.")
 
         def reuse_current_prompt():
             """Copies the prompt from the current image to the main prompt input."""
