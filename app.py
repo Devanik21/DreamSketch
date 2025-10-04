@@ -2532,6 +2532,7 @@ with col2:
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
+# --- START: INPAINTING (MAGIC ERASE) TOOL ---
     with st.expander("🪄 Magic Erase & Edit", expanded=False):
         st.info("Magic edit using nano banana (gemini-2.5-flash-image) [Beta] ")
 
@@ -2547,12 +2548,15 @@ with col2:
                 st.session_state.inpainting_result_dict = None
 
             original_pil_inpainting = Image.open(BytesIO(st.session_state.inpainting_img_bytes))
-            
-            # NOTE: The extra .convert("RGB") line has been removed from here.
-            
-            inpainting_prompt = st.text_input("Works like magic", placeholder="e.g., a majestic eagle, a field of flowers, remove the person", key="inpainting_prompt_text")
 
-            
+            # --- FIX: Display the uploaded image before the canvas ---
+            st.markdown("##### 1. Your Uploaded Image")
+            st.image(original_pil_inpainting, caption="This is the image you'll be editing on the canvas below.", use_container_width=True)
+            st.markdown("---")
+            # --- END FIX ---
+
+            st.markdown("##### 2. Describe Your Edit & Draw a Mask")
+            inpainting_prompt = st.text_input("What should replace the masked area?", placeholder="e.g., a majestic eagle, a field of flowers, remove the person", key="inpainting_prompt_text")
 
             canvas_result = st_canvas(
                 fill_color="rgba(255, 255, 255, 0.5)",
