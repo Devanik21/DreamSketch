@@ -18,7 +18,31 @@ import base64
 from tinydb import TinyDB, Query
 
 
+# --- START: MONKEY-PATCH FOR DEPRECATED image_to_url ---
+# This helper function re-creates the missing `image_to_url` functionality
+# in newer versions of Streamlit, allowing streamlit-drawable-canvas to work.
+import streamlit.elements.image as st_image
+from PIL import Image
+from io import BytesIO
 
+
+def image_to_url(img, width, height, clamp, channels, output_format, image_id):
+    """
+    Converts a PIL Image to a base64-encoded data URL.
+    This function is a stand-in for the deprecated st.image_to_url.
+    """
+    # In-memory file-like object
+    buffered = BytesIO()
+    # Save the image to the buffer in the desired format
+    img.save(buffered, format="PNG")
+    # Encode the bytes to a base64 string
+    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    # Return the data URL
+    return f"data:image/png;base64,{img_str}"
+
+# Overwrite the missing function with our new implementation
+st_image.image_to_url = image_to_url
+# --- END: MONKEY-PATCH ---
 # --- START: API KEY ROTATION SETUP ---
 def initialize_gemini_client():
     """
@@ -3574,6 +3598,7 @@ with col2:
 
     # --- START: INPAINTING (MAGIC ERASE) TOOL ---
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
+# --- START: INPAINTING (MAGIC ERASE) TOOL ---
     with st.expander("🪄 Magic Erase & Inpainting", expanded=False):
         st.info("Draw a mask over an area of your image and tell the AI what to replace it with.")
 
@@ -3594,13 +3619,12 @@ with col2:
 
             st.markdown("Draw on the image below to create a mask:")
 
-            # --- FIX: Pass the PIL Image object directly to the canvas ---
-            # The library should handle the conversion internally. This fixes the "'str' object has no attribute 'height'" error.
+            # This call now works because the monkey-patch from Step 1 restored the needed function.
             canvas_result = st_canvas(
                 fill_color="rgba(255, 255, 255, 0.5)",
                 stroke_width=20,
                 stroke_color="#FFFFFF",
-                background_image=original_pil_inpainting, # Pass the image object here
+                background_image=original_pil_inpainting, # Pass the actual image object
                 update_streamlit=True,
                 height=original_pil_inpainting.height,
                 width=original_pil_inpainting.width,
@@ -3612,22 +3636,17 @@ with col2:
                 if canvas_result.image_data is not None and inpainting_prompt:
                     with st.spinner("The AI is working its magic..."):
                         try:
-                            # The mask is the drawn part. We need to convert it to a proper mask image.
                             mask_pil = Image.fromarray(canvas_result.image_data).convert("L")
-
-                            # The prompt for the API
                             inpaint_api_prompt = (
                                 "You are an expert image editor. Use the provided mask to perform an inpainting task. "
                                 f"Replace the masked (white) area with: '{inpainting_prompt}'. "
                                 "Ensure the new content blends seamlessly with the original image in terms of style, lighting, and texture."
                             )
-
                             response = client.models.generate_content(
                                 model="gemini-2.0-flash-exp-image-generation",
                                 contents=[inpaint_api_prompt, original_pil_inpainting, mask_pil],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
-
                             st.session_state.inpainting_result_dict = None
                             for part in response.candidates[0].content.parts:
                                 if part.inline_data:
@@ -3639,7 +3658,6 @@ with col2:
                                     break
                             if not st.session_state.inpainting_result_dict:
                                 st.error("The model did not return an edited image. Please try again.")
-
                         except Exception as e:
                             st.error(f"Inpainting failed: {e}")
                 else:
@@ -3648,14 +3666,11 @@ with col2:
         if 'inpainting_result_dict' in st.session_state and st.session_state.inpainting_result_dict:
             st.markdown("---")
             st.markdown("#### ✨ Inpainting Result")
-
             result_dict = st.session_state.inpainting_result_dict
             result_data = result_dict['data']
             image_id = result_dict['id']
             original_filename = result_dict.get('original_filename', f"image_{int(time.time())}.png")
-            
             st.image(result_data, use_container_width=True, caption="Your edited masterpiece")
-            
             st.download_button(label="📥 Download Edited Image", data=result_data, file_name=f"inpainted_{original_filename}", mime="image/png", use_container_width=True, key=f"download_inpainted_{image_id}")
     # --- END: INPAINTING (MAGIC ERASE) TOOL ---
 
