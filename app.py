@@ -5981,4 +5981,4 @@ st.markdown("""
     <p>✨ Powered by Google Gemini Flash • Created with ❤️ for artists and dreamers</p>
     <p style="font-size: 0.8rem;">Transform your imagination into reality with AI-powered artistry</p>
 </div>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html=True)      
