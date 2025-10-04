@@ -6,4 +6,4 @@ gTTS
 scikit-learn
 numpy
 opencv-python
- 
+streamlit-drawable-canvas
