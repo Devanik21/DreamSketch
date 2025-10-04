@@ -3594,19 +3594,13 @@ with col2:
 
             st.markdown("Draw on the image below to create a mask:")
 
-            # --- FIX: Convert PIL image to base64 data URL ---
-            # This avoids the 'image_to_url' error with newer Streamlit versions.
-            buffered = BytesIO()
-            original_pil_inpainting.save(buffered, format="PNG")
-            img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-            bg_image_url = f"data:image/png;base64,{img_str}"
-            # --- END FIX ---
-
+            # --- FIX: Pass the PIL Image object directly to the canvas ---
+            # The library should handle the conversion internally. This fixes the "'str' object has no attribute 'height'" error.
             canvas_result = st_canvas(
                 fill_color="rgba(255, 255, 255, 0.5)",
                 stroke_width=20,
                 stroke_color="#FFFFFF",
-                background_image=bg_image_url, # Use the data URL here
+                background_image=original_pil_inpainting, # Pass the image object here
                 update_streamlit=True,
                 height=original_pil_inpainting.height,
                 width=original_pil_inpainting.width,
