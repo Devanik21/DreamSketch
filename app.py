@@ -2533,7 +2533,7 @@ with col2:
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
     with st.expander("🪄 Magic Erase & Edit", expanded=False):
-        st.info("Magic edit using nano banana (gemini-2.5-flash-image)")
+        st.info("Magic edit using nano banana (gemini-2.5-flash-image) [Beta] ")
 
         inpainting_image_file = st.file_uploader(
             "Upload an image to edit",
@@ -2580,7 +2580,7 @@ with col2:
                                 "Ensure the new content blends seamlessly with the original image in terms of style, lighting, and texture."
                             )
                             response = client.models.generate_content(
-                                model="gemini-2.5-flash-image",
+                                model="gemini-2.0-flash-exp-image-generation",
                                 contents=[inpaint_api_prompt, original_for_api, mask_pil],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
