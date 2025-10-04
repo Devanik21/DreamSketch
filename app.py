@@ -2532,7 +2532,7 @@ with col2:
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
-    with st.expander("🪄 Magic Erase & Inpainting", expanded=False):
+    with st.expander("🪄 Magic Erase & Edit", expanded=False):
         st.info("Draw a mask over an area of your image and tell the AI what to replace it with.")
 
         inpainting_image_file = st.file_uploader(
