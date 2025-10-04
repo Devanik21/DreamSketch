@@ -11,6 +11,7 @@ import random
 import uuid
 import numpy as np
 from sklearn.cluster import KMeans
+from streamlit_drawable_canvas import st_canvas
 # --- START: DATABASE PERSISTENCE SETUP ---
 import os
 import base64
@@ -3571,6 +3572,89 @@ with col2:
                 )
     # --- END: BACKGROUND REMOVAL TOOL ---
 
+    # --- START: INPAINTING (MAGIC ERASE) TOOL ---
+    with st.expander("🪄 Magic Erase & Inpainting", expanded=False):
+        st.info("Draw a mask over an area of your image and tell the AI what to replace it with.")
+
+        inpainting_image_file = st.file_uploader(
+            "Upload an image to edit",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="inpainting_uploader"
+        )
+
+        if inpainting_image_file:
+            if 'inpainting_img_bytes' not in st.session_state or inpainting_image_file.getvalue() != st.session_state.get('inpainting_img_bytes'):
+                st.session_state.inpainting_img_bytes = inpainting_image_file.getvalue()
+                st.session_state.inpainting_result_dict = None
+
+            original_pil_inpainting = Image.open(BytesIO(st.session_state.inpainting_img_bytes))
+            
+            inpainting_prompt = st.text_input("What should replace the masked area?", placeholder="e.g., a majestic eagle, a field of flowers, remove the person", key="inpainting_prompt_text")
+
+            st.markdown("Draw on the image below to create a mask:")
+            canvas_result = st_canvas(
+                fill_color="rgba(255, 255, 255, 0.5)",
+                stroke_width=20,
+                stroke_color="#FFFFFF",
+                background_image=original_pil_inpainting,
+                update_streamlit=True,
+                height=original_pil_inpainting.height,
+                width=original_pil_inpainting.width,
+                drawing_mode="freedraw",
+                key="inpainting_canvas",
+            )
+
+            if st.button("🪄 Perform Inpainting", use_container_width=True):
+                if canvas_result.image_data is not None and inpainting_prompt:
+                    with st.spinner("The AI is working its magic..."):
+                        try:
+                            # The mask is the drawn part. We need to convert it to a proper mask image.
+                            mask_pil = Image.fromarray(canvas_result.image_data).convert("L")
+
+                            # The prompt for the API
+                            inpaint_api_prompt = (
+                                "You are an expert image editor. Use the provided mask to perform an inpainting task. "
+                                f"Replace the masked (white) area with: '{inpainting_prompt}'. "
+                                "Ensure the new content blends seamlessly with the original image in terms of style, lighting, and texture."
+                            )
+
+                            response = client.models.generate_content(
+                                model="gemini-2.0-flash-exp-image-generation",
+                                contents=[inpaint_api_prompt, original_pil_inpainting, mask_pil],
+                                config=types.GenerateContentConfig(response_modalities=["text", "image"])
+                            )
+
+                            st.session_state.inpainting_result_dict = None
+                            for part in response.candidates[0].content.parts:
+                                if part.inline_data:
+                                    st.session_state.inpainting_result_dict = {
+                                        "id": str(uuid.uuid4()),
+                                        "data": part.inline_data.data,
+                                        "original_filename": inpainting_image_file.name
+                                    }
+                                    break
+                            if not st.session_state.inpainting_result_dict:
+                                st.error("The model did not return an edited image. Please try again.")
+
+                        except Exception as e:
+                            st.error(f"Inpainting failed: {e}")
+                else:
+                    st.warning("Please draw a mask on the image and provide a prompt.")
+
+        if 'inpainting_result_dict' in st.session_state and st.session_state.inpainting_result_dict:
+            st.markdown("---")
+            st.markdown("#### ✨ Inpainting Result")
+
+            result_dict = st.session_state.inpainting_result_dict
+            result_data = result_dict['data']
+            image_id = result_dict['id']
+            original_filename = result_dict.get('original_filename', f"image_{int(time.time())}.png")
+            
+            st.image(result_data, use_container_width=True, caption="Your edited masterpiece")
+            
+            st.download_button(label="📥 Download Edited Image", data=result_data, file_name=f"inpainted_{original_filename}", mime="image/png", use_container_width=True, key=f"download_inpainted_{image_id}")
+    # --- END: INPAINTING (MAGIC ERASE) TOOL ---
+
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
     # This container is now outside the 'if' condition, so it appears on startup.
     # --- START: SURPRISE ME - RANDOM PROMPT GENERATOR ---
@@ -5894,7 +5978,7 @@ with col2:
             ]
             st.session_state.main_prompt = f"{random.choice(subjects)}, {random.choice(details)}"
 
-        st.button("🎲 Surprise Me! ", on_click=set_random_prompt, use_container_width=True, help="Generate a completely new random prompt.")
+        st.button("🎲 Surprise Me! (Full Prompt)", on_click=set_random_prompt, use_container_width=True, help="Generate a completely new random prompt.")
 
         def reuse_current_prompt():
             """Copies the prompt from the current image to the main prompt input."""
