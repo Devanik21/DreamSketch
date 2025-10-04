@@ -5902,8 +5902,7 @@ with col2:
             """, unsafe_allow_html=True)
 
         # --- START: REVISED QUICK ACTION BUTTONS ---
-        def set_random_prompt():
-            """Generates and sets a full random prompt."""
+        if st.button("🎲 Surprise Me! (Full Prompt)", use_container_width=True, help="Generate a completely new random prompt."):
             subjects = [
                 "A majestic dragon soaring over a volcanic landscape", "An ancient tree spirit with glowing eyes",
                 "A celestial fox with nine tails, leaping through stars", "A forgotten library in the clouds",
@@ -5917,9 +5916,9 @@ with col2:
                 "with dramatic, cinematic lighting", "with an ethereal, otherworldly glow",
                 "in vibrant, rich, saturated colors", "rendered in Unreal Engine 5, hyperrealistic"
             ]
-            st.session_state.main_prompt = f"{random.choice(subjects)}, {random.choice(details)}"
-
-        st.button("🎲 Surprise Me! (Full Prompt)", on_click=set_random_prompt, use_container_width=True, help="Generate a completely new random prompt.")
+            new_prompt = f"{random.choice(subjects)}, {random.choice(details)}"
+            st.session_state.main_prompt = new_prompt
+            st.markdown(f'<div class="info-box">✨ New prompt generated! <br><small><i>"{new_prompt[:50]}..."</i></small></div>', unsafe_allow_html=True)
 
         if st.button("🔄 Re-use Prompt", use_container_width=True, help="Copy the prompt from the currently viewed image back to the input box."):
             if st.session_state.current_image:
@@ -5981,4 +5980,4 @@ st.markdown("""
     <p>✨ Powered by Google Gemini Flash • Created with ❤️ for artists and dreamers</p>
     <p style="font-size: 0.8rem;">Transform your imagination into reality with AI-powered artistry</p>
 </div>
-""", unsafe_allow_html=True)      
+""", unsafe_allow_html=True)
