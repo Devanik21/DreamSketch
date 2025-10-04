@@ -5876,31 +5876,6 @@ with col2:
 
 
 
-        
-        
-        if st.button("🎲 Random Style", use_container_width=True):
-            import random
-            random_category = random.choice(list(STYLE_CATEGORIES.keys()))
-            random_style = random.choice(STYLE_CATEGORIES[random_category])
-            st.session_state.temp_style = f"{random_category}: {random_style}"
-            st.rerun()
-
-
-
-        
-        if hasattr(st.session_state, 'temp_style'):
-            st.markdown(f"**Suggested**: {st.session_state.temp_style}")
-        
-        if st.button("📊 Gallery Stats", use_container_width=True):
-            st.markdown(f"""
-            <div class="info-box">
-            <strong>📈 Your Stats:</strong><br>
-            • Images Generated: {len(st.session_state.images)}<br>
-            • Most Used Style: {selected_style}<br>
-            • Session Started: {time.strftime('%H:%M')}
-            </div>
-            """, unsafe_allow_html=True)
-
         # --- START: REVISED QUICK ACTION BUTTONS ---
         def set_random_prompt():
             """Generates and sets a full random prompt."""
@@ -5934,6 +5909,30 @@ with col2:
 
         st.button("🔄 Re-use Prompt", on_click=reuse_current_prompt, use_container_width=True, help="Copy the prompt from the currently viewed image back to the input box.")
         # --- END: REVISED QUICK ACTION BUTTONS ---
+        
+        
+        if st.button("🎲 Random Style", use_container_width=True):
+            import random
+            random_category = random.choice(list(STYLE_CATEGORIES.keys()))
+            random_style = random.choice(STYLE_CATEGORIES[random_category])
+            st.session_state.temp_style = f"{random_category}: {random_style}"
+            st.rerun()
+
+
+
+        
+        if hasattr(st.session_state, 'temp_style'):
+            st.markdown(f"**Suggested**: {st.session_state.temp_style}")
+        
+        if st.button("📊 Gallery Stats", use_container_width=True):
+            st.markdown(f"""
+            <div class="info-box">
+            <strong>📈 Your Stats:</strong><br>
+            • Images Generated: {len(st.session_state.images)}<br>
+            • Most Used Style: {selected_style}<br>
+            • Session Started: {time.strftime('%H:%M')}
+            </div>
+            """, unsafe_allow_html=True)
 
 
 # Footer
