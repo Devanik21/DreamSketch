@@ -2314,28 +2314,62 @@ with col1:
 
 with col2:
     st.markdown("### 💡 Quick Tips")
-    
-    with st.expander("✨ Prompt Writing Guide", expanded=False):
-        st.markdown("""
-        **Structure your prompt:**
-        1. **Subject**: What/who is the main focus?
-        2. **Setting**: Where does it take place?
-        3. **Style**: Art style or technique
-        4. **Mood**: Atmosphere and emotion
-        5. **Details**: Colors, lighting, composition
+
+    tip_options = {
+        "--- Select a Tip ---": "Select a category from the dropdown to learn more about crafting the perfect prompt.",
+        "✍️ Effective Prompting 101": """
+        A great prompt is a recipe for a great image. Structure your ideas clearly for the best results.
+        - **Subject**: Start with the main focus. *'A majestic lion', 'A futuristic city', 'A portrait of a queen'.*
+        - **Medium**: How was it made? *'Oil painting', 'Photograph', '3D render', 'Pencil sketch'.*
+        - **Style**: The artistic influence. *'Impressionism', 'Cyberpunk', 'Art Nouveau', 'by Van Gogh'.*
+        - **Setting & Context**: Where and when? *'in a sun-drenched meadow', 'on a distant alien planet', 'during the Roaring Twenties'.*
+        - **Composition**: How is it framed? *'Wide-angle shot', 'Close-up portrait', 'Bird's-eye view'.*
+        - **Lighting**: How is it lit? *'Soft morning light', 'Dramatic cinematic lighting', 'Neon glow'.*
+        - **Color & Mood**: The emotional tone. *'Vibrant and energetic', 'Monochromatic and somber', 'Pastel and dreamy'.*
         
-        **Example**: *"A mystical forest guardian, ancient oak setting, Studio Ghibli style, serene mood, soft golden lighting"*
-        """)
-        
-    
-    
-    with st.expander(" 🎉 Style Examples"):
-        st.markdown("""
-        - **Photorealistic**: "Ultra-realistic, 8K, professional photography"
-        - **Artistic**: "Oil painting, impressionist, brush strokes visible"
-        - **Cinematic**: "Movie poster style, dramatic lighting, epic composition"
-        - **Fantasy**: "Magic realism, ethereal glow, mythical atmosphere"
-        """)
+        **Example Breakdown:**
+        `A photorealistic close-up portrait of an old wizard, in the style of Rembrandt, dramatic studio lighting, deep shadows, intricate wrinkles, wise expression, 8k`
+        """,
+        "🖼️ Composition & Framing": """
+        Control the virtual camera to frame your subject perfectly.
+        - **`Wide-angle shot`, `Panoramic`**: Captures a broad scene, great for landscapes.
+        - **`Close-up`, `Macro shot`**: Focuses on small details.
+        - **`Portrait`, `Full-body shot`**: Specifies how much of a character is visible.
+        - **`Bird's-eye view`, `Top-down view`**: Looks directly down on the scene.
+        - **`Low-angle shot`, `Worm's-eye view`**: Looks up from below, making subjects seem powerful.
+        - **`Dutch angle`, `Tilted frame`**: Creates a sense of unease or dynamism.
+        - **`Rule of thirds`**: A classic composition technique for balanced images.
+        """,
+        "🔑 Understanding Keywords": """
+        Certain words act as powerful modifiers. Use them to guide the AI.
+        - **Quality Boosters**: `masterpiece`, `best quality`, `highly detailed`, `intricate details`, `4k`, `8k`, `UHD`. These encourage the AI to spend more effort on detail.
+        - **Realism**: `photorealistic`, `realistic`, `DSLR photo`, `shot on film`.
+        - **Artistic Mediums**: `oil painting`, `watercolor`, `charcoal sketch`, `digital art`, `sculpture`.
+        - **Rendering Engines**: For digital art, try `Unreal Engine`, `Octane render`, `V-Ray` to simulate specific 3D rendering styles.
+        """,
+        "🎨 Blending Artist Styles": """
+        Create unique aesthetics by combining influences.
+        - **Simple Blend**: *'A cat, in the style of Van Gogh and Hayao Miyazaki'.* The AI will try to merge the swirling brushstrokes of Van Gogh with the whimsical character design of Miyazaki.
+        - **Weighted Blend**: You can sometimes influence the mix with parentheses, though this is model-dependent. *'A (Van Gogh:1.2) and (Miyazaki:0.8) style cat'.*
+        - **Conceptual Blend**: Combine a subject with an unrelated artist's style for surprising results. *'A futuristic city skyline in the style of Claude Monet'.*
+        """,
+        "🚫 Mastering Negative Prompts": """
+        Telling the AI what *not* to do is as important as telling it what to do. Use the Negative Prompt box to refine your results.
+        - **Fix Common Flaws**: `ugly, deformed, disfigured, extra limbs, bad anatomy, blurry, grainy, text, watermark, signature`.
+        - **Remove Unwanted Objects**: `no people, no cars, no buildings`.
+        - **Control the Style**: If you want a photo, you might add `painting, drawing, illustration, cartoon` to the negative prompt.
+        - **Refine Colors**: `monochrome, black and white, oversaturated`.
+        """
+    }
+
+    selected_tip = st.selectbox(
+        "Select a tip category:",
+        options=list(tip_options.keys()),
+        key="quick_tips_selector"
+    )
+
+    with st.container(border=True):
+        st.markdown(tip_options[selected_tip])
 
     st.markdown("### 🛠️ Creative Utilities")
 
