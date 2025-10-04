@@ -5902,7 +5902,8 @@ with col2:
             """, unsafe_allow_html=True)
 
         # --- START: REVISED QUICK ACTION BUTTONS ---
-        if st.button("🎲 Surprise Me! (Full Prompt)", use_container_width=True, help="Generate a completely new random prompt."):
+        def set_random_prompt():
+            """Generates and sets a full random prompt."""
             subjects = [
                 "A majestic dragon soaring over a volcanic landscape", "An ancient tree spirit with glowing eyes",
                 "A celestial fox with nine tails, leaping through stars", "A forgotten library in the clouds",
@@ -5916,11 +5917,9 @@ with col2:
                 "with dramatic, cinematic lighting", "with an ethereal, otherworldly glow",
                 "in vibrant, rich, saturated colors", "rendered in Unreal Engine 5, hyperrealistic"
             ]
-            new_prompt = f"{random.choice(subjects)}, {random.choice(details)}"
-            st.session_state.main_prompt = new_prompt
-            st.markdown(f'<div class="info-box">✨ New prompt generated! <br><small><i>"{new_prompt[:50]}..."</i></small></div>', unsafe_allow_html=True)
-            time.sleep(2) # Pause to show the message
-            st.rerun()
+            st.session_state.main_prompt = f"{random.choice(subjects)}, {random.choice(details)}"
+
+        st.button("🎲 Surprise Me! (Full Prompt)", on_click=set_random_prompt, use_container_width=True, help="Generate a completely new random prompt.")
 
         if st.button("🔄 Re-use Prompt", use_container_width=True, help="Copy the prompt from the currently viewed image back to the input box."):
             if st.session_state.current_image:
