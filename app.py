@@ -3575,7 +3575,7 @@ with col2:
         "🔪 Unsharp Mask",
         "🔤 Add Watermark",
         "🌃 Vignette Effect",
-        "🎨 Cartoon Effect",
+        "🎨 Color Quantization",
         "💡 Gamma Correction",
         "🖌️ Median Filter (Smudge)"
     ])
@@ -4659,61 +4659,55 @@ with col2:
                     def handle_favorite_vignette(): add_vignette_to_gallery(); toggle_and_save_favorite(image_id)
                     st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_vignette, width='stretch', key=f"fav_vignette_{image_id}")
 
-    elif selected_misc_tool == "🎨 Cartoon Effect":
-        with st.expander("🎨 Cartoon Effect", expanded=True):
-            st.info("Transform your photo into a simplified, cartoon-like image.")
+    elif selected_misc_tool == "🎨 Color Quantization":
+        with st.expander("🎨 Color Quantization", expanded=True):
+            st.info("Simplify the image by reducing it to a limited number of colors, creating a stylized, poster-like effect.")
             
-            cartoon_image_file = st.file_uploader("Upload an image to cartoonify", type=["png", "jpg", "jpeg", "webp"], key="cartoon_uploader")
+            quant_image_file = st.file_uploader("Upload an image to quantize", type=["png", "jpg", "jpeg", "webp"], key="quant_uploader")
 
-            if cartoon_image_file:
-                if 'cartoon_img_bytes' not in st.session_state or cartoon_image_file.getvalue() != st.session_state.get('cartoon_img_bytes'):
-                    st.session_state.cartoon_img_bytes = cartoon_image_file.getvalue()
-                    st.session_state.cartoon_art_dict = None
+            if quant_image_file:
+                if 'quant_img_bytes' not in st.session_state or quant_image_file.getvalue() != st.session_state.get('quant_img_bytes'):
+                    st.session_state.quant_img_bytes = quant_image_file.getvalue()
+                    st.session_state.quant_art_dict = None
 
-                original_pil_cartoon = Image.open(BytesIO(st.session_state.cartoon_img_bytes))
-                st.image(original_pil_cartoon, caption="Original Image", use_container_width=True)
+                original_pil_quant = Image.open(BytesIO(st.session_state.quant_img_bytes))
+                st.image(original_pil_quant, caption="Original Image", use_container_width=True)
 
-                if st.button("🎨 Apply Cartoon Effect", width='stretch'):
-                    with st.spinner("Cartoonifying..."):
+                num_colors = st.slider("Number of Colors", 2, 256, 16, key="quant_colors")
+
+                if st.button("🎨 Apply Quantization", width='stretch'):
+                    with st.spinner("Simplifying colors..."):
                         try:
-                            img_np = np.array(original_pil_cartoon.convert("RGB"))
-                            # Edge detection
-                            gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
-                            gray = cv2.medianBlur(gray, 5)
-                            edges = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 9)
-                            # Color quantization
-                            color = cv2.bilateralFilter(img_np, 9, 300, 300)
-                            # Combine
-                            cartoon = cv2.bitwise_and(color, color, mask=edges)
-                            cartoon_image = Image.fromarray(cartoon)
+                            # Quantize the image to a specific number of colors
+                            quantized_image = original_pil_quant.quantize(colors=num_colors, method=Image.Quantize.MEDIANCUT)
+                            # Convert back to RGB so it can be saved as PNG/JPG and displayed correctly
+                            quantized_image = quantized_image.convert("RGB")
 
                             output_buffer = BytesIO()
-                            cartoon_image.save(output_buffer, format="PNG")
-                            st.session_state.cartoon_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
-                        except NameError:
-                            st.error("This tool requires the 'opencv-python' library. Please install it by running: pip install opencv-python")
+                            quantized_image.save(output_buffer, format="PNG")
+                            st.session_state.quant_art_dict = {"id": str(uuid.uuid4()), "data": output_buffer.getvalue()}
                         except Exception as e:
-                            st.error(f"Cartoon effect failed: {e}")
+                            st.error(f"Color quantization failed: {e}")
 
-            if 'cartoon_art_dict' in st.session_state and st.session_state.cartoon_art_dict:
-                st.markdown("---"); st.markdown("#### ✨ Cartoon Result")
-                result_dict = st.session_state.cartoon_art_dict
+            if 'quant_art_dict' in st.session_state and st.session_state.quant_art_dict:
+                st.markdown("---"); st.markdown("#### ✨ Quantized Result")
+                result_dict = st.session_state.quant_art_dict
                 result_data, image_id = result_dict['data'], result_dict['id']
-                st.image(result_data, use_container_width=True, caption="Your cartoon image")
-                st.download_button("💾 Download as .png", result_data, f"cartoon_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_cartoon_{image_id}")
+                st.image(result_data, use_container_width=True, caption="Your quantized image")
+                st.download_button("💾 Download as .png", result_data, f"quantized_art_{int(time.time())}.png", "image/png", width='stretch', key=f"download_quant_{image_id}")
                 b_col1, b_col2 = st.columns(2)
-                def add_cartoon_to_gallery():
+                def add_quant_to_gallery():
                     if not any(img['id'] == image_id for img in st.session_state.images):
-                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Cartoon Effect", 'enhanced_prompt': "Image created with the Cartoon Effect utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Cartoon Effect', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Cartoon Effect feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
+                        st.session_state.images.append({'id': image_id, 'image_data': result_data, 'original_prompt': "Image from Color Quantization", 'enhanced_prompt': "Image created with the Color Quantization utility.", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"), 'style_used': 'Color Quantization', 'color_mood': 'N/A', 'lighting': 'N/A', 'description': 'Image created using the Color Quantization feature.', 'aspect_ratio': 'N/A', 'quality_level': 'N/A'})
                         save_image_to_db(st.session_state.images[-1]); st.toast("✅ Added to gallery!")
                 with b_col1:
                     is_in_gallery = any(img['id'] == image_id for img in st.session_state.images)
-                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_cartoon_{image_id}"):
-                        add_cartoon_to_gallery(); st.rerun()
+                    if st.button("🖼️ Add to Gallery", width='stretch', disabled=is_in_gallery, key=f"gallery_quant_{image_id}"):
+                        add_quant_to_gallery(); st.rerun()
                 with b_col2:
                     is_favorited = image_id in st.session_state.favorites; star_icon = "★" if is_favorited else "☆"
-                    def handle_favorite_cartoon(): add_cartoon_to_gallery(); toggle_and_save_favorite(image_id)
-                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_cartoon, width='stretch', key=f"fav_cartoon_{image_id}")
+                    def handle_favorite_quant(): add_quant_to_gallery(); toggle_and_save_favorite(image_id)
+                    st.button(f"{star_icon} {'Favorited' if is_favorited else 'Favorite'}", on_click=handle_favorite_quant, width='stretch', key=f"fav_quant_{image_id}")
 
     elif selected_misc_tool == "💡 Gamma Correction":
         with st.expander("💡 Gamma Correction", expanded=True):
