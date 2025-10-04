@@ -24,9 +24,10 @@ from tinydb import TinyDB, Query
 import streamlit.elements.image as st_image
 from PIL import Image
 from io import BytesIO
+import base64
 
-
-def image_to_url(img, width, height, clamp, channels, output_format, image_id):
+# FIX: Removed the unused 'image_id' argument to match what the library expects.
+def image_to_url(img, width, height, clamp, channels, output_format):
     """
     Converts a PIL Image to a base64-encoded data URL.
     This function is a stand-in for the deprecated st.image_to_url.
