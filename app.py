@@ -18,32 +18,37 @@ import base64
 from tinydb import TinyDB, Query
 
 
-# --- START: MONKEY-PATCH FOR DEPRECATED image_to_url ---
+# --- START: MONKEY-PATCH V2 FOR DEPRECATED image_to_url ---
 # This helper function re-creates the missing `image_to_url` functionality
-# in newer versions of Streamlit, allowing streamlit-drawable-canvas to work.
+# by forcing any incoming image into a non-transparent JPEG format.
 import streamlit.elements.image as st_image
 from PIL import Image
 from io import BytesIO
 import base64
 
-# FIX: Removed the unused 'image_id' argument to match what the library expects.
+# FIX V2: Force conversion to RGB and save as JPEG to eliminate all transparency issues.
 def image_to_url(img, width, height, clamp, channels, output_format):
     """
-    Converts a PIL Image to a base64-encoded data URL.
-    This function is a stand-in for the deprecated st.image_to_url.
+    Converts a PIL Image to a base64-encoded JPEG data URL.
     """
+    # Force conversion to RGB to remove any alpha (transparency) channel
+    rgb_img = img.convert("RGB")
+    
     # In-memory file-like object
     buffered = BytesIO()
-    # Save the image to the buffer in the desired format
-    img.save(buffered, format="PNG")
+    
+    # Save the image as JPEG (a format that does not support transparency)
+    rgb_img.save(buffered, format="JPEG")
+    
     # Encode the bytes to a base64 string
     img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-    # Return the data URL
-    return f"data:image/png;base64,{img_str}"
+    
+    # Return the JPEG data URL
+    return f"data:image/jpeg;base64,{img_str}"
 
 # Overwrite the missing function with our new implementation
 st_image.image_to_url = image_to_url
-# --- END: MONKEY-PATCH ---
+# --- END: MONKEY-PATCH V2 ---
 # --- START: API KEY ROTATION SETUP ---
 def initialize_gemini_client():
     """
@@ -3601,6 +3606,7 @@ with col2:
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
 # --- START: INPAINTING (MAGIC ERASE) TOOL ---
+# --- START: INPAINTING (MAGIC ERASE) TOOL ---
     with st.expander("🪄 Magic Erase & Inpainting", expanded=False):
         st.info("Draw a mask over an area of your image and tell the AI what to replace it with.")
 
@@ -3617,9 +3623,7 @@ with col2:
 
             original_pil_inpainting = Image.open(BytesIO(st.session_state.inpainting_img_bytes))
             
-            # --- FIX: Convert image to RGB to prevent black canvas issue ---
-            # This removes the transparency layer that can cause rendering problems.
-            original_pil_inpainting = original_pil_inpainting.convert("RGB")
+            # NOTE: The extra .convert("RGB") line has been removed from here.
             
             inpainting_prompt = st.text_input("What should replace the masked area?", placeholder="e.g., a majestic eagle, a field of flowers, remove the person", key="inpainting_prompt_text")
 
@@ -3641,7 +3645,10 @@ with col2:
                 if canvas_result.image_data is not None and inpainting_prompt:
                     with st.spinner("The AI is working its magic..."):
                         try:
+                            # We still convert the original image to RGB here for the AI model
+                            original_for_api = original_pil_inpainting.convert("RGB")
                             mask_pil = Image.fromarray(canvas_result.image_data).convert("L")
+                            
                             inpaint_api_prompt = (
                                 "You are an expert image editor. Use the provided mask to perform an inpainting task. "
                                 f"Replace the masked (white) area with: '{inpainting_prompt}'. "
@@ -3649,7 +3656,7 @@ with col2:
                             )
                             response = client.models.generate_content(
                                 model="gemini-2.0-flash-exp-image-generation",
-                                contents=[inpaint_api_prompt, original_pil_inpainting, mask_pil],
+                                contents=[inpaint_api_prompt, original_for_api, mask_pil],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
                             st.session_state.inpainting_result_dict = None
