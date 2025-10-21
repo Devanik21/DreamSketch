@@ -776,7 +776,7 @@ st.markdown("""
 
 # --- SET BACKGROUND IMAGE ---
 try:
-    base64_img = get_base64_of_bin_file('Gemini_Generated_Image_gx24iygx24iygx24.png')
+    base64_img = get_base64_of_bin_file('fantasy-eye-illustration.jpg')
     bg_css = f'''
     <style>
     .stApp {{
