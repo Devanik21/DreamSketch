@@ -2151,14 +2151,14 @@ with col1:
         st.markdown("""
         <div style="text-align: center; padding-top: 4rem; padding-bottom: 2rem;">
             <p class="pretty-subtitle" style="font-size: 1.25rem; max-width: 600px; margin: auto; line-height: 1.6; font-weight: 500;">
-                Got a vision? Let me paint your imagination into reality.”
+                Got a vision? Let me paint your imagination into reality.
             </p>
         </div>
         """, unsafe_allow_html=True)
 
         # This button reveals the main creation area.
         # The `type="secondary"` is styled by the app's CSS to be transparent.
-        if st.button("🎨 Start a New Creation", use_container_width=True, type="secondary"):
+        if st.button("Start a New Creation", use_container_width=True, type="secondary"):
             st.session_state.show_prompt_area = True
             st.rerun()
 
