@@ -804,12 +804,11 @@ st.markdown("""
     font-weight: bold;
     text-align: center;
     /* blue → teal → yellow → orange */
-    background: linear-gradient(
+    background: linear-gradient( /* Night sky gradient: cyan -> periwinkle -> lavender */
       90deg,
-      #7fa4ff 0%,
-      #4cd9c0 33%,
-      #ffea5d 66%,
-      #ff8a65 100%
+      #90e0ef 0%,
+      #a6c0fe 50%,
+      #c77dff 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -820,12 +819,11 @@ st.markdown("""
     text-align: center;
     margin-top: -0.5rem;
     /* reversed stops for contrast */
-    background: linear-gradient(
+    background: linear-gradient( /* Reversed night sky gradient */
       90deg,
-      #ff8a65 0%,
-      #ffea5d 33%,
-      #4cd9c0 66%,
-      #7fa4ff 100%
+      #c77dff 0%,
+      #a6c0fe 50%,
+      #90e0ef 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
