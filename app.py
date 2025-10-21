@@ -6209,21 +6209,4 @@ st.markdown("""
 
 
 
-st.markdown("""
-<div style="text-align: center; padding: 2rem;">
-    <p style="
-        font-size: 1rem;
-        font-weight: 600;
-        background: linear-gradient(90deg, #06b6d4, #0ea5e9, #8b5cf6, #ec4899);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-fill-color: transparent;
-    ">
-         
-    </p>
-    <p style="font-size: 0.8rem; color: #cbd5e1;">
-        Transform your imagination into reality with AI-powered artistry
-    </p>
-</div>
-""", unsafe_allow_html=True)
+
