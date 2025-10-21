@@ -856,7 +856,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-st.sidebar.image("bg_2.jpg", use_container_width=True)
+#st.sidebar.image("bg_2.jpg", use_container_width=True)
 
 
 
