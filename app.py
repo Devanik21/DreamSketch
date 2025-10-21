@@ -523,6 +523,20 @@ button[kind="secondary"]:hover {
         outline: none !important;
         background: rgba(99, 102, 241, 0.08) !important;
     }
+
+    /* --- NEW: Make ONLY the main prompt boxes transparent --- */
+textarea[placeholder="A majestic dragon soaring through a crystal cave filled with glowing gems..."],
+textarea[placeholder="e.g., blurry, ugly, text, watermark, extra limbs, bad anatomy..."] {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+textarea[placeholder="A majestic dragon soaring through a crystal cave filled with glowing gems..."]:focus,
+textarea[placeholder="e.g., blurry, ugly, text, watermark, extra limbs, bad anatomy..."]:focus {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+/* --- END OF NEW RULES --- */
     
 
 /* THIS IS THE NEW RULE FOR YOUR PROMPT BOXES */
