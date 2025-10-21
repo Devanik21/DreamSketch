@@ -6183,7 +6183,7 @@ st.markdown("""
     font-weight: 700;
     padding: 1rem 0;
 ">
-
+✨ Powered by Google Gemini Flash
 </h3>
 """, unsafe_allow_html=True)
 
@@ -6220,7 +6220,7 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
         text-fill-color: transparent;
     ">
-        ✨ Powered by Google Gemini Flash • Created with ❤️ for artists and dreamers
+         • Created with ❤️ for artists and dreamers
     </p>
     <p style="font-size: 0.8rem; color: #cbd5e1;">
         Transform your imagination into reality with AI-powered artistry
