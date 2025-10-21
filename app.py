@@ -203,7 +203,7 @@ st.set_page_config(
 
 
 
-st.sidebar.image("k5.jpg", width='stretch')
+#st.sidebar.image("k5.jpg", width='stretch')
 
 
 
