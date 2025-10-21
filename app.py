@@ -687,8 +687,16 @@ st.markdown("""
         padding: 1.25rem !important;
     }
     /* Ensure text inside st.info is always bright */
-    [data-testid="stInfo"] div {
-        color: var(--text-primary) !important;
+    /* Make the AI Description text brighter with a subtle gradient */
+    [data-testid="stInfo"] p {
+        background: linear-gradient(135deg, #e0e7ff, #c7d2fe); /* Brighter gradient: lavender to light blue */
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 500; /* Slightly bolder for readability */
+        /* Fallback for browsers that don't support background-clip: text */
+        color: var(--text-primary);
+        line-height: 1.6; /* Improve readability of multi-line text */
     }
     
     /* Download button */
