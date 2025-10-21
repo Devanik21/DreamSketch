@@ -280,6 +280,11 @@ st.markdown("""
         position: relative;
     }
     
+    /* Make the header transparent to show the background image */
+    [data-testid="stHeader"] {
+        background: transparent !important;
+    }
+
     .stApp::before {
         content: '';
         position: fixed;
