@@ -466,7 +466,15 @@ st.markdown("""
     .stButton > button:hover::before {
         left: 100%;
     }
-    
+    button[kind="secondary"] {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+button[kind="secondary"]:hover {
+    background-color: transparent !important;
+    background: transparent !important;
+}
     /* Sidebar styling */
     .stSidebar {
         background: transparent !important;
