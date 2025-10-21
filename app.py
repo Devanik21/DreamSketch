@@ -466,14 +466,6 @@ st.markdown("""
     .stButton > button:hover::before {
         left: 100%;
     }
-    button[kind="secondary"] {
-    background-color: transparent !important;
-    background: transparent !important;
-}
-    button[kind="secondary"]:hover {
-    background-color: transparent !important;
-    background: transparent !important;
-}
     
     /* Sidebar styling */
     .stSidebar {
@@ -726,6 +718,12 @@ st.markdown("""
         border-color: rgba(16, 185, 129, 0.6) !important;
         transform: translateY(-2px);
         box-shadow: 0 12px 48px rgba(16, 185, 129, 0.25);
+    }
+
+    /* Make the audio player background transparent and full-width */
+    [data-testid="stAudio"] > audio {
+        background: transparent !important;
+        width: 100%;
     }
     
     /* Scrollbar styling */
