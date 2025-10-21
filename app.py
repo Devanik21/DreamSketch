@@ -2151,7 +2151,7 @@ with col1:
         st.markdown("""
         <div style="text-align: center; padding-top: 4rem; padding-bottom: 2rem;">
             <p class="pretty-subtitle" style="font-size: 1.25rem; max-width: 600px; margin: auto; line-height: 1.6; font-weight: 500;">
-                Ready to bring your ideas to life? Click the button below to describe your vision and watch the magic happen.
+                Got a vision? Let me paint your imagination into reality.”
             </p>
         </div>
         """, unsafe_allow_html=True)
