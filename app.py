@@ -6172,7 +6172,7 @@ with col2:
 # Footer
 st.markdown("---")
 
-# 📸 Glimpses from the Gallery – Crafted with love & AI magic 💖
+
 
 st.markdown("""
 <h3 style="
@@ -6208,7 +6208,7 @@ st.markdown("""
 # --- END: RANDOM GALLERY IMAGE DISPLAY ---
 
 
-st.markdown("---")
+
 st.markdown("""
 <div style="text-align: center; padding: 2rem;">
     <p style="
