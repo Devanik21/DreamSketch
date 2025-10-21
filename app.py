@@ -823,47 +823,55 @@ except FileNotFoundError:
 
 st.markdown("""
 <style>
-/* 🌌 Starry night gradient title */
+/* 🌌 Elegant Starry Title */
 .pretty-title {
     font-size: 3rem;
     font-weight: 700;
     text-align: center;
     background: linear-gradient(
         90deg,
-        #89CFF0 0%,
-        #7393B3 35%,
-        #6A5ACD 65%,
+        #8EC5FC 0%,
+        #6A5ACD 50%,
         #C77DFF 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 20px rgba(138,180,255,0.25);
-    letter-spacing: 1px;
-    animation: shimmer 6s infinite alternate ease-in-out;
+    letter-spacing: 1.2px;
+    animation: floaty 6s ease-in-out infinite alternate;
 }
 
-/* 🌠 Soft shimmer animation */
-@keyframes shimmer {
-    from { filter: brightness(1.1); text-shadow: 0 0 15px rgba(138,180,255,0.25); }
-    to { filter: brightness(1.4); text-shadow: 0 0 30px rgba(138,180,255,0.45); }
+/* ✨ Gentle vertical float motion */
+@keyframes floaty {
+    0% { transform: translateY(0px); filter: brightness(1); }
+    100% { transform: translateY(-4px); filter: brightness(1.15); }
 }
 
-/* 💫 Subtitle with reversed night gradient */
+/* 💫 Subtle shifting gradient subtitle */
 .pretty-subtitle {
     font-size: 1.15rem;
     text-align: center;
     margin-top: -0.6rem;
     background: linear-gradient(
-        90deg,
-        #C77DFF 0%,
-        #6A5ACD 50%,
-        #7393B3 100%
+        to right,
+        #C77DFF,
+        #7393B3,
+        #6A5ACD,
+        #C77DFF
     );
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     opacity: 0.85;
+    animation: gradientShift 8s linear infinite;
 }
 
+/* 🎵 Gradient movement animation */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+/* 🌑 Calm dark background */
 body {
     background-color: #000814;
 }
@@ -871,6 +879,7 @@ body {
 
 <h1 class="pretty-title">DreamCanvas — Painting Possibilities</h1>
 """, unsafe_allow_html=True)
+
 
 
 
