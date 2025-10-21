@@ -866,8 +866,7 @@ body {
 }
 </style>
 
-<h1 class="pretty-title">DreamCanvas — Painting Possibilities 🌙</h1>
-<h2 class="pretty-subtitle">✨ Where Imagination Meets AI ✨</h2>
+<h1 class="pretty-title">DreamCanvas — Painting Possibilities</h1>
 """, unsafe_allow_html=True)
 
 
@@ -6215,7 +6214,7 @@ body {
 </style>
 
 <div class="starry-text">
-✨ Powered by <b style="color:#93C5FD;">Google Gemini Flash</b> 🌌
+ Powered by <b style="color:#93C5FD;">Google Gemini Flash</b> 
 </div>
 """, unsafe_allow_html=True)
 
