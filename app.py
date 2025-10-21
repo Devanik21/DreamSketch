@@ -1974,6 +1974,8 @@ with st.sidebar:
             st.rerun()
             
         st.markdown("---")
+
+        st.sidebar.image("17740155_159Z_2107.w026.n002.628B.p1.628.jpg", use_container_width=True)
                         
         st.markdown("---")        
 
@@ -6204,7 +6206,7 @@ st.markdown("""
 
 
 # Display the randomly selected image
-st.sidebar.image("17740155_159Z_2107.w026.n002.628B.p1.628.jpg", use_container_width=True)
+
 
 # --- END: RANDOM GALLERY IMAGE DISPLAY ---
 
