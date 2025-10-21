@@ -856,7 +856,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-#st.image("k11.jpg", use_container_width=True)
+st.image("Gemini_Generated_Image_7xsail7xsail7xsa (2).png", use_container_width=True)
 
 
 
