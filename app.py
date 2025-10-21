@@ -6220,7 +6220,7 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
         text-fill-color: transparent;
     ">
-         • Created with ❤️ for artists and dreamers
+         
     </p>
     <p style="font-size: 0.8rem; color: #cbd5e1;">
         Transform your imagination into reality with AI-powered artistry
