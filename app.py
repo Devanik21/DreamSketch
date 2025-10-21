@@ -79,6 +79,13 @@ def rotate_api_key():
     time.sleep(2) # Brief pause to allow UI update
 # --- END: API KEY ROTATION SETUP ---
 
+@st.cache_data
+def get_base64_of_bin_file(bin_file):
+    """Encodes a binary file to a base64 string."""
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
 
 def load_data_from_db():
     """Loads images and favorites from TinyDB into session state."""
@@ -696,6 +703,25 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# --- SET BACKGROUND IMAGE ---
+try:
+    base64_img = get_base64_of_bin_file('k14.jpg')
+    bg_css = f'''
+    <style>
+    .stApp {{
+        background-image: url("data:image/jpeg;base64,{base64_img}");
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }}
+    </style>
+    '''
+    st.markdown(bg_css, unsafe_allow_html=True)
+except FileNotFoundError:
+    st.warning("Background image 'k14.jpg' not found. Using default background.")
+# --- END SET BACKGROUND IMAGE ---
 
 
 
