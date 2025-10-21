@@ -2149,6 +2149,23 @@ with col1:
         # This is the placeholder view before the user starts creating.
         # It provides a more decorated and welcoming entry point.
         st.markdown("""
+        <style>
+          .pretty-subtitle {
+            font-size: 1.15rem;
+            text-align: center;
+            margin-top: -0.6rem;
+            background: linear-gradient(
+              90deg,
+              #E0B3FF 0%,   /* light lavender */
+              #AFCBFF 50%,  /* soft sky blue */
+              #A0E7E5 100%  /* pale aqua */
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0.95;
+          }
+        </style>
+
         <div style="text-align: center; padding-top: 4rem; padding-bottom: 2rem;">
             <p class="pretty-subtitle" style="font-size: 1.25rem; max-width: 600px; margin: auto; line-height: 1.6; font-weight: 500;">
                 Got a vision? Let me paint your imagination into reality.
