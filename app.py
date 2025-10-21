@@ -1975,9 +1975,6 @@ with st.sidebar:
             
         st.markdown("---")
 
-        st.sidebar.image("17740155_159Z_2107.w026.n002.628B.p1.628.jpg", use_container_width=True)
-                        
-        st.markdown("---")        
 
 # Main content area
 col1, col2 = st.columns([2, 1])
@@ -6213,8 +6210,8 @@ st.markdown("""
 
 st.markdown("---")
 st.markdown("""
-<div style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.7);">
+<div style="text-align: center; padding: 2rem; color: #e2e8f0;">
     <p>✨ Powered by Google Gemini Flash • Created with ❤️ for artists and dreamers</p>
-    <p style="font-size: 0.8rem;">Transform your imagination into reality with AI-powered artistry</p>
+    <p style="font-size: 0.8rem; color: #cbd5e1;">Transform your imagination into reality with AI-powered artistry</p>
 </div>
 """, unsafe_allow_html=True)
