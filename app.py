@@ -820,40 +820,56 @@ except FileNotFoundError:
 
 st.markdown("""
 <style>
-  /* ——— Static full‑line rainbow ——— */
-  .pretty-title {
+/* 🌌 Starry night gradient title */
+.pretty-title {
     font-size: 3rem;
-    font-weight: bold;
+    font-weight: 700;
     text-align: center;
-    /* blue → teal → yellow → orange */
-    background: linear-gradient( /* Night sky gradient: cyan -> periwinkle -> lavender */
-      90deg,
-      #90e0ef 0%,
-      #a6c0fe 50%,
-      #c77dff 100%
+    background: linear-gradient(
+        90deg,
+        #89CFF0 0%,
+        #7393B3 35%,
+        #6A5ACD 65%,
+        #C77DFF 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-  }
+    text-shadow: 0 0 20px rgba(138,180,255,0.25);
+    letter-spacing: 1px;
+    animation: shimmer 6s infinite alternate ease-in-out;
+}
 
-  .pretty-subtitle {
-    font-size: 1.2rem;
+/* 🌠 Soft shimmer animation */
+@keyframes shimmer {
+    from { filter: brightness(1.1); text-shadow: 0 0 15px rgba(138,180,255,0.25); }
+    to { filter: brightness(1.4); text-shadow: 0 0 30px rgba(138,180,255,0.45); }
+}
+
+/* 💫 Subtitle with reversed night gradient */
+.pretty-subtitle {
+    font-size: 1.15rem;
     text-align: center;
-    margin-top: -0.5rem;
-    /* reversed stops for contrast */
-    background: linear-gradient( /* Reversed night sky gradient */
-      90deg,
-      #c77dff 0%,
-      #a6c0fe 50%,
-      #90e0ef 100%
+    margin-top: -0.6rem;
+    background: linear-gradient(
+        90deg,
+        #C77DFF 0%,
+        #6A5ACD 50%,
+        #7393B3 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-  }
+    opacity: 0.85;
+}
+
+body {
+    background-color: #000814;
+}
 </style>
 
-<h1 class="pretty-title">DreamCanvas - Painting Possibilities</h1>
+<h1 class="pretty-title">DreamCanvas — Painting Possibilities 🌙</h1>
+<h2 class="pretty-subtitle">✨ Where Imagination Meets AI ✨</h2>
 """, unsafe_allow_html=True)
+
 
 
 #st.sidebar.image("bg_2.jpg", use_container_width=True)
