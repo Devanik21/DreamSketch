@@ -466,15 +466,18 @@ st.markdown("""
     .stButton > button:hover::before {
         left: 100%;
     }
-    button[kind="secondary"] {
-    background-color: transparent !important;
-    background: transparent !important;
-}
+    /* Style for the 'Start a New Creation' button to be transparent but with feedback */
+    button[data-testid="stButton"][kind="secondary"] {
+        background: transparent !important;
+        border: 1px solid transparent !important; /* Fully transparent border */
+        box-shadow: none !important;
+    }
 
-button[kind="secondary"]:hover {
-    background-color: transparent !important;
-    background: transparent !important;
-}
+    button[data-testid="stButton"][kind="secondary"]:hover {
+        background: var(--aurora-glow) !important; /* Use existing theme variable for subtle glow */
+        border: 1px solid rgba(99, 102, 241, 0.3) !important; /* Match primary button border color */
+        color: var(--text-primary) !important;
+    }
     /* Sidebar styling */
     .stSidebar {
         background: transparent !important;
@@ -2143,8 +2146,19 @@ with col1:
                         progress_container.empty()
                     # --- END: API KEY ROTATION LOGIC ---
     else:
-        # This button will reveal the creation area.
-        # Using type="secondary" should make it transparent based on the app's existing CSS.
+        # This is the placeholder view before the user starts creating.
+        # It provides a more decorated and welcoming entry point.
+        st.markdown("""
+        <div style="text-align: center; padding-top: 4rem; padding-bottom: 2rem;">
+            <h2 class="rainbow-header" style="font-size: 2.5rem; margin-bottom: 1rem;">Your Canvas Awaits</h2>
+            <p style="color: var(--text-secondary); font-size: 1.15rem; max-width: 600px; margin: auto;">
+                Ready to bring your ideas to life? Click the button below to describe your vision and watch the magic happen.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # This button reveals the main creation area.
+        # The `type="secondary"` is styled by the app's CSS to be transparent.
         if st.button("🎨 Start a New Creation", use_container_width=True, type="secondary"):
             st.session_state.show_prompt_area = True
             st.rerun()
