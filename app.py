@@ -767,7 +767,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-st.image("k11.jpg", use_container_width=True)
+#st.image("k11.jpg", use_container_width=True)
 
 
 
@@ -6108,14 +6108,14 @@ st.markdown("""
  #   "k4.jpg", "k16.jpg", "k13.jpg", "k14.jpg", "k17.jpg", "k1.jpg","k10.jpg","k9.jpg","k12.jpg","k18.jpg",
 #]
 
-st.sidebar.image("k15.jpg", use_container_width=True)
+#st.sidebar.image("k15.jpg", use_container_width=True)
 
 
 # Select one image at random from the list
 
 
 # Display the randomly selected image
-st.image("k19.jpg", use_container_width=True)
+#st.image("k19.jpg", use_container_width=True)
 
 # --- END: RANDOM GALLERY IMAGE DISPLAY ---
 
