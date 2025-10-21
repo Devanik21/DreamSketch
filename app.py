@@ -1993,155 +1993,161 @@ with st.sidebar:
 
 # Main content area
 col1, col2 = st.columns([2, 1])
+
+if 'show_prompt_area' not in st.session_state:
+    st.session_state.show_prompt_area = False
+
 with col1:
-    # Enhanced prompt input
-    st.markdown("### 🖋️ Describe Your Vision")
-    prompt = st.text_area(
-        "Enter your creative prompt:",
-        height=100,
-        placeholder="A majestic dragon soaring through a crystal cave filled with glowing gems...",
-        help="Be descriptive! Include details about subjects, settings, mood, and style.",
-        key="main_prompt"
-    )
-        # >>> ADD THIS CODE BLOCK <<<
-    negative_prompt = st.text_area(
-        "🚫 Negative Prompt (Optional)",
-        height=80,
-        placeholder="e.g., blurry, ugly, text, watermark, extra limbs, bad anatomy...",
-        help="Tell the AI what to AVOID in the image. Separate concepts with commas.",
-        key="negative_prompt_input"
-    )
-    # >>> END OF CODE BLOCK <<<
-    
-    # Prompt enhancement options
-    enhance_prompt = st.checkbox(" 🦄 Auto-enhance prompt with selected styles", key="enhance_check")
-    
-    # Generate button
-    generate_col1, generate_col2, generate_col3 = st.columns([1, 2, 1])
-    with generate_col2:
-        if st.button("✨ Generate Masterpiece", key="generate_btn", use_container_width=True):
-            if not prompt.strip():
-                st.markdown('<div class="error-box">❌ Please enter a prompt to begin your creative journey!</div>', unsafe_allow_html=True)
-            else:
-                # Enhance prompt if requested or preset applied
-                if enhance_prompt or (hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied):
-                    if hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied:
-                        preset = st.session_state.preset_applied
-                        enhanced_prompt = f"{prompt}, {preset['styles'][0]} style, {preset['color_mood']} color palette, {preset['lighting']} lighting, {preset['enhancement']}, {quality_level} quality"
-                    else:
-                        enhanced_prompt = f"{prompt}, {selected_style} style, {color_mood} color palette, {lighting} lighting, {quality_level} quality"
+    if st.session_state.show_prompt_area:
+        # Enhanced prompt input
+        st.markdown("### 🖋️ Describe Your Vision")
+        prompt = st.text_area(
+            "Enter your creative prompt:",
+            height=100,
+            placeholder="A majestic dragon soaring through a crystal cave filled with glowing gems...",
+            help="Be descriptive! Include details about subjects, settings, mood, and style.",
+            key="main_prompt"
+        )
+            # >>> ADD THIS CODE BLOCK <<<
+        negative_prompt = st.text_area(
+            "🚫 Negative Prompt (Optional)",
+            height=80,
+            placeholder="e.g., blurry, ugly, text, watermark, extra limbs, bad anatomy...",
+            help="Tell the AI what to AVOID in the image. Separate concepts with commas.",
+            key="negative_prompt_input"
+        )
+        # >>> END OF CODE BLOCK <<<
+        
+        # Prompt enhancement options
+        enhance_prompt = st.checkbox(" 🦄 Auto-enhance prompt with selected styles", key="enhance_check")
+        
+        # Generate button
+        generate_col1, generate_col2, generate_col3 = st.columns([1, 2, 1])
+        with generate_col2:
+            if st.button("✨ Generate Masterpiece", key="generate_btn", use_container_width=True):
+                if not prompt.strip():
+                    st.markdown('<div class="error-box">❌ Please enter a prompt to begin your creative journey!</div>', unsafe_allow_html=True)
                 else:
-                    enhanced_prompt = prompt
+                    # Enhance prompt if requested or preset applied
+                    if enhance_prompt or (hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied):
+                        if hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied:
+                            preset = st.session_state.preset_applied
+                            enhanced_prompt = f"{prompt}, {preset['styles'][0]} style, {preset['color_mood']} color palette, {preset['lighting']} lighting, {preset['enhancement']}, {quality_level} quality"
+                        else:
+                            enhanced_prompt = f"{prompt}, {selected_style} style, {color_mood} color palette, {lighting} lighting, {quality_level} quality"
+                    else:
+                        enhanced_prompt = prompt
 
-                # --- ADDED: Step 2 - Add the new prompt to history ---
-                if enhanced_prompt not in st.session_state.prompt_history:
-                    st.session_state.prompt_history.insert(0, enhanced_prompt)
-                    save_prompt_history_to_db()
-                # ---
+                    # --- ADDED: Step 2 - Add the new prompt to history ---
+                    if enhanced_prompt not in st.session_state.prompt_history:
+                        st.session_state.prompt_history.insert(0, enhanced_prompt)
+                        save_prompt_history_to_db()
+                    # ---
 
-                # Show enhanced prompt
-                if enhance_prompt or (hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied):
-                    st.markdown("**Enhanced Prompt:**")
-                    st.code(enhanced_prompt, language=None)
+                    # Show enhanced prompt
+                    if enhance_prompt or (hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied):
+                        st.markdown("**Enhanced Prompt:**")
+                        st.code(enhanced_prompt, language=None)
 
-                # Progress indicators
-                progress_container = st.container()
-                with progress_container:
-                    progress_bar = st.progress(0)
-                    status_text = st.empty()
+                    # Progress indicators
+                    progress_container = st.container()
+                    with progress_container:
+                        progress_bar = st.progress(0)
+                        status_text = st.empty()
 
-                # --- START: API KEY ROTATION LOGIC ---
-                generation_successful = False
-                max_retries = len(st.secrets.get("gemini_api_keys", []))
-                
-                for attempt in range(max_retries):
-                    try:
-                        # Use a local client variable that gets re-initialized on retry
-                        local_client = initialize_gemini_client()
+                    # --- START: API KEY ROTATION LOGIC ---
+                    generation_successful = False
+                    max_retries = len(st.secrets.get("gemini_api_keys", []))
+                    
+                    for attempt in range(max_retries):
+                        try:
+                            # Use a local client variable that gets re-initialized on retry
+                            local_client = initialize_gemini_client()
 
-                        status_text.text(f"🎨 Initializing... (Using Key {st.session_state.current_api_key_index + 1})")
-                        progress_bar.progress(20)
-                        
-                        status_text.text("✨ Creating your masterpiece...")
-                        progress_bar.progress(60)
-                        
-                        generation_contents = [enhanced_prompt]
-                        if negative_prompt:
-                            generation_contents.append(f"Negative prompt: {negative_prompt}")
-
-                        response = local_client.models.generate_content(
-                            model="gemini-2.0-flash-exp-image-generation",
-                            contents=generation_contents,
-                            config=types.GenerateContentConfig(
-                                response_modalities=["text", "image"]
-                            )
-                        )
-                        
-                        progress_bar.progress(100)
-                        status_text.text("🎉 Masterpiece complete!")
-                        
-                        image_data, description = None, ""
-                        for part in response.candidates[0].content.parts:
-                            if part.text:
-                                description = part.text
-                            elif part.inline_data:
-                                image_data = part.inline_data.data
-                        
-                        if image_data:
-                            generation_successful = True
-                            image_metadata = {
-                                'id': str(uuid.uuid4()),
-                                'image_data': image_data,
-                                'original_prompt': prompt,
-                                'enhanced_prompt': enhanced_prompt,
-                                'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                                'style_used': selected_style,
-                                'color_mood': color_mood,
-                                'lighting': lighting,
-                                'description': description,
-                                'aspect_ratio': aspect_ratio,
-                                'quality_level': quality_level
-                            }
-                            st.session_state.images.append(image_metadata)
-                            save_image_to_db(image_metadata)
-                            st.session_state.current_image = image_metadata
+                            status_text.text(f"🎨 Initializing... (Using Key {st.session_state.current_api_key_index + 1})")
+                            progress_bar.progress(20)
                             
-                            progress_container.empty()
-                            st.markdown('<div class="success-box">🎉 Your masterpiece has been created!</div>', unsafe_allow_html=True)
-                            st.rerun()
-                        else:
-                             st.markdown('<div class="error-box">❌ No image was generated. Please try again with a different prompt.</div>', unsafe_allow_html=True)
-                        break  # Exit loop on success
+                            status_text.text("✨ Creating your masterpiece...")
+                            progress_bar.progress(60)
+                            
+                            generation_contents = [enhanced_prompt]
+                            if negative_prompt:
+                                generation_contents.append(f"Negative prompt: {negative_prompt}")
 
-                    except Exception as e:
-                        error_msg = str(e).lower()
-                        if "quota" in error_msg or "limit" in error_msg:
-                            if st.session_state.current_api_key_index < max_retries - 1:
-                                rotate_api_key()
-                                continue  # Retry with the next key
+                            response = local_client.models.generate_content(
+                                model="gemini-2.0-flash-exp-image-generation",
+                                contents=generation_contents,
+                                config=types.GenerateContentConfig(
+                                    response_modalities=["text", "image"]
+                                )
+                            )
+                            
+                            progress_bar.progress(100)
+                            status_text.text("🎉 Masterpiece complete!")
+                            
+                            image_data, description = None, ""
+                            for part in response.candidates[0].content.parts:
+                                if part.text:
+                                    description = part.text
+                                elif part.inline_data:
+                                    image_data = part.inline_data.data
+                            
+                            if image_data:
+                                generation_successful = True
+                                image_metadata = {
+                                    'id': str(uuid.uuid4()),
+                                    'image_data': image_data,
+                                    'original_prompt': prompt,
+                                    'enhanced_prompt': enhanced_prompt,
+                                    'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                                    'style_used': selected_style,
+                                    'color_mood': color_mood,
+                                    'lighting': lighting,
+                                    'description': description,
+                                    'aspect_ratio': aspect_ratio,
+                                    'quality_level': quality_level
+                                }
+                                st.session_state.images.append(image_metadata)
+                                save_image_to_db(image_metadata)
+                                st.session_state.current_image = image_metadata
+                                
+                                progress_container.empty()
+                                st.markdown('<div class="success-box">🎉 Your masterpiece has been created!</div>', unsafe_allow_html=True)
+                                st.rerun()
                             else:
-                                st.markdown('<div class="error-box">⏳ All API keys have reached their limit. Please try again later.</div>', unsafe_allow_html=True)
-                                break
-                        else:
-                            # Handle other errors like safety, network, etc.
-                            if "api key" in error_msg or "authentication" in error_msg:
-                                st.markdown('<div class="error-box">🔑 Authentication Error: Please check your API key configuration.</div>', unsafe_allow_html=True)
-                            elif "safety" in error_msg or "policy" in error_msg:
-                                st.markdown('<div class="error-box">🛡️ Content Policy: Your prompt may violate guidelines. Please try a different description.</div>', unsafe_allow_html=True)
-                            elif "network" in error_msg or "connection" in error_msg:
-                                st.markdown('<div class="error-box">🌐 Network Error: Please check your internet connection and try again.</div>', unsafe_allow_html=True)
+                                 st.markdown('<div class="error-box">❌ No image was generated. Please try again with a different prompt.</div>', unsafe_allow_html=True)
+                            break  # Exit loop on success
+
+                        except Exception as e:
+                            error_msg = str(e).lower()
+                            if "quota" in error_msg or "limit" in error_msg:
+                                if st.session_state.current_api_key_index < max_retries - 1:
+                                    rotate_api_key()
+                                    continue  # Retry with the next key
+                                else:
+                                    st.markdown('<div class="error-box">⏳ All API keys have reached their limit. Please try again later.</div>', unsafe_allow_html=True)
+                                    break
                             else:
-                                st.markdown(f'<div class="error-box">⚠️ Generation Error: {str(e)}</div>', unsafe_allow_html=True)
-                            break # Exit loop for other errors
+                                # Handle other errors like safety, network, etc.
+                                if "api key" in error_msg or "authentication" in error_msg:
+                                    st.markdown('<div class="error-box">🔑 Authentication Error: Please check your API key configuration.</div>', unsafe_allow_html=True)
+                                elif "safety" in error_msg or "policy" in error_msg:
+                                    st.markdown('<div class="error-box">🛡️ Content Policy: Your prompt may violate guidelines. Please try a different description.</div>', unsafe_allow_html=True)
+                                elif "network" in error_msg or "connection" in error_msg:
+                                    st.markdown('<div class="error-box">🌐 Network Error: Please check your internet connection and try again.</div>', unsafe_allow_html=True)
+                                else:
+                                    st.markdown(f'<div class="error-box">⚠️ Generation Error: {str(e)}</div>', unsafe_allow_html=True)
+                                break # Exit loop for other errors
 
-                if not generation_successful:
-                    progress_container.empty()
-                # --- END: API KEY ROTATION LOGIC ---
-                    
-
-
-
-                    
+                    if not generation_successful:
+                        progress_container.empty()
+                    # --- END: API KEY ROTATION LOGIC ---
+    else:
+        # This button will reveal the creation area.
+        # Using type="secondary" should make it transparent based on the app's existing CSS.
+        if st.button("🎨 Start a New Creation", use_container_width=True, type="secondary"):
+            st.session_state.show_prompt_area = True
+            st.rerun()
 
     # Display current image
     if st.session_state.current_image:
@@ -6239,7 +6245,3 @@ body {
 
 
 # --- END: RANDOM GALLERY IMAGE DISPLAY ---
-
-
-
-
