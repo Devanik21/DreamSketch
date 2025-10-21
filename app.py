@@ -6252,7 +6252,7 @@ body {
 </style>
 
 <div class="starry-text">
- ✨ Powered by <b style="background: linear-gradient(90deg, #c084fc, #7dd3fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Google Gemini Flash</b> 🌌
+  Powered by <b style="background: linear-gradient(90deg, #c084fc, #7dd3fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Google's Gemini </b> 
 </div>
 """, unsafe_allow_html=True)
 
