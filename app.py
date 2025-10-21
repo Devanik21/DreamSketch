@@ -480,6 +480,7 @@ st.markdown("""
     
     /* Input fields with glass effect */
     /* Input fields with glass effect */
+    /* Input fields with glass effect */
     .stTextInput > div > div > input {
         background: rgba(99, 102, 241, 0.05) !important;
         backdrop-filter: blur(12px);
@@ -492,8 +493,10 @@ st.markdown("""
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
 
+    /* THIS IS THE NEW RULE FOR YOUR PROMPT BOXES */
     .stTextArea > div > div > textarea {
-        background: transparent !important; /* <-- This makes your prompt boxes transparent */
+        background: transparent !important;
+        background-color: transparent !important; /* <-- NEW: Explicitly set background-color */
         backdrop-filter: blur(12px);
         border: 1px solid rgba(99, 102, 241, 0.2) !important;
         border-radius: 12px !important;
@@ -511,6 +514,17 @@ st.markdown("""
             0 8px 32px rgba(0, 0, 0, 0.2) !important;
         outline: none !important;
         background: rgba(99, 102, 241, 0.08) !important;
+    }
+
+    /* THIS IS THE NEW FOCUS RULE FOR YOUR PROMPT BOXES */
+    .stTextArea > div > div > textarea:focus {
+        border-color: rgba(99, 102, 241, 0.5) !important;
+        box-shadow: 
+            0 0 0 3px rgba(99, 102, 241, 0.15),
+            0 8px 32px rgba(0, 0, 0, 0.2) !important;
+        outline: none !important;
+        background: transparent !important;
+        background-color: transparent !important; /* <-- NEW: Explicitly set background-color on focus */
     }
 
     .stTextArea > div > div > textarea:focus {
