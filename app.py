@@ -856,7 +856,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-st.sidebar.image("Gemini_Generated_Image_7xsail7xsail7xsa (2).png", use_container_width=True)
+st.sidebar.image("bg_2.jpg", use_container_width=True)
 
 
 
