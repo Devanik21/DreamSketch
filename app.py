@@ -6230,27 +6230,29 @@ st.markdown("""
 .starry-text {
     font-family: 'Poppins', sans-serif;
     text-align: center;
-    color: #E0E7FF;
-    background: none;
     font-size: 1.15rem;
-    letter-spacing: 0.6px;
-    text-shadow: 0 0 8px #3b82f6, 0 0 16px #60a5fa, 0 0 32px #93c5fd;
-    animation: glow 3s ease-in-out infinite alternate;
-    margin-top: 20px;
+    letter-spacing: 0.8px;
+    background: linear-gradient(90deg, #7dd3fc 0%, #c084fc 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 12px rgba(180, 150, 255, 0.3), 0 0 28px rgba(120, 200, 255, 0.2);
+    animation: shimmer 5s ease-in-out infinite alternate;
+    margin-top: 24px;
+    opacity: 0.9;
 }
 
-@keyframes glow {
-    from { text-shadow: 0 0 6px #3b82f6, 0 0 14px #60a5fa, 0 0 28px #93c5fd; }
-    to { text-shadow: 0 0 14px #60a5fa, 0 0 28px #3b82f6, 0 0 42px #2563eb; }
+@keyframes shimmer {
+    from { filter: brightness(1); text-shadow: 0 0 10px rgba(180, 150, 255, 0.25); }
+    to { filter: brightness(1.3); text-shadow: 0 0 22px rgba(120, 200, 255, 0.4); }
 }
 
 body {
-    background-color: #000814;
+    background-color: #020617; /* Deep cosmic navy */
 }
 </style>
 
 <div class="starry-text">
- Powered by <b style="color:#93C5FD;">Google Gemini Flash</b> 
+ ✨ Powered by <b style="background: linear-gradient(90deg, #c084fc, #7dd3fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Google Gemini Flash</b> 🌌
 </div>
 """, unsafe_allow_html=True)
 
