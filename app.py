@@ -253,9 +253,9 @@ st.markdown("""
         --nebula-dark: #1a1a2e;
         --star-dust: #16213e;
         --aurora-glow: rgba(99, 102, 241, 0.15);
-        --text-primary: #e2e8f0;
-        --text-secondary: #cbd5e1;
-        --text-muted: #94a3b8;
+        --text-primary: #f8fafc; /* Brighter: near-white */
+        --text-secondary: #e2e8f0; /* Brighter: old primary */
+        --text-muted: #cbd5e1; /* Brighter: old secondary */
     }
 
     .rainbow-header {
@@ -577,7 +577,7 @@ st.markdown("""
     .stMarkdown h3 {
         font-size: 1.5rem;
         margin-bottom: 1rem;
-        background: linear-gradient(135deg, var(--cosmic-purple), var(--cosmic-cyan));
+        background: linear-gradient(135deg, #93c5fd, #f0abfc); /* Brighter gradient: light blue to light purple */
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -671,9 +671,24 @@ st.markdown("""
         border: 1px solid rgba(99, 102, 241, 0.3);
         padding: 1.25rem;
         border-radius: 16px;
-        color: #c7d2fe;
+        color: var(--text-secondary); /* Use a brighter, standard text color */
         margin: 1rem 0;
         box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
+    }
+
+    /* Style for native st.info boxes to match the theme and improve readability */
+    [data-testid="stInfo"] {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        border-radius: 16px;
+        margin: 1rem 0;
+        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
+        padding: 1.25rem !important;
+    }
+    /* Ensure text inside st.info is always bright */
+    [data-testid="stInfo"] div {
+        color: var(--text-primary) !important;
     }
     
     /* Download button */
