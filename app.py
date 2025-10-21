@@ -464,13 +464,9 @@ st.markdown("""
     
     /* Sidebar styling */
     .stSidebar {
-        background: linear-gradient(
-            180deg,
-            rgba(26, 26, 46, 0.95) 0%,
-            rgba(10, 10, 15, 0.98) 100%
-        );
-        backdrop-filter: blur(24px);
-        border-right: 1px solid rgba(99, 102, 241, 0.2);
+        background: transparent !important;
+        backdrop-filter: none !important;
+        border-right: none !important;
     }
     
     .stSidebar > div {
@@ -6126,4 +6122,3 @@ st.markdown("""
     <p style="font-size: 0.8rem;">Transform your imagination into reality with AI-powered artistry</p>
 </div>
 """, unsafe_allow_html=True)
-
