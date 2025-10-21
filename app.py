@@ -2150,7 +2150,6 @@ with col1:
         # It provides a more decorated and welcoming entry point.
         st.markdown("""
         <div style="text-align: center; padding-top: 4rem; padding-bottom: 2rem;">
-            
             <p style="color: var(--text-secondary); font-size: 1.15rem; max-width: 600px; margin: auto;">
                 Ready to bring your ideas to life? Click the button below to describe your vision and watch the magic happen.
             </p>
