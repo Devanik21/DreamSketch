@@ -6177,21 +6177,20 @@ st.markdown("---")
 st.markdown("""
 <style>
 .starry-text {
-    background: linear-gradient(135deg, #001233, #001845, #002855);
-    color: #E0E7FF;
     font-family: 'Poppins', sans-serif;
     text-align: center;
-    padding: 18px 25px;
-    border-radius: 18px;
-    box-shadow: 0 0 20px rgba(100, 180, 255, 0.4), 0 0 60px rgba(50, 100, 200, 0.2);
+    color: #E0E7FF;
+    background: none;
+    font-size: 1.15rem;
+    letter-spacing: 0.6px;
+    text-shadow: 0 0 8px #3b82f6, 0 0 16px #60a5fa, 0 0 32px #93c5fd;
     animation: glow 3s ease-in-out infinite alternate;
-    font-size: 1.1rem;
-    letter-spacing: 0.5px;
+    margin-top: 20px;
 }
 
 @keyframes glow {
-    from { text-shadow: 0 0 8px #3b82f6, 0 0 16px #60a5fa, 0 0 32px #93c5fd; }
-    to { text-shadow: 0 0 16px #60a5fa, 0 0 32px #3b82f6, 0 0 48px #2563eb; }
+    from { text-shadow: 0 0 6px #3b82f6, 0 0 14px #60a5fa, 0 0 28px #93c5fd; }
+    to { text-shadow: 0 0 14px #60a5fa, 0 0 28px #3b82f6, 0 0 42px #2563eb; }
 }
 
 body {
@@ -6203,6 +6202,7 @@ body {
 ✨ Powered by <b style="color:#93C5FD;">Google Gemini Flash</b> 🌌
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
