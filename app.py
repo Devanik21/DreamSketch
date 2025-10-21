@@ -801,7 +801,7 @@ textarea[placeholder="e.g., blurry, ugly, text, watermark, extra limbs, bad anat
 
 # --- SET BACKGROUND IMAGE ---
 try:
-    base64_img = get_base64_of_bin_file('Gemini_Generated_Image_u1w8yru1w8yru1w8.png')
+    base64_img = get_base64_of_bin_file('Gemini_Generated_Image_62lda862lda862ld.png')
     bg_css = f'''
     <style>
     .stApp {{
