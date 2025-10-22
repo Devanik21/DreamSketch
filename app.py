@@ -847,7 +847,7 @@ if not st.session_state.authenticated:
         with lock_col:
             st.markdown("<br><br><br>", unsafe_allow_html=True)
             st.error("🚫 **Access Blocked**")
-            st.warning("Too many incorrect password attempts. Please close and reopen the app to try again.")
+            st.warning("For security reasons, access to this account has been temporarily blocked due to multiple failed password attempts.")
         st.stop()
 
     # Display the login form
