@@ -819,8 +819,14 @@ except FileNotFoundError:
 # --- END SET BACKGROUND IMAGE ---
 
 # --- START: PASSWORD PROTECTION ---
+# Initialize session state variables for authentication
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
+if "login_attempts" not in st.session_state:
+    st.session_state.login_attempts = 0
+
+# Define the maximum number of allowed attempts
+MAX_ATTEMPTS = 3
 
 try:
     # The password should be set in your Streamlit secrets
@@ -831,16 +837,28 @@ except KeyError:
     st.error("`app_password` not found in secrets.toml. Please set it to run the app.")
     st.stop()
 
+# If already authenticated, the rest of the app will run.
+# If not, we show the login screen.
 if not st.session_state.authenticated:
-    # Use columns to center the login form and make it look nicer
+    
+    # Check if the user is locked out from too many attempts
+    if st.session_state.login_attempts >= MAX_ATTEMPTS:
+        _, lock_col, _ = st.columns([1, 2, 1])
+        with lock_col:
+            st.markdown("<br><br><br>", unsafe_allow_html=True)
+            st.error("🚫 **Access Blocked**")
+            st.warning("Too many incorrect password attempts. Please close and reopen the app to try again.")
+        st.stop()
+
+    # Display the login form
     _, login_col, _ = st.columns([1, 2, 1])
     with login_col:
         st.markdown("<br><br><br>", unsafe_allow_html=True) # Add vertical space
         st.markdown("<h1 class='pretty-title'>DreamCanvas Login</h1>", unsafe_allow_html=True)
         
         password = st.text_input(
-            "Enter Password", 
-            type="password", 
+            "Enter Password",
+            type="password",
             key="password_input_field",
             label_visibility="collapsed",
             placeholder="Enter password to unlock"
@@ -849,9 +867,21 @@ if not st.session_state.authenticated:
         if st.button("Enter", use_container_width=True):
             if password == correct_password:
                 st.session_state.authenticated = True
+                st.session_state.login_attempts = 0 # Reset on success
                 st.rerun()
             else:
-                st.error("The password you entered is incorrect.")
+                st.session_state.login_attempts += 1
+                attempts_left = MAX_ATTEMPTS - st.session_state.login_attempts
+                if attempts_left > 0:
+                    st.error(f"Incorrect password. You have {attempts_left} attempt(s) left.")
+                else:
+                    # This message is shown just before the lockout screen appears on rerun
+                    st.error("Incorrect password. No attempts left. Access will be blocked.")
+                
+                # Rerun to update the UI and check the lockout condition
+                time.sleep(1) # Brief pause for the user to read the message
+                st.rerun()
+
     # Stop the app from running further if not authenticated
     st.stop()
 # --- END: PASSWORD PROTECTION ---
