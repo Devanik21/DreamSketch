@@ -818,8 +818,43 @@ except FileNotFoundError:
     st.warning("Background image 'k14.jpg' not found. Using default background.")
 # --- END SET BACKGROUND IMAGE ---
 
+# --- START: PASSWORD PROTECTION ---
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
 
+try:
+    # The password should be set in your Streamlit secrets
+    # e.g., in .streamlit/secrets.toml
+    # app_password = "your_secret_password"
+    correct_password = st.secrets["app_password"]
+except KeyError:
+    st.error("`app_password` not found in secrets.toml. Please set it to run the app.")
+    st.stop()
 
+if not st.session_state.authenticated:
+    # Use columns to center the login form and make it look nicer
+    _, login_col, _ = st.columns([1, 2, 1])
+    with login_col:
+        st.markdown("<br><br><br>", unsafe_allow_html=True) # Add vertical space
+        st.markdown("<h1 class='pretty-title'>DreamCanvas Login</h1>", unsafe_allow_html=True)
+        
+        password = st.text_input(
+            "Enter Password", 
+            type="password", 
+            key="password_input_field",
+            label_visibility="collapsed",
+            placeholder="Enter password to unlock"
+        )
+        
+        if st.button("Enter", use_container_width=True):
+            if password == correct_password:
+                st.session_state.authenticated = True
+                st.rerun()
+            else:
+                st.error("The password you entered is incorrect.")
+    # Stop the app from running further if not authenticated
+    st.stop()
+# --- END: PASSWORD PROTECTION ---
 
 st.markdown("""
 <style>
