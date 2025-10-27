@@ -898,6 +898,26 @@ st.markdown("""
 """, unsafe_allow_html=True)
 st.markdown("<br><br>", unsafe_allow_html=True)
 
+# --- GLOBAL CANVAS MODE ---
+with st.container(border=True):
+    st.markdown("<h4 style='text-align: center;'>🎨 GLOBAL CANVAS MODE</h4>", unsafe_allow_html=True)
+    
+    canvas_mode_is_active = st.session_state.get('canvas_mode', False)
+
+    if canvas_mode_is_active:
+        st.warning("Image Generation is **ACTIVE**")
+    else:
+        st.info("Image Generation is **INACTIVE**")
+
+    st.session_state.canvas_mode = st.toggle(
+        "Activate/Deactivate Image Generation",
+        value=canvas_mode_is_active,
+        key="global_canvas_mode_toggle",
+        label_visibility="collapsed"
+    )
+    st.caption("When active, all prompts will generate images.")
+
+
 # Footer in main area
 st.markdown("""
 <hr>
@@ -906,27 +926,6 @@ st.markdown("""
 
 # Sidebar with chat interface
 with st.sidebar:
-    # --- GLOBAL CANVAS MODE ---
-    with st.container(border=True):
-        st.markdown("<h4 style='text-align: center;'>🎨 GLOBAL CANVAS MODE</h4>", unsafe_allow_html=True)
-        
-        canvas_mode_is_active = st.session_state.get('canvas_mode', False)
-
-        if canvas_mode_is_active:
-            st.warning("Image Generation is **ACTIVE**")
-        else:
-            st.info("Image Generation is **INACTIVE**")
-
-        st.session_state.canvas_mode = st.toggle(
-            "Activate/Deactivate Image Generation",
-            value=canvas_mode_is_active,
-            key="global_canvas_mode_toggle",
-            label_visibility="collapsed"
-        )
-        st.caption("When active, all prompts will generate images.")
-    
-    st.markdown("---")
-
 
     # --- Persona Selection ---
     st.markdown("### 🎓 AI PERSONA")
