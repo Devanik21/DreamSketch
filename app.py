@@ -3,7 +3,7 @@ from PIL import Image
 import base64
 import os
 import google.generativeai as genai
-import PyPDF2
+import PyPDF2 
 import docx
 from pathlib import Path
 import json
