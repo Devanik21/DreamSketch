@@ -926,6 +926,16 @@ with st.sidebar:
         active_persona = get_session_persona(db, st.session_state.current_session_id)
         st.caption(f"Active Persona: **{active_persona}**")
 
+    # --- Canvas Mode Toggle ---
+    st.markdown("---")
+    st.markdown("### 🎨 CANVAS MODE")
+    st.session_state.canvas_mode = st.toggle(
+        "Activate Image Generation",
+        value=st.session_state.get('canvas_mode', False),
+        help="When active, all prompts will be sent to the image generation model. When inactive, it's a standard text chat."
+    )
+    st.markdown("---")
+
     st.markdown("### 🌌 CHAT SESSIONS")
     
     # New chat button
@@ -1588,7 +1598,7 @@ apply_cosmic_theme(fig, 'Supernova')
             is_image_message = content.startswith("[IMAGE:") and "]" in content
 
             if message["role"] == "assistant" and "Ethical Compass Report" not in content:
-                col1, col2, col3, col4 = st.columns([10, 1, 1, 1])
+                col1, col2, col3 = st.columns([12, 1, 1])
                 with col1:
                     if is_image_message:
                         try:
@@ -1673,10 +1683,6 @@ apply_cosmic_theme(fig, 'Supernova')
                             'content': content,
                             'timestamp': message['timestamp']
                         }
-                        st.rerun()
-                with col4:
-                    if st.button("🎨", key=f"canvas_{message['timestamp']}", help="Toggle Canvas Mode"):
-                        st.session_state.canvas_mode = not st.session_state.get('canvas_mode', False)
                         st.rerun()
             else:
                 st.markdown(content)
