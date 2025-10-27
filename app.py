@@ -926,16 +926,6 @@ with st.sidebar:
         active_persona = get_session_persona(db, st.session_state.current_session_id)
         st.caption(f"Active Persona: **{active_persona}**")
 
-    # --- Canvas Mode Toggle ---
-    st.markdown("---")
-    st.markdown("### 🎨 CANVAS MODE")
-    st.session_state.canvas_mode = st.toggle(
-        "Activate Image Generation",
-        value=st.session_state.get('canvas_mode', False),
-        help="When active, all prompts will be sent to the image generation model. When inactive, it's a standard text chat."
-    )
-    st.markdown("---")
-
     st.markdown("### 🌌 CHAT SESSIONS")
     
     # New chat button
@@ -1110,6 +1100,26 @@ Your task is to take a user's description of a web tool or dashboard and generat
                 use_container_width=True,
                 on_click=clear_genesis_engine_output
             )
+
+    # --- GLOBAL CANVAS MODE ---
+    st.markdown("---")
+    with st.container(border=True):
+        st.markdown("<h4 style='text-align: center;'>🎨 GLOBAL CANVAS MODE</h4>", unsafe_allow_html=True)
+        
+        canvas_mode_is_active = st.session_state.get('canvas_mode', False)
+
+        if canvas_mode_is_active:
+            st.warning("Image Generation is **ACTIVE**")
+        else:
+            st.info("Image Generation is **INACTIVE**")
+
+        st.session_state.canvas_mode = st.toggle(
+            "Activate/Deactivate Image Generation",
+            value=canvas_mode_is_active,
+            key="global_canvas_mode_toggle",
+            label_visibility="collapsed"
+        )
+        st.caption("When active, all prompts will generate images.")
 
     st.markdown("---")
     with st.expander("🧪 Code Alchemist: Live Refactoring"):
