@@ -906,6 +906,28 @@ st.markdown("""
 
 # Sidebar with chat interface
 with st.sidebar:
+    # --- GLOBAL CANVAS MODE ---
+    with st.container(border=True):
+        st.markdown("<h4 style='text-align: center;'>🎨 GLOBAL CANVAS MODE</h4>", unsafe_allow_html=True)
+        
+        canvas_mode_is_active = st.session_state.get('canvas_mode', False)
+
+        if canvas_mode_is_active:
+            st.warning("Image Generation is **ACTIVE**")
+        else:
+            st.info("Image Generation is **INACTIVE**")
+
+        st.session_state.canvas_mode = st.toggle(
+            "Activate/Deactivate Image Generation",
+            value=canvas_mode_is_active,
+            key="global_canvas_mode_toggle",
+            label_visibility="collapsed"
+        )
+        st.caption("When active, all prompts will generate images.")
+    
+    st.markdown("---")
+
+
     # --- Persona Selection ---
     st.markdown("### 🎓 AI PERSONA")
     st.markdown("<small>The selected persona applies to new chats. 'Cognitive Twin' evolves to match your style.</small>", unsafe_allow_html=True)
@@ -1100,26 +1122,6 @@ Your task is to take a user's description of a web tool or dashboard and generat
                 use_container_width=True,
                 on_click=clear_genesis_engine_output
             )
-
-    # --- GLOBAL CANVAS MODE ---
-    st.markdown("---")
-    with st.container(border=True):
-        st.markdown("<h4 style='text-align: center;'>🎨 GLOBAL CANVAS MODE</h4>", unsafe_allow_html=True)
-        
-        canvas_mode_is_active = st.session_state.get('canvas_mode', False)
-
-        if canvas_mode_is_active:
-            st.warning("Image Generation is **ACTIVE**")
-        else:
-            st.info("Image Generation is **INACTIVE**")
-
-        st.session_state.canvas_mode = st.toggle(
-            "Activate/Deactivate Image Generation",
-            value=canvas_mode_is_active,
-            key="global_canvas_mode_toggle",
-            label_visibility="collapsed"
-        )
-        st.caption("When active, all prompts will generate images.")
 
     st.markdown("---")
     with st.expander("🧪 Code Alchemist: Live Refactoring"):
