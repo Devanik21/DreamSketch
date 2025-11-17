@@ -2152,7 +2152,7 @@ with col1:
                                 generation_contents.append(f"Negative prompt: {negative_prompt}")
 
                             response = local_client.models.generate_content(
-                                model="gemini-2.0-flash-exp-image-generation",
+                                model="models/gemini-2.5-flash-image",
                                 contents=generation_contents,
                                 config=types.GenerateContentConfig(
                                     response_modalities=["text", "image"]
