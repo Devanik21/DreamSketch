@@ -2231,39 +2231,258 @@ For hexagonal cells, each cell has 6 co-channel interferers in the first tier (c
     6 co-channel cells at distance D from serving cell
 ```
 
-**SIR Calculation:**
 
-Assuming all base stations transmit equal power P, and path loss follows d⁻ⁿ:
-- Signal power from serving BS at mobile: S = P × R⁻ⁿ
-- Interference from each co-channel BS: Iᵢ ≈ P × D⁻ⁿ (approximating all at distance D)
-- Total interference from 6 co-channel cells: I = 6 × P × D⁻ⁿ
 
-$SIR = \frac{S}{I} = \frac{P \cdot R^{-n}}{6 \cdot P \cdot D^{-n}} = \frac{1}{6}\left(\frac{D}{R}\right)^n = \frac{(\sqrt{3N})^n}{6} = \frac{(3N)^{n/2}}{6}$
+## 13. FREQUENCY REUSE
 
-**For typical urban environment with n = 4:**
+### Concept
+**Frequency reuse** is the design principle of using the same frequencies in multiple cells that are geographically separated to increase system capacity without requiring additional spectrum.
+
+### Frequency Reuse Pattern
+```
+[Diagram: 7-Cell Frequency Reuse Pattern]
+
+              ╱╲     ╱╲     ╱╲
+             ╱ 2╲   ╱ 3╲   ╱ 2╲
+            ╱    ╲ ╱    ╲ ╱    ╲
+           ╱──────╳──────╳──────╲
+          ╱╲  1  ╱╲  1  ╱╲  1  ╱╲
+         ╱ 7╲   ╱ 7╲   ╱ 7╲   ╱ 7╲
+        ╱    ╲ ╱    ╲ ╱    ╲ ╱    ╲
+       ╱──────╳──────╳──────╳──────╲
+      ╱╲  6  ╱╲  6  ╱╲  6  ╱╲  6  ╱
+     ╱ 5╲   ╱ 5╲   ╱ 5╲   ╱ 5╲   ╱
+    ╱    ╲ ╱    ╲ ╱    ╲ ╱    ╲ ╱
+           ╲  4  ╱╲  4  ╱
+            ╲   ╱  ╲   ╱
+
+    Cells with same number use same frequencies
+    N = 7 (cluster size)
+```
+
+### Cluster Size (N)
+
+A **cluster** is a group of N cells using the complete set of available frequencies. For hexagonal cells:
+
+$N = i^2 + ij + j^2$
+
+Where i and j are non-negative integers.
+
+**Valid cluster sizes:** N = 1, 3, 4, 7, 9, 12, 13, 16, 19, 21...
+
+### Frequency Reuse Factor
+
+$\text{Reuse Factor} = \frac{1}{N}$
+
+Smaller N → more capacity but more interference.
+
+### Co-channel Reuse Distance (D)
+
+Distance between cells using the same frequency:
+
+$D = R\sqrt{3N}$
+
+**Where:**
+- **D** = Co-channel reuse distance
+- **R** = Cell radius
+- **N** = Cluster size
+
+**Co-channel Reuse Ratio:**
+$Q = \frac{D}{R} = \sqrt{3N}$
+
+| Cluster Size (N) | Q = D/R |
+|------------------|---------|
+| 3 | 3.0 |
+| 4 | 3.46 |
+| 7 | 4.58 |
+| 12 | 6.0 |
+
+### Signal-to-Interference Ratio (SIR)
+
+For first tier of co-channel interferers (6 cells in hexagonal layout):
+
+$SIR = \frac{S}{I} = \frac{R^{-n}}{6 \cdot D^{-n}} = \frac{1}{6}\left(\frac{D}{R}\right)^n = \frac{(3N)^{n/2}}{6}$
+
+**For n = 4 (typical urban):**
 $SIR = \frac{(3N)^2}{6} = \frac{9N^2}{6} = 1.5N^2$
 
-**In decibels:**
-$SIR(dB) = 10\log_{10}(1.5N^2) = 10\log_{10}(1.5) + 20\log_{10}(N) = 1.76 + 20\log_{10}(N)$
+**In dB:**
+$SIR(dB) = 10\log_{10}(1.5N^2)$
 
-**SIR for Different Cluster Sizes (n=4):**
+**Example:** For N = 7:
+$SIR = 1.5 × 49 = 73.5 \text{ (or 18.7 dB)}$
 
-| N | Q = √3N | SIR (linear) | SIR (dB) |
-|---|---------|--------------|----------|
-| 3 | 3.00 | 13.5 | 11.3 dB |
-| 4 | 3.46 | 24.0 | 13.8 dB |
-| 7 | 4.58 | 73.5 | 18.7 dB |
-| 12 | 6.00 | 216 | 23.3 dB |
+### Capacity Calculation
 
-**Minimum SIR Requirements:**
-- Analog FM (AMPS): ~18 dB → N = 7
-- Digital GSM: ~9-12 dB → N = 3-4 possible with DTX, power control
-- CDMA: ~7 dB → N = 1 with power control
+**Total channels in system:**
+$C = \frac{S}{N} \times M$
 
-### System Capacity Analysis
+**Where:**
+- **S** = Total available channels
+- **N** = Cluster size
+- **M** = Number of clusters in coverage area
 
-**Total Channels Available:**
-If S = total number of channels allocated to the system:
+**Channels per cell:**
+$k = S/N$
 
-**Channels per Cell:**
-$
+### Trade-offs in Frequency Reuse
+
+| Small N (e.g., 3-4) | Large N (e.g., 12-19) |
+|---------------------|----------------------|
+| High capacity | Lower capacity |
+| High interference | Low interference |
+| Requires good power control | More forgiving |
+| Used in CDMA (N=1) | Used in legacy FDMA/TDMA |
+
+### Improving Capacity
+
+1. **Cell splitting**: Divide cells to add more channels
+2. **Sectoring**: Use directional antennas (120° or 60° sectors)
+3. **Microcells/Picocells**: Very small cells in high-traffic areas
+4. **Dynamic channel allocation**: Flexible frequency assignment
+
+---
+
+## 14. NUMERICAL: OFFERED TRAFFIC CALCULATION
+
+### Key Formulas
+
+**Traffic Intensity (Offered Traffic):**
+$A = \lambda \times h \text{ (Erlangs)}$
+
+**Where:**
+- **λ** = Call arrival rate (calls per unit time)
+- **h** = Average holding time (same time unit)
+
+**Alternative expressions:**
+$A = \frac{\text{Total call minutes in hour}}{60} \text{ Erlangs}$
+
+$A = \frac{n \times c \times h}{T}$
+Where n = number of users, c = calls per user per hour, h = holding time, T = observation period
+
+### Erlang B Formula (For Blocking Probability)
+
+$P_B = \frac{A^N/N!}{\sum_{k=0}^{N} A^k/k!}$
+
+### Example Problems
+
+---
+
+**Problem 1: Basic Traffic Calculation**
+
+A cellular system receives an average of 300 calls per hour with mean holding time of 3 minutes. Calculate the offered traffic.
+
+**Solution:**
+$\lambda = 300 \text{ calls/hour}$
+$h = 3 \text{ minutes} = 3/60 = 0.05 \text{ hours}$
+$A = \lambda \times h = 300 \times 0.05 = 15 \text{ Erlangs}$
+
+---
+
+**Problem 2: Traffic from User Population**
+
+A cell serves 500 users. Each user makes an average of 2 calls per hour, with mean duration of 2 minutes. Find offered traffic.
+
+**Solution:**
+$\lambda = 500 \times 2 = 1000 \text{ calls/hour}$
+$h = 2/60 = 0.0333 \text{ hours}$
+$A = 1000 \times 0.0333 = 33.33 \text{ Erlangs}$
+
+---
+
+**Problem 3: Channel Dimensioning**
+
+Traffic intensity is 25 Erlangs. How many channels needed for 2% blocking (GoS = 0.02)?
+
+**Solution:**
+Using Erlang B table or calculator:
+- For A = 25 E and PB = 0.02
+- **N = 34 channels required**
+
+---
+
+**Problem 4: Finding Offered Traffic from Blocking**
+
+A system with 20 channels experiences 5% blocking. What is the offered traffic?
+
+**Solution:**
+From Erlang B table:
+- N = 20, PB = 0.05
+- **A ≈ 15.2 Erlangs**
+
+---
+
+**Problem 5: Comprehensive System Design**
+
+A cellular system has:
+- 500 kHz total bandwidth
+- 25 kHz channel bandwidth  
+- 7-cell reuse pattern
+- 2% target GoS
+
+Calculate: (a) Channels per cell, (b) Maximum offered traffic per cell, (c) Maximum users per cell (2 calls/hour, 3 min each)
+
+**Solution:**
+
+(a) Total channels = 500/25 = 20 channels
+Channels per cell = 20/7 ≈ 2.86 → **2 channels per cell**
+
+(b) From Erlang B table, for N=2, PB=0.02:
+**A ≈ 0.22 Erlangs per cell**
+
+(c) Traffic per user = 2 × (3/60) = 0.1 Erlangs
+Users per cell = 0.22/0.1 = **2.2 ≈ 2 users per cell**
+
+---
+
+**Problem 6: Busy Hour Traffic**
+
+During busy hour, a cell handles:
+- 150 voice calls (average 2 min)
+- 200 data sessions (average 30 sec)
+
+Calculate total offered traffic.
+
+**Solution:**
+Voice traffic = 150 × 2/60 = 5 Erlangs
+Data traffic = 200 × 0.5/60 = 1.67 Erlangs
+**Total A = 5 + 1.67 = 6.67 Erlangs**
+
+---
+
+### Erlang B Table (Quick Reference)
+
+| Channels (N) | A for 1% GoS | A for 2% GoS | A for 5% GoS |
+|--------------|--------------|--------------|--------------|
+| 1 | 0.01 | 0.02 | 0.05 |
+| 5 | 1.36 | 1.66 | 2.22 |
+| 10 | 4.46 | 5.08 | 6.22 |
+| 15 | 8.11 | 9.01 | 10.63 |
+| 20 | 12.03 | 13.18 | 15.25 |
+| 30 | 20.34 | 21.93 | 24.80 |
+| 50 | 37.90 | 40.26 | 44.53 |
+
+---
+
+## QUICK REVISION FORMULAS
+
+| Topic | Key Formula |
+|-------|-------------|
+| Friis Equation | $P_r = P_t G_t G_r (\lambda/4\pi d)^2$ |
+| Path Loss Exponent | $PL = PL(d_0) + 10n\log(d/d_0)$ |
+| RAKE Output SNR | $\gamma_{RAKE} = \sum \gamma_i$ |
+| MRC Output SNR | $\gamma_{MRC} = \sum \gamma_i$ |
+| Traffic Intensity | $A = \lambda \times h$ |
+| Erlang B | $P_B = (A^N/N!)/\sum(A^k/k!)$ |
+| OFDM Orthogonality | $\Delta f = 1/T_s$ |
+| Spread Spectrum Gain | $G_p = R_c/R_b$ |
+| Critical Frequency | $f_c = 9\sqrt{N_{max}}$ |
+| MUF | $MUF = f_c \sec\theta$ |
+| LOS Distance | $d = 4.12(\sqrt{h_1} + \sqrt{h_2})$ km |
+| Reuse Distance | $D = R\sqrt{3N}$ |
+| SIR | $SIR = (3N)^{n/2}/6$ |
+| Propagation Delay | $t_{prop} = d/c$ |
+
+---
+
+**Good luck with your exam!**
