@@ -15,6 +15,7 @@ from streamlit_drawable_canvas import st_canvas
 import os
 import base64
 from tinydb import TinyDB, Query
+from google import genai
 
 
 # --- START: MONKEY-PATCH V2 FOR DEPRECATED image_to_url ---
