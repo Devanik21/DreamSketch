@@ -61,20 +61,20 @@ def initialize_gemini_client():
 
     if 'current_api_key_index' not in st.session_state:
         st.session_state.current_api_key_index = 0
+    
+    # Ensure index is within bounds (e.g., if the secrets list was shortened)
+    st.session_state.current_api_key_index %= len(api_keys)
 
-    try:
-        current_key_index = st.session_state.current_api_key_index
-        api_key = api_keys[current_key_index]
-        return genai.Client(api_key=api_key)
-    except IndexError:
-        st.error("All available API keys have reached their limit.")
-        st.stop()
+    api_key = api_keys[st.session_state.current_api_key_index]
+    return genai.Client(api_key=api_key)
 
 def rotate_api_key():
     """
-    Moves to the next API key in the list.
+    Moves to the next API key in the list, wrapping around to the start if necessary.
     """
-    st.session_state.current_api_key_index += 1
+    api_keys = st.secrets.get("gemini_api_keys", [])
+    if api_keys:
+        st.session_state.current_api_key_index = (st.session_state.current_api_key_index + 1) % len(api_keys)
     st.warning("API key limit reached. Attempting to switch to the next key...")
     time.sleep(2) # Brief pause to allow UI update
 # --- END: API KEY ROTATION SETUP ---
@@ -2198,7 +2198,7 @@ with col1:
                         except Exception as e:
                             error_msg = str(e).lower()
                             if "quota" in error_msg or "limit" in error_msg:
-                                if st.session_state.current_api_key_index < max_retries - 1:
+                                if attempt < max_retries - 1:
                                     rotate_api_key()
                                     continue  # Retry with the next key
                                 else:
