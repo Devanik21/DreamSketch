@@ -49,35 +49,24 @@ def image_to_url(img, width, height, clamp, channels, output_format):
 # Overwrite the missing function with our new implementation
 st_image.image_to_url = image_to_url
 # --- END: MONKEY-PATCH V2 ---
-# --- START: API KEY ROTATION SETUP ---
+# --- START: API KEY SETUP ---
 def initialize_gemini_client():
     """
-    Initializes and returns a Gemini client by trying a list of API keys from secrets.
+    Initializes and returns a Gemini client using the API key from secrets.
     """
-    api_keys = st.secrets.get("gemini_api_keys", [])
-    if not api_keys:
-        st.error("API keys not found in secrets.toml. Please add them.")
+    # Try singular key first, fall back to first key in list for compatibility
+    api_key = st.secrets.get("gemini_api_key")
+    if not api_key:
+        api_keys = st.secrets.get("gemini_api_keys", [])
+        if api_keys:
+            api_key = api_keys[0]
+            
+    if not api_key:
+        st.error("API key not found in secrets.toml. Please add 'gemini_api_key'.")
         st.stop()
 
-    if 'current_api_key_index' not in st.session_state:
-        st.session_state.current_api_key_index = 0
-    
-    # Ensure index is within bounds (e.g., if the secrets list was shortened)
-    st.session_state.current_api_key_index %= len(api_keys)
-
-    api_key = api_keys[st.session_state.current_api_key_index]
     return genai.Client(api_key=api_key)
-
-def rotate_api_key():
-    """
-    Moves to the next API key in the list, wrapping around to the start if necessary.
-    """
-    api_keys = st.secrets.get("gemini_api_keys", [])
-    if api_keys:
-        st.session_state.current_api_key_index = (st.session_state.current_api_key_index + 1) % len(api_keys)
-    st.warning("API key limit reached. Attempting to switch to the next key...")
-    time.sleep(2) # Brief pause to allow UI update
-# --- END: API KEY ROTATION SETUP ---
+# --- END: API KEY SETUP ---
 
 @st.cache_data
 def get_base64_of_bin_file(bin_file):
@@ -2132,93 +2121,83 @@ with col1:
                         progress_bar = st.progress(0)
                         status_text = st.empty()
 
-                    # --- START: API KEY ROTATION LOGIC ---
+                    # --- START: GENERATION LOGIC ---
                     generation_successful = False
-                    max_retries = len(st.secrets.get("gemini_api_keys", []))
-                    
-                    for attempt in range(max_retries):
-                        try:
-                            # Use a local client variable that gets re-initialized on retry
-                            local_client = initialize_gemini_client()
+                    try:
+                        # Use a local client variable
+                        local_client = initialize_gemini_client()
 
-                            status_text.text(f"🎨 Initializing... (Using Key {st.session_state.current_api_key_index + 1})")
-                            progress_bar.progress(20)
-                            
-                            status_text.text("✨ Creating your masterpiece...")
-                            progress_bar.progress(60)
-                            
-                            generation_contents = [enhanced_prompt]
-                            if negative_prompt:
-                                generation_contents.append(f"Negative prompt: {negative_prompt}")
+                        status_text.text("🎨 Initializing...")
+                        progress_bar.progress(20)
+                        
+                        status_text.text("✨ Creating your masterpiece...")
+                        progress_bar.progress(60)
+                        
+                        generation_contents = [enhanced_prompt]
+                        if negative_prompt:
+                            generation_contents.append(f"Negative prompt: {negative_prompt}")
 
-                            response = local_client.models.generate_content(
-                                model="models/gemini-2.5-flash-image",
-                                contents=generation_contents,
-                                config=types.GenerateContentConfig(
-                                    response_modalities=["text", "image"]
-                                )
+                        response = local_client.models.generate_content(
+                            model="models/gemini-2.5-flash-image",
+                            contents=generation_contents,
+                            config=types.GenerateContentConfig(
+                                response_modalities=["text", "image"]
                             )
+                        )
+                        
+                        progress_bar.progress(100)
+                        status_text.text("🎉 Masterpiece complete!")
+                        
+                        image_data, description = None, ""
+                        for part in response.candidates[0].content.parts:
+                            if part.text:
+                                description = part.text
+                            elif part.inline_data:
+                                image_data = part.inline_data.data
+                        
+                        if image_data:
+                            generation_successful = True
+                            image_metadata = {
+                                'id': str(uuid.uuid4()),
+                                'image_data': image_data,
+                                'original_prompt': prompt,
+                                'enhanced_prompt': enhanced_prompt,
+                                'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                                'style_used': selected_style,
+                                'color_mood': color_mood,
+                                'lighting': lighting,
+                                'description': description,
+                                'aspect_ratio': aspect_ratio,
+                                'quality_level': quality_level
+                            }
+                            st.session_state.images.append(image_metadata)
+                            save_image_to_db(image_metadata)
+                            st.session_state.current_image = image_metadata
                             
-                            progress_bar.progress(100)
-                            status_text.text("🎉 Masterpiece complete!")
-                            
-                            image_data, description = None, ""
-                            for part in response.candidates[0].content.parts:
-                                if part.text:
-                                    description = part.text
-                                elif part.inline_data:
-                                    image_data = part.inline_data.data
-                            
-                            if image_data:
-                                generation_successful = True
-                                image_metadata = {
-                                    'id': str(uuid.uuid4()),
-                                    'image_data': image_data,
-                                    'original_prompt': prompt,
-                                    'enhanced_prompt': enhanced_prompt,
-                                    'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                                    'style_used': selected_style,
-                                    'color_mood': color_mood,
-                                    'lighting': lighting,
-                                    'description': description,
-                                    'aspect_ratio': aspect_ratio,
-                                    'quality_level': quality_level
-                                }
-                                st.session_state.images.append(image_metadata)
-                                save_image_to_db(image_metadata)
-                                st.session_state.current_image = image_metadata
-                                
-                                progress_container.empty()
-                                st.markdown('<div class="success-box">🎉 Your masterpiece has been created!</div>', unsafe_allow_html=True)
-                                st.rerun()
-                            else:
-                                 st.markdown('<div class="error-box">❌ No image was generated. Please try again with a different prompt.</div>', unsafe_allow_html=True)
-                            break  # Exit loop on success
+                            progress_container.empty()
+                            st.markdown('<div class="success-box">🎉 Your masterpiece has been created!</div>', unsafe_allow_html=True)
+                            st.rerun()
+                        else:
+                             st.markdown('<div class="error-box">❌ No image was generated. Please try again with a different prompt.</div>', unsafe_allow_html=True)
 
-                        except Exception as e:
-                            error_msg = str(e).lower()
-                            if "quota" in error_msg or "limit" in error_msg:
-                                if attempt < max_retries - 1:
-                                    rotate_api_key()
-                                    continue  # Retry with the next key
-                                else:
-                                    st.markdown('<div class="error-box">⏳ All API keys have reached their limit. Please try again later.</div>', unsafe_allow_html=True)
-                                    break
+                    except Exception as e:
+                        error_msg = str(e).lower()
+                        if "quota" in error_msg or "limit" in error_msg:
+                            st.markdown('<div class="error-box">⏳ API key limit reached. Please try again later.</div>', unsafe_allow_html=True)
+                        else:
+                            # Handle other errors like safety, network, etc.
+                            if "api key" in error_msg or "authentication" in error_msg:
+                                st.markdown('<div class="error-box">🔑 Authentication Error: Please check your API key configuration.</div>', unsafe_allow_html=True)
+                            elif "safety" in error_msg or "policy" in error_msg:
+                                st.markdown('<div class="error-box">🛡️ Content Policy: Your prompt may violate guidelines. Please try a different description.</div>', unsafe_allow_html=True)
+                            elif "network" in error_msg or "connection" in error_msg:
+                                st.markdown('<div class="error-box">🌐 Network Error: Please check your internet connection and try again.</div>', unsafe_allow_html=True)
                             else:
-                                # Handle other errors like safety, network, etc.
-                                if "api key" in error_msg or "authentication" in error_msg:
-                                    st.markdown('<div class="error-box">🔑 Authentication Error: Please check your API key configuration.</div>', unsafe_allow_html=True)
-                                elif "safety" in error_msg or "policy" in error_msg:
-                                    st.markdown('<div class="error-box">🛡️ Content Policy: Your prompt may violate guidelines. Please try a different description.</div>', unsafe_allow_html=True)
-                                elif "network" in error_msg or "connection" in error_msg:
-                                    st.markdown('<div class="error-box">🌐 Network Error: Please check your internet connection and try again.</div>', unsafe_allow_html=True)
-                                else:
-                                    st.markdown(f'<div class="error-box">⚠️ Generation Error: {str(e)}</div>', unsafe_allow_html=True)
-                                break # Exit loop for other errors
+                                st.markdown(f'<div class="error-box">⚠️ Generation Error: {str(e)}</div>', unsafe_allow_html=True)
 
                     if not generation_successful:
                         progress_container.empty()
-                    # --- END: API KEY ROTATION LOGIC ---
+                    # --- END: GENERATION LOGIC ---
     else:
         # This is the placeholder view before the user starts creating.
         # It provides a more decorated and welcoming entry point.
@@ -2300,12 +2279,14 @@ with col1:
                         original_image_pil = Image.open(BytesIO(img_data['image_data']))
                         original_prompt_text = img_data.get('enhanced_prompt', img_data.get('original_prompt', ''))
                         
+                        # --- START: VARIATION GENERATION LOGIC ---
+                        local_client = initialize_gemini_client()
+                        
                         variation_prompt = (
                             f"Generate a new, unique variation of the provided image. The original concept was: '{original_prompt_text}'. "
                             "Maintain the core subject and theme, but creatively alter the composition, lighting, or details to offer a fresh perspective."
                         )
 
-                        # --- CORRECTED CODE ---
                         # Build the contents list for the API call
                         variation_contents = [variation_prompt, original_image_pil]
 
@@ -2313,14 +2294,14 @@ with col1:
                         if negative_prompt:
                              variation_contents.append(f"Negative prompt: {negative_prompt}")
                         
-                        response = client.models.generate_content(
+                        response = local_client.models.generate_content(
                             model="gemini-2.0-flash-exp-image-generation",
-                            contents=variation_contents, # Use the new list here
+                            contents=variation_contents,
                             config=types.GenerateContentConfig(
                                 response_modalities=["text", "image"]
                             )
                         )
-                        # --- END OF CORRECTION ---
+                        # --- END: VARIATION GENERATION LOGIC ---
 
                         new_image_data = None
                         new_description = ""
