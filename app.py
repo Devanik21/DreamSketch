@@ -54,6 +54,7 @@ st_image.image_to_url = image_to_url
 def initialize_gemini_client():
     """
     Initializes and returns a Gemini client using the API key from secrets.
+    Returns None if no key is found.
     """
     # Try singular key first, fall back to first key in list for compatibility
     api_key = st.secrets.get("gemini_api_key")
@@ -63,10 +64,12 @@ def initialize_gemini_client():
             api_key = api_keys[0]
             
     if not api_key:
-        st.error("API key not found in secrets.toml. Please add 'gemini_api_key'.")
-        st.stop()
+        return None
 
-    return genai.Client(api_key=api_key)
+    try:
+        return genai.Client(api_key=api_key)
+    except Exception:
+        return None
 # --- END: API KEY SETUP ---
 
 # --- START: HUGGING FACE API SETUP ---
@@ -2152,6 +2155,9 @@ with col1:
                     try:
                         # Use a local client variable
                         local_client = initialize_gemini_client()
+                        if not local_client:
+                            # Raising an exception with 'limit' to trigger the fallback logic below
+                            raise Exception("Gemini API key not found. Switching to fallback...")
 
                         status_text.text("🎨 Initializing...")
                         progress_bar.progress(20)
@@ -2334,6 +2340,8 @@ with col1:
                         
                         # --- START: VARIATION GENERATION LOGIC ---
                         local_client = initialize_gemini_client()
+                        if not local_client:
+                             raise Exception("Gemini API key not found. Switching to fallback...")
                         
                         variation_prompt = (
                             f"Generate a new, unique variation of the provided image. The original concept was: '{original_prompt_text}'. "
