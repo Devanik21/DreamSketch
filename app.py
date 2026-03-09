@@ -2295,7 +2295,7 @@ with col1:
                              variation_contents.append(f"Negative prompt: {negative_prompt}")
                         
                         response = local_client.models.generate_content(
-                            model="gemini-2.0-flash-exp-image-generation",
+                            model="gemini-2.5-flash-image",
                             contents=variation_contents,
                             config=types.GenerateContentConfig(
                                 response_modalities=["text", "image"]
@@ -2658,7 +2658,7 @@ with col2:
                         )
 
                         response = client.models.generate_content(
-                            model="gemini-2.0-flash-exp-image-generation",
+                            model="gemini-2.5-flash-image",
                             contents=[upscale_prompt, original_pil_upscale],
                             config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
@@ -2805,7 +2805,7 @@ with col2:
                                 "Ensure the new content blends seamlessly with the original image in terms of style, lighting, and texture."
                             )
                             response = client.models.generate_content(
-                                model="gemini-2.0-flash-exp-image-generation",
+                                model="gemini-2.5-flash-image",
                                 contents=[inpaint_api_prompt, original_for_api, mask_pil],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
@@ -2898,7 +2898,7 @@ with col2:
                             )
 
                             response = client.models.generate_content(
-                                model="gemini-2.0-flash-exp-image-generation",
+                                model="gemini-2.5-flash-image",
                                 contents=[outpaint_api_prompt, new_img, mask],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
@@ -3306,7 +3306,7 @@ with col2:
                         )
 
                         response = client.models.generate_content(
-                            model="gemini-2.0-flash-exp-image-generation",
+                            model="gemini-2.5-flash-image",
                             contents=[colorize_prompt, original_pil_colorize],
                             config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
@@ -3830,7 +3830,7 @@ with col2:
                         )
 
                         response = client.models.generate_content(
-                            model="gemini-2.0-flash-exp-image-generation",
+                            model="gemini-2.5-flash-image",
                             contents=[bg_removal_prompt, original_pil_bg],
                             config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
