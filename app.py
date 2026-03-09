@@ -2613,7 +2613,7 @@ with col2:
                         )
 
                         response = client.models.generate_content(
-                            model="gemini-2.0-flash-exp-image-generation",
+                            model="gemini-flash-lite-latest-exp-image-generation",
                             contents=[upscale_prompt, original_pil_upscale],
                             config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
@@ -2760,7 +2760,7 @@ with col2:
                                 "Ensure the new content blends seamlessly with the original image in terms of style, lighting, and texture."
                             )
                             response = client.models.generate_content(
-                                model="gemini-2.0-flash-exp-image-generation",
+                                model="gemini-flash-lite-latest-exp-image-generation",
                                 contents=[inpaint_api_prompt, original_for_api, mask_pil],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
@@ -2830,7 +2830,7 @@ with col2:
                             # Analyze the original image to get its style
                             analysis_prompt = "In 10 words or less, describe the visual style of this image (e.g., 'vibrant anime style, sunset lighting'). Do not describe the content, only the style."
                             analysis_response = client.models.generate_content(
-                                model="gemini-2.0-flash", 
+                                model="gemini-flash-lite-latest", 
                                 contents=[analysis_prompt, original_pil]
                             )
                             image_style = analysis_response.candidates[0].content.parts[0].text.strip()
@@ -2853,7 +2853,7 @@ with col2:
                             )
 
                             response = client.models.generate_content(
-                                model="gemini-2.0-flash-exp-image-generation",
+                                model="gemini-flash-lite-latest-exp-image-generation",
                                 contents=[outpaint_api_prompt, new_img, mask],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
@@ -2966,7 +2966,7 @@ with col2:
                         st.session_state.analysis_image # Use the image from session state
                     ]
                     analysis_response = client.models.generate_content(
-                        model="gemini-2.0-flash",
+                        model="gemini-flash-lite-latest",
                         contents=prompt_for_analysis
                     )
                     st.session_state.analyzed_prompt_text = analysis_response.candidates[0].content.parts[0].text
@@ -3067,7 +3067,7 @@ with col2:
                         chat_contents = [question, st.session_state.chat_image]
 
                         response = client.models.generate_content(
-                            model="gemini-2.0-flash",
+                            model="gemini-flash-lite-latest",
                             contents=chat_contents
                         )
                         
@@ -3261,7 +3261,7 @@ with col2:
                         )
 
                         response = client.models.generate_content(
-                            model="gemini-2.0-flash-exp-image-generation",
+                            model="gemini-flash-lite-latest-exp-image-generation",
                             contents=[colorize_prompt, original_pil_colorize],
                             config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
@@ -3785,7 +3785,7 @@ with col2:
                         )
 
                         response = client.models.generate_content(
-                            model="gemini-2.0-flash-exp-image-generation",
+                            model="gemini-flash-lite-latest-exp-image-generation",
                             contents=[bg_removal_prompt, original_pil_bg],
                             config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
