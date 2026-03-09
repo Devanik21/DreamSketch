@@ -1,6 +1,4 @@
 import streamlit as st
-from google import genai
-from google.genai import types
 from PIL import Image, ImageFilter, ImageOps, ImageDraw, ImageEnhance
 from io import BytesIO
 import base64
@@ -50,27 +48,6 @@ def image_to_url(img, width, height, clamp, channels, output_format):
 # Overwrite the missing function with our new implementation
 st_image.image_to_url = image_to_url
 # --- END: MONKEY-PATCH V2 ---
-# --- START: API KEY SETUP ---
-def initialize_gemini_client():
-    """
-    Initializes and returns a Gemini client using the API key from secrets.
-    Returns None if no key is found.
-    """
-    # Try singular key first, fall back to first key in list for compatibility
-    api_key = st.secrets.get("gemini_api_key")
-    if not api_key:
-        api_keys = st.secrets.get("gemini_api_keys", [])
-        if api_keys:
-            api_key = api_keys[0]
-            
-    if not api_key:
-        return None
-
-    try:
-        return genai.Client(api_key=api_key)
-    except Exception:
-        return None
-# --- END: API KEY SETUP ---
 
 # --- START: HUGGING FACE API SETUP ---
 def generate_image_hf(prompt):
@@ -80,10 +57,10 @@ def generate_image_hf(prompt):
     """
     hf_api_key = st.secrets.get("huggingface_api_key")
     if not hf_api_key:
-        raise Exception("Hugging Face API key not found in secrets.toml for fallback generation.")
+        raise Exception("Hugging Face API key not found in secrets.toml.")
         
     # Using FLUX.1-schnell for fast, high-quality generation
-    API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell"
+    API_URL = "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell"
     headers = {"Authorization": f"Bearer {hf_api_key}"}
     
     payload = {
@@ -2153,39 +2130,18 @@ with col1:
                     # --- START: GENERATION LOGIC ---
                     generation_successful = False
                     try:
-                        # Use a local client variable
-                        local_client = initialize_gemini_client()
-                        if not local_client:
-                            # Raising an exception with 'limit' to trigger the fallback logic below
-                            raise Exception("Gemini API key not found. Switching to fallback...")
-
-                        status_text.text("🎨 Initializing...")
+                        status_text.text("🎨 Initializing Hugging Face FLUX...")
                         progress_bar.progress(20)
                         
                         status_text.text("✨ Creating your masterpiece...")
                         progress_bar.progress(60)
                         
-                        generation_contents = [enhanced_prompt]
-                        if negative_prompt:
-                            generation_contents.append(f"Negative prompt: {negative_prompt}")
-
-                        response = local_client.models.generate_content(
-                            model="models/gemini-2.5-flash-image",
-                            contents=generation_contents,
-                            config=types.GenerateContentConfig(
-                                response_modalities=["text", "image"]
-                            )
-                        )
+                        # Direct call to HF
+                        image_data = generate_image_hf(enhanced_prompt)
+                        description = "Generated via Hugging Face FLUX.1-schnell."
                         
                         progress_bar.progress(100)
                         status_text.text("🎉 Masterpiece complete!")
-                        
-                        image_data, description = None, ""
-                        for part in response.candidates[0].content.parts:
-                            if part.text:
-                                description = part.text
-                            elif part.inline_data:
-                                image_data = part.inline_data.data
                         
                         if image_data:
                             generation_successful = True
@@ -2214,40 +2170,7 @@ with col1:
 
                     except Exception as e:
                         error_msg = str(e).lower()
-                        if "quota" in error_msg or "limit" in error_msg:
-                            # --- START: FALLBACK TO HUGGING FACE ---
-                            st.warning("⏳ Gemini API limit reached. Attempting fallback to Hugging Face FLUX...")
-                            try:
-                                hf_image_bytes = generate_image_hf(enhanced_prompt)
-                                generation_successful = True
-                                image_metadata = {
-                                    'id': str(uuid.uuid4()),
-                                    'image_data': hf_image_bytes,
-                                    'original_prompt': prompt,
-                                    'enhanced_prompt': enhanced_prompt + " (HF Fallback)",
-                                    'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                                    'style_used': selected_style,
-                                    'color_mood': color_mood,
-                                    'lighting': lighting,
-                                    'description': "Generated via Hugging Face FLUX.1 (Fallback).",
-                                    'aspect_ratio': aspect_ratio,
-                                    'quality_level': quality_level
-                                }
-                                st.session_state.images.append(image_metadata)
-                                save_image_to_db(image_metadata)
-                                st.session_state.current_image = image_metadata
-                                
-                                progress_container.empty()
-                                st.markdown('<div class="success-box">🎉 Your masterpiece has been created! (Fallback)</div>', unsafe_allow_html=True)
-                                st.rerun()
-                            except Exception as hf_e:
-                                st.markdown(f'<div class="error-box">⏳ API key limit reached. Fallback also failed.<br><br><small>Gemini Error: {str(e)}</small><br><small>HF Error: {str(hf_e)}</small></div>', unsafe_allow_html=True)
-                            # --- END: FALLBACK TO HUGGING FACE ---
-                        else:
-                            # Handle other errors like safety, network, etc.
-                            if "api key" in error_msg or "authentication" in error_msg:
-                                st.markdown(f'<div class="error-box">🔑 Authentication Error: Please check your API key configuration.<br><br><small>Raw Error: {str(e)}</small></div>', unsafe_allow_html=True)
-                            elif "safety" in error_msg or "policy" in error_msg:
+                        st.markdown(f'<div class="error-box">⏳ Image generation failed.<br><br><small>Error: {str(e)}</small></div>', unsafe_allow_html=True)
                                 st.markdown(f'<div class="error-box">🛡️ Content Policy: Your prompt may violate guidelines. Please try a different description.<br><br><small>Raw Error: {str(e)}</small></div>', unsafe_allow_html=True)
                             elif "network" in error_msg or "connection" in error_msg:
                                 st.markdown(f'<div class="error-box">🌐 Network Error: Please check your internet connection and try again.<br><br><small>Raw Error: {str(e)}</small></div>', unsafe_allow_html=True)
@@ -2339,39 +2262,17 @@ with col1:
                         original_prompt_text = img_data.get('enhanced_prompt', img_data.get('original_prompt', ''))
                         
                         # --- START: VARIATION GENERATION LOGIC ---
-                        local_client = initialize_gemini_client()
-                        if not local_client:
-                             raise Exception("Gemini API key not found. Switching to fallback...")
-                        
                         variation_prompt = (
-                            f"Generate a new, unique variation of the provided image. The original concept was: '{original_prompt_text}'. "
+                            f"Generate a new, unique variation of the following concept: '{original_prompt_text}'. "
                             "Maintain the core subject and theme, but creatively alter the composition, lighting, or details to offer a fresh perspective."
                         )
-
-                        # Build the contents list for the API call
-                        variation_contents = [variation_prompt, original_image_pil]
-
-                        # Add the negative prompt if it exists from the main input
+                        
                         if negative_prompt:
-                             variation_contents.append(f"Negative prompt: {negative_prompt}")
-                        
-                        response = local_client.models.generate_content(
-                            model="gemini-2.0-flash-exp-image-generation",
-                            contents=variation_contents,
-                            config=types.GenerateContentConfig(
-                                response_modalities=["text", "image"]
-                            )
-                        )
-                        # --- END: VARIATION GENERATION LOGIC ---
+                            variation_prompt += f" Negative prompt: {negative_prompt}"
 
-                        new_image_data = None
-                        new_description = ""
-                        for part in response.candidates[0].content.parts:
-                            if part.text:
-                                new_description = part.text
-                            elif part.inline_data:
-                                new_image_data = part.inline_data.data
-                        
+                        new_image_data = generate_image_hf(variation_prompt)
+                        new_description = "Generated via Hugging Face FLUX.1-schnell."
+
                         if new_image_data:
                             new_image_metadata = {
                                 'id': str(uuid.uuid4()), 'image_data': new_image_data,
@@ -2389,29 +2290,7 @@ with col1:
                         st.success("Successfully created a new variation!")
 
                     except Exception as e:
-                        error_msg = str(e).lower()
-                        if "quota" in error_msg or "limit" in error_msg:
-                            st.warning("⏳ Gemini API limit reached. Attempting fallback to Hugging Face FLUX...")
-                            try:
-                                hf_image_bytes = generate_image_hf(variation_prompt)
-                                new_image_metadata = {
-                                    'id': str(uuid.uuid4()), 'image_data': hf_image_bytes,
-                                    'original_prompt': f"Variation of: {img_data['original_prompt']}",
-                                    'enhanced_prompt': variation_prompt + " (HF Fallback)", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                                    'style_used': img_data.get('style_used'), 'color_mood': img_data.get('color_mood'),
-                                    'lighting': img_data.get('lighting'), 'description': "Generated via Hugging Face FLUX.1 (Fallback).",
-                                    'aspect_ratio': img_data.get('aspect_ratio'), 'quality_level': img_data.get('quality_level')
-                                }
-                                st.session_state.images.append(new_image_metadata)
-                                save_image_to_db(new_image_metadata)
-                                newly_generated.append(new_image_metadata)
-                                
-                                st.session_state.newly_generated_variations = newly_generated
-                                st.success("Successfully created a new variation! (Fallback)")
-                            except Exception as hf_e:
-                                st.error(f"Failed to generate variation. Gemini Limit reached, and HF Fallback failed: {hf_e}")
-                        else:
-                            st.error(f"Failed to generate a variation: {e}")
+                        st.error(f"Failed to generate a variation: {e}")
         # --- END: GENERATE VARIATION FEATURE (SINGLE) ---
 
         # --- START: DISPLAY NEW VARIATION ---
@@ -6390,7 +6269,7 @@ body {
 </style>
 
 <div class="starry-text">
-  Powered by <b style="background: linear-gradient(90deg, #c084fc, #7dd3fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Google's Gemini </b> 
+  Powered by <b style="background: linear-gradient(90deg, #c084fc, #7dd3fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Hugging Face FLUX.1 </b> 
 </div>
 """, unsafe_allow_html=True)
 
