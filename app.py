@@ -108,6 +108,42 @@ def generate_text_hf(prompt, system_prompt="You are a creative AI. Write a conci
     except Exception:
          return "Generated via Hugging Face Qwen 2.5."
 
+def generate_vision_hf(prompt, image_bytes):
+    """
+    Experimental: Chat with an image using Hugging Face Qwen2-VL.
+    """
+    hf_api_key = st.secrets.get("huggingface_api_key")
+    if not hf_api_key:
+        return "I need a Hugging Face API key to chat about this image without Gemini."
+        
+    API_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2-VL-7B-Instruct"
+    headers = {"Authorization": f"Bearer {hf_api_key}"}
+    
+    # Base64 encode the image for the multimodal prompt
+    base64_image = base64.b64encode(image_bytes).decode('utf-8')
+    data_url = f"data:image/jpeg;base64,{base64_image}"
+    
+    # Standard ChatML-like prompt with image token
+    # Note: Different models use different multimodal tokens. Qwen2-VL uses <|vision_start|>...
+    # For HF API, sometimes just sending the prompt is enough if the model handles it.
+    
+    payload = {
+        "inputs": {
+            "image": data_url,
+            "text": prompt
+        }
+    }
+    
+    try:
+        response = requests.post(API_URL, headers=headers, json=payload)
+        if response.status_code == 200:
+            result = response.json()
+            if isinstance(result, list) and len(result) > 0 and 'generated_text' in result[0]:
+                return result[0]['generated_text'].strip()
+        return "I can see the image, but I'm having trouble describing it right now. (HF Error or Limit)"
+    except Exception as e:
+         return f"Chat Error: {e}"
+
 # --- END: HUGGING FACE API SETUP ---
 
 # --- START: GEMINI ADVANCED TOOLS SETUP ---
@@ -2682,16 +2718,16 @@ with col2:
                                 contents=[upscale_prompt, original_pil_upscale],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
-                        
-                        st.session_state.upscaled_result_dict = None
-                        for part in response.candidates[0].content.parts:
-                            if part.inline_data:
-                                st.session_state.upscaled_result_dict = {
-                                    "id": str(uuid.uuid4()),
-                                    "data": part.inline_data.data,
-                                    "original_filename": upscaler_image.name
-                                }
-                                break
+                            
+                            st.session_state.upscaled_result_dict = None
+                            for part in response.candidates[0].content.parts:
+                                if part.inline_data:
+                                    st.session_state.upscaled_result_dict = {
+                                        "id": str(uuid.uuid4()),
+                                        "data": part.inline_data.data,
+                                        "original_filename": upscaler_image.name
+                                    }
+                                    break
 
 
 
@@ -3144,16 +3180,15 @@ with col2:
                         chat_contents = [question, st.session_state.chat_image]
 
                         if not client:
-                            st.info("I need a Gemini API key to 'see' and chat about this image.")
+                            ai_response = generate_vision_hf(question, st.session_state.chat_image.getvalue())
                         else:
                             response = client.models.generate_content(
                                 model="gemini-flash-lite-latest",
                                 contents=chat_contents
                             )
+                            ai_response = response.candidates[0].content.parts[0].text
                         
-                        ai_response = response.candidates[0].content.parts[0].text
                         st.session_state.image_chat_history.append({"role": "assistant", "content": ai_response})
-                        
                         st.rerun()
 
                     except Exception as e:
@@ -3348,16 +3383,16 @@ with col2:
                                 contents=[colorize_prompt, original_pil_colorize],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
-                        
-                        st.session_state.colorized_result_dict = None
-                        for part in response.candidates[0].content.parts:
-                            if part.inline_data:
-                                st.session_state.colorized_result_dict = {
-                                    "id": str(uuid.uuid4()),
-                                    "data": part.inline_data.data,
-                                    "original_filename": colorizer_image.name
-                                }
-                                break
+                            
+                            st.session_state.colorized_result_dict = None
+                            for part in response.candidates[0].content.parts:
+                                if part.inline_data:
+                                    st.session_state.colorized_result_dict = {
+                                        "id": str(uuid.uuid4()),
+                                        "data": part.inline_data.data,
+                                        "original_filename": colorize_image.name
+                                    }
+                                    break
 
 #                        if not st.session_state.colorized_result_data:
  #                           st.error("The model did not return a colorized image. Please try again.")
