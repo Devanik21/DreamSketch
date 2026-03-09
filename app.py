@@ -83,7 +83,7 @@ def generate_image_hf(prompt):
         raise Exception("Hugging Face API key not found in secrets.toml for fallback generation.")
         
     # Using FLUX.1-schnell for fast, high-quality generation
-    API_URL = "https://router.huggingface.co/models/black-forest-labs/FLUX.1-schnell"
+    API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell"
     headers = {"Authorization": f"Bearer {hf_api_key}"}
     
     payload = {
