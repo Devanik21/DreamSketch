@@ -2169,13 +2169,7 @@ with col1:
                              st.markdown('<div class="error-box">❌ No image was generated. Please try again with a different prompt.</div>', unsafe_allow_html=True)
 
                     except Exception as e:
-                        error_msg = str(e).lower()
                         st.markdown(f'<div class="error-box">⏳ Image generation failed.<br><br><small>Error: {str(e)}</small></div>', unsafe_allow_html=True)
-                                st.markdown(f'<div class="error-box">🛡️ Content Policy: Your prompt may violate guidelines. Please try a different description.<br><br><small>Raw Error: {str(e)}</small></div>', unsafe_allow_html=True)
-                            elif "network" in error_msg or "connection" in error_msg:
-                                st.markdown(f'<div class="error-box">🌐 Network Error: Please check your internet connection and try again.<br><br><small>Raw Error: {str(e)}</small></div>', unsafe_allow_html=True)
-                            else:
-                                st.markdown(f'<div class="error-box">⚠️ Generation Error: {str(e)}</div>', unsafe_allow_html=True)
 
                     if not generation_successful:
                         progress_container.empty()
