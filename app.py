@@ -950,8 +950,7 @@ body {
 
 
 # Load secrets with error handling
-# Initialize Gemini client using the key rotation function
-client = initialize_gemini_client()
+# Hugging Face integration does not require a local client initialization.
 
 # Comprehensive style categories
 # Comprehensive style categories with 300+ styles
