@@ -5,6 +5,7 @@ from PIL import Image, ImageFilter, ImageOps, ImageDraw, ImageEnhance
 from io import BytesIO
 import base64
 import json
+import requests
 from gtts import gTTS
 import time
 import random
@@ -67,6 +68,31 @@ def initialize_gemini_client():
 
     return genai.Client(api_key=api_key)
 # --- END: API KEY SETUP ---
+
+# --- START: HUGGING FACE API SETUP ---
+def generate_image_hf(prompt):
+    """
+    Generates an image using Hugging Face Inference API as a fallback.
+    Returns bytes of the image or raises Exception.
+    """
+    hf_api_key = st.secrets.get("huggingface_api_key")
+    if not hf_api_key:
+        raise Exception("Hugging Face API key not found in secrets.toml for fallback generation.")
+        
+    # Using FLUX.1-schnell for fast, high-quality generation
+    API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell"
+    headers = {"Authorization": f"Bearer {hf_api_key}"}
+    
+    payload = {
+        "inputs": prompt
+    }
+    
+    response = requests.post(API_URL, headers=headers, json=payload)
+    if response.status_code != 200:
+        raise Exception(f"HF API Error ({response.status_code}): {response.text}")
+        
+    return response.content
+# --- END: HUGGING FACE API SETUP ---
 
 @st.cache_data
 def get_base64_of_bin_file(bin_file):
@@ -2183,15 +2209,42 @@ with col1:
                     except Exception as e:
                         error_msg = str(e).lower()
                         if "quota" in error_msg or "limit" in error_msg:
-                            st.markdown('<div class="error-box">⏳ API key limit reached. Please try again later.</div>', unsafe_allow_html=True)
+                            # --- START: FALLBACK TO HUGGING FACE ---
+                            st.warning("⏳ Gemini API limit reached. Attempting fallback to Hugging Face FLUX...")
+                            try:
+                                hf_image_bytes = generate_image_hf(enhanced_prompt)
+                                generation_successful = True
+                                image_metadata = {
+                                    'id': str(uuid.uuid4()),
+                                    'image_data': hf_image_bytes,
+                                    'original_prompt': prompt,
+                                    'enhanced_prompt': enhanced_prompt + " (HF Fallback)",
+                                    'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                                    'style_used': selected_style,
+                                    'color_mood': color_mood,
+                                    'lighting': lighting,
+                                    'description': "Generated via Hugging Face FLUX.1 (Fallback).",
+                                    'aspect_ratio': aspect_ratio,
+                                    'quality_level': quality_level
+                                }
+                                st.session_state.images.append(image_metadata)
+                                save_image_to_db(image_metadata)
+                                st.session_state.current_image = image_metadata
+                                
+                                progress_container.empty()
+                                st.markdown('<div class="success-box">🎉 Your masterpiece has been created! (Fallback)</div>', unsafe_allow_html=True)
+                                st.rerun()
+                            except Exception as hf_e:
+                                st.markdown(f'<div class="error-box">⏳ API key limit reached. Fallback also failed.<br><br><small>Gemini Error: {str(e)}</small><br><small>HF Error: {str(hf_e)}</small></div>', unsafe_allow_html=True)
+                            # --- END: FALLBACK TO HUGGING FACE ---
                         else:
                             # Handle other errors like safety, network, etc.
                             if "api key" in error_msg or "authentication" in error_msg:
-                                st.markdown('<div class="error-box">🔑 Authentication Error: Please check your API key configuration.</div>', unsafe_allow_html=True)
+                                st.markdown(f'<div class="error-box">🔑 Authentication Error: Please check your API key configuration.<br><br><small>Raw Error: {str(e)}</small></div>', unsafe_allow_html=True)
                             elif "safety" in error_msg or "policy" in error_msg:
-                                st.markdown('<div class="error-box">🛡️ Content Policy: Your prompt may violate guidelines. Please try a different description.</div>', unsafe_allow_html=True)
+                                st.markdown(f'<div class="error-box">🛡️ Content Policy: Your prompt may violate guidelines. Please try a different description.<br><br><small>Raw Error: {str(e)}</small></div>', unsafe_allow_html=True)
                             elif "network" in error_msg or "connection" in error_msg:
-                                st.markdown('<div class="error-box">🌐 Network Error: Please check your internet connection and try again.</div>', unsafe_allow_html=True)
+                                st.markdown(f'<div class="error-box">🌐 Network Error: Please check your internet connection and try again.<br><br><small>Raw Error: {str(e)}</small></div>', unsafe_allow_html=True)
                             else:
                                 st.markdown(f'<div class="error-box">⚠️ Generation Error: {str(e)}</div>', unsafe_allow_html=True)
 
@@ -2295,7 +2348,7 @@ with col1:
                              variation_contents.append(f"Negative prompt: {negative_prompt}")
                         
                         response = local_client.models.generate_content(
-                            model="gemini-2.5-flash-image",
+                            model="gemini-2.0-flash-exp-image-generation",
                             contents=variation_contents,
                             config=types.GenerateContentConfig(
                                 response_modalities=["text", "image"]
@@ -2328,7 +2381,29 @@ with col1:
                         st.success("Successfully created a new variation!")
 
                     except Exception as e:
-                        st.error(f"Failed to generate a variation: {e}")
+                        error_msg = str(e).lower()
+                        if "quota" in error_msg or "limit" in error_msg:
+                            st.warning("⏳ Gemini API limit reached. Attempting fallback to Hugging Face FLUX...")
+                            try:
+                                hf_image_bytes = generate_image_hf(variation_prompt)
+                                new_image_metadata = {
+                                    'id': str(uuid.uuid4()), 'image_data': hf_image_bytes,
+                                    'original_prompt': f"Variation of: {img_data['original_prompt']}",
+                                    'enhanced_prompt': variation_prompt + " (HF Fallback)", 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
+                                    'style_used': img_data.get('style_used'), 'color_mood': img_data.get('color_mood'),
+                                    'lighting': img_data.get('lighting'), 'description': "Generated via Hugging Face FLUX.1 (Fallback).",
+                                    'aspect_ratio': img_data.get('aspect_ratio'), 'quality_level': img_data.get('quality_level')
+                                }
+                                st.session_state.images.append(new_image_metadata)
+                                save_image_to_db(new_image_metadata)
+                                newly_generated.append(new_image_metadata)
+                                
+                                st.session_state.newly_generated_variations = newly_generated
+                                st.success("Successfully created a new variation! (Fallback)")
+                            except Exception as hf_e:
+                                st.error(f"Failed to generate variation. Gemini Limit reached, and HF Fallback failed: {hf_e}")
+                        else:
+                            st.error(f"Failed to generate a variation: {e}")
         # --- END: GENERATE VARIATION FEATURE (SINGLE) ---
 
         # --- START: DISPLAY NEW VARIATION ---
@@ -2658,7 +2733,7 @@ with col2:
                         )
 
                         response = client.models.generate_content(
-                            model="gemini-2.5-flash-image",
+                            model="gemini-2.0-flash-exp-image-generation",
                             contents=[upscale_prompt, original_pil_upscale],
                             config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
@@ -2805,7 +2880,7 @@ with col2:
                                 "Ensure the new content blends seamlessly with the original image in terms of style, lighting, and texture."
                             )
                             response = client.models.generate_content(
-                                model="gemini-2.5-flash-image",
+                                model="gemini-2.0-flash-exp-image-generation",
                                 contents=[inpaint_api_prompt, original_for_api, mask_pil],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
@@ -2898,7 +2973,7 @@ with col2:
                             )
 
                             response = client.models.generate_content(
-                                model="gemini-2.5-flash-image",
+                                model="gemini-2.0-flash-exp-image-generation",
                                 contents=[outpaint_api_prompt, new_img, mask],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
@@ -3306,7 +3381,7 @@ with col2:
                         )
 
                         response = client.models.generate_content(
-                            model="gemini-2.5-flash-image",
+                            model="gemini-2.0-flash-exp-image-generation",
                             contents=[colorize_prompt, original_pil_colorize],
                             config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
@@ -3830,7 +3905,7 @@ with col2:
                         )
 
                         response = client.models.generate_content(
-                            model="gemini-2.5-flash-image",
+                            model="gemini-2.0-flash-exp-image-generation",
                             contents=[bg_removal_prompt, original_pil_bg],
                             config=types.GenerateContentConfig(response_modalities=["text", "image"])
                         )
