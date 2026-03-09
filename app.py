@@ -15,7 +15,6 @@ from streamlit_drawable_canvas import st_canvas
 import os
 import base64
 from tinydb import TinyDB, Query
-from google import genai
 
 
 # --- START: MONKEY-PATCH V2 FOR DEPRECATED image_to_url ---
@@ -73,7 +72,62 @@ def generate_image_hf(prompt):
         raise Exception(f"HF API Error ({response.status_code}): {response.text}")
         
     return response.content
+
+def generate_text_hf(prompt, system_prompt="You are a creative AI. Write a concise, 1-2 sentence description of the following image concept. No fluff, just the description."):
+    """
+    Generates text using Hugging Face Inference API (Qwen 2.5 7B Instruct) as a replacement for Gemini text descriptions.
+    """
+    hf_api_key = st.secrets.get("huggingface_api_key")
+    if not hf_api_key:
+        return "AI Description unavailable (No Hugging Face API key)."
+        
+    API_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B-Instruct"
+    headers = {"Authorization": f"Bearer {hf_api_key}"}
+    
+    # Qwen instruction format
+    qwen_prompt = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
+    
+    payload = {
+        "inputs": qwen_prompt,
+        "parameters": {
+            "max_new_tokens": 100,
+            "return_full_text": False,
+            "temperature": 0.7
+        }
+    }
+    
+    try:
+        response = requests.post(API_URL, headers=headers, json=payload)
+        if response.status_code == 200:
+            result = response.json()
+            if isinstance(result, list) and len(result) > 0 and 'generated_text' in result[0]:
+                text = result[0]['generated_text'].strip()
+                # Clean up any residual markdown formatting or prompt leakage
+                return text.split("<|im_end|>")[0].strip()
+        return "Generated via Hugging Face Qwen 2.5."
+    except Exception:
+         return "Generated via Hugging Face Qwen 2.5."
+
 # --- END: HUGGING FACE API SETUP ---
+
+# --- START: GEMINI ADVANCED TOOLS SETUP ---
+def initialize_gemini_client():
+    """Initializes Gemini client for advanced tools like Upscale, Inpaint, etc."""
+    api_key = st.secrets.get("gemini_api_key")
+    if not api_key:
+        api_keys = st.secrets.get("gemini_api_keys", [])
+        if api_keys:
+            api_key = api_keys[0]
+            
+    if not api_key:
+        return None
+
+    try:
+        from google import genai
+        return genai.Client(api_key=api_key)
+    except Exception:
+        return None
+# --- END: GEMINI ADVANCED TOOLS SETUP ---
 
 @st.cache_data
 def get_base64_of_bin_file(bin_file):
@@ -951,7 +1005,8 @@ body {
 
 
 # Load secrets with error handling
-# Hugging Face integration does not require a local client initialization.
+# Initialize Gemini client for advanced tools (Upscale, Inpainting, etc.)
+client = initialize_gemini_client()
 
 # Comprehensive style categories
 # Comprehensive style categories with 300+ styles
@@ -2136,9 +2191,14 @@ with col1:
                         status_text.text("✨ Creating your masterpiece...")
                         progress_bar.progress(60)
                         
-                        # Direct call to HF
+                        # Direct call to HF for image
                         image_data = generate_image_hf(enhanced_prompt)
-                        description = "Generated via Hugging Face FLUX.1-schnell."
+                        
+                        status_text.text("✍️ Writing description...")
+                        progress_bar.progress(80)
+                        
+                        # Generate description with Qwen
+                        description = generate_text_hf(enhanced_prompt)
                         
                         progress_bar.progress(100)
                         status_text.text("🎉 Masterpiece complete!")
@@ -2265,7 +2325,8 @@ with col1:
                             variation_prompt += f" Negative prompt: {negative_prompt}"
 
                         new_image_data = generate_image_hf(variation_prompt)
-                        new_description = "Generated via Hugging Face FLUX.1-schnell."
+                        # Generate description with Qwen for the new variation
+                        new_description = generate_text_hf(variation_prompt)
 
                         if new_image_data:
                             new_image_metadata = {
