@@ -2674,11 +2674,14 @@ with col2:
                             "Do not add, remove, or alter any elements."
                         )
 
-                        response = client.models.generate_content(
-                            model="gemini-flash-lite-latest-exp-image-generation",
-                            contents=[upscale_prompt, original_pil_upscale],
-                            config=types.GenerateContentConfig(response_modalities=["text", "image"])
-                        )
+                        if not client:
+                            st.error("🔑 Gemini API key not found. This advanced feature requires a Gemini API key.")
+                        else:
+                            response = client.models.generate_content(
+                                model="gemini-flash-lite-latest-exp-image-generation",
+                                contents=[upscale_prompt, original_pil_upscale],
+                                config=types.GenerateContentConfig(response_modalities=["text", "image"])
+                            )
                         
                         st.session_state.upscaled_result_dict = None
                         for part in response.candidates[0].content.parts:
@@ -2821,11 +2824,14 @@ with col2:
                                 f"Replace the masked (white) area with: '{inpainting_prompt}'. "
                                 "Ensure the new content blends seamlessly with the original image in terms of style, lighting, and texture."
                             )
-                            response = client.models.generate_content(
-                                model="gemini-flash-lite-latest-exp-image-generation",
-                                contents=[inpaint_api_prompt, original_for_api, mask_pil],
-                                config=types.GenerateContentConfig(response_modalities=["text", "image"])
-                            )
+                            if not client:
+                                st.error("🔑 Gemini API key not found. This advanced feature requires a Gemini API key.")
+                            else:
+                                response = client.models.generate_content(
+                                    model="gemini-flash-lite-latest-exp-image-generation",
+                                    contents=[inpaint_api_prompt, original_for_api, mask_pil],
+                                    config=types.GenerateContentConfig(response_modalities=["text", "image"])
+                                )
                             st.session_state.inpainting_result_dict = None
                             for part in response.candidates[0].content.parts:
                                 if part.inline_data:
@@ -2891,11 +2897,14 @@ with col2:
                         try:
                             # Analyze the original image to get its style
                             analysis_prompt = "In 10 words or less, describe the visual style of this image (e.g., 'vibrant anime style, sunset lighting'). Do not describe the content, only the style."
-                            analysis_response = client.models.generate_content(
-                                model="gemini-flash-lite-latest", 
-                                contents=[analysis_prompt, original_pil]
-                            )
-                            image_style = analysis_response.candidates[0].content.parts[0].text.strip()
+                            if not client:
+                                image_style = "vibrant realistic style" # Default fallback
+                            else:
+                                analysis_response = client.models.generate_content(
+                                    model="gemini-flash-lite-latest", 
+                                    contents=[analysis_prompt, original_pil]
+                                )
+                                image_style = analysis_response.candidates[0].content.parts[0].text.strip()
                             st.info(f"Detected Style: {image_style}")
                             
                             w, h = original_pil.size
@@ -2914,11 +2923,14 @@ with col2:
                                 f"The new content to add is: '{outpainting_prompt}'. Do not introduce clashing styles."
                             )
 
-                            response = client.models.generate_content(
-                                model="gemini-flash-lite-latest-exp-image-generation",
-                                contents=[outpaint_api_prompt, new_img, mask],
-                                config=types.GenerateContentConfig(response_modalities=["text", "image"])
-                            )
+                            if not client:
+                                st.error("🔑 Gemini API key not found. Outpainting requires a Gemini API key.")
+                            else:
+                                response = client.models.generate_content(
+                                    model="gemini-flash-lite-latest-exp-image-generation",
+                                    contents=[outpaint_api_prompt, new_img, mask],
+                                    config=types.GenerateContentConfig(response_modalities=["text", "image"])
+                                )
 
                             st.session_state.outpainting_result_dict = None
                             for part in response.candidates[0].content.parts:
@@ -3027,11 +3039,14 @@ with col2:
                         "You are an expert prompt writer for AI image generators. Look at the provided image and write a single, detailed, plain-text prompt that could be used to generate a similar image. Do not include any analysis, explanations, headings, or markdown formatting. Only output the prompt itself.",
                         st.session_state.analysis_image # Use the image from session state
                     ]
-                    analysis_response = client.models.generate_content(
-                        model="gemini-flash-lite-latest",
-                        contents=prompt_for_analysis
-                    )
-                    st.session_state.analyzed_prompt_text = analysis_response.candidates[0].content.parts[0].text
+                    if not client:
+                        st.error("🔑 Gemini API key not found. Image analysis requires a Gemini API key.")
+                    else:
+                        analysis_response = client.models.generate_content(
+                            model="gemini-flash-lite-latest",
+                            contents=prompt_for_analysis
+                        )
+                        st.session_state.analyzed_prompt_text = analysis_response.candidates[0].content.parts[0].text
                 except Exception as e:
                     st.error(f"Could not analyze the image. Error: {e}")
                     # Clear all related state on error
@@ -3128,10 +3143,13 @@ with col2:
                     try:
                         chat_contents = [question, st.session_state.chat_image]
 
-                        response = client.models.generate_content(
-                            model="gemini-flash-lite-latest",
-                            contents=chat_contents
-                        )
+                        if not client:
+                            st.info("I need a Gemini API key to 'see' and chat about this image.")
+                        else:
+                            response = client.models.generate_content(
+                                model="gemini-flash-lite-latest",
+                                contents=chat_contents
+                            )
                         
                         ai_response = response.candidates[0].content.parts[0].text
                         st.session_state.image_chat_history.append({"role": "assistant", "content": ai_response})
@@ -3322,11 +3340,14 @@ with col2:
                             "Do not alter the original composition or content, only add color."
                         )
 
-                        response = client.models.generate_content(
-                            model="gemini-flash-lite-latest-exp-image-generation",
-                            contents=[colorize_prompt, original_pil_colorize],
-                            config=types.GenerateContentConfig(response_modalities=["text", "image"])
-                        )
+                        if not client:
+                            st.error("🔑 Gemini API key not found.")
+                        else:
+                            response = client.models.generate_content(
+                                model="gemini-flash-lite-latest-exp-image-generation",
+                                contents=[colorize_prompt, original_pil_colorize],
+                                config=types.GenerateContentConfig(response_modalities=["text", "image"])
+                            )
                         
                         st.session_state.colorized_result_dict = None
                         for part in response.candidates[0].content.parts:
@@ -3846,11 +3867,14 @@ with col2:
                             "Do not alter the subject itself. The final image should be a PNG with an alpha channel."
                         )
 
-                        response = client.models.generate_content(
-                            model="gemini-flash-lite-latest-exp-image-generation",
-                            contents=[bg_removal_prompt, original_pil_bg],
-                            config=types.GenerateContentConfig(response_modalities=["text", "image"])
-                        )
+                        if not client:
+                            st.error("🔑 Gemini API key not found.")
+                        else:
+                            response = client.models.generate_content(
+                                model="gemini-flash-lite-latest-exp-image-generation",
+                                contents=[bg_removal_prompt, original_pil_bg],
+                                config=types.GenerateContentConfig(response_modalities=["text", "image"])
+                            )
                         
                         st.session_state.bg_remover_result_dict = None
                         for part in response.candidates[0].content.parts:
