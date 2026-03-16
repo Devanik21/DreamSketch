@@ -287,7 +287,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-
+st.warning(
+    "🛠️ Creative Utilities are currently in **Beta**. "
+    "Some tools may have bugs or incomplete functionality. "
+    "These features recently migrated from Gemini image tools to FLUX/Hugging Face, "
+    "so improvements and fixes are ongoing."
+)
 
 #st.sidebar.image("k5.jpg", width='stretch')
 
