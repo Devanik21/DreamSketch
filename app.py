@@ -3078,11 +3078,14 @@ with col2:
                     if not client:
                         st.error("🔑 Gemini API key not found. Image analysis requires a Gemini API key.")
                     else:
-                        analysis_response = client.models.generate_content(
-                            model="gemini-flash-lite-latest",
-                            contents=prompt_for_analysis
-                        )
-                        st.session_state.analyzed_prompt_text = analysis_response.candidates[0].content.parts[0].text
+                        # Convert PIL Image to Bytes for HF API
+                        img_byte_arr = BytesIO()
+                        st.session_state.analysis_image.save(img_byte_arr, format='PNG')
+                        img_bytes = img_byte_arr.getvalue()
+                        
+                        # Generate prompt using Qwen2-VL
+                        analysis_prompt = "Look at the provided image and write a single, detailed, plain-text prompt that could be used to generate a similar image. Do not include any analysis, explanations, headings, or markdown formatting. Only output the prompt itself."
+                        st.session_state.analyzed_prompt_text = generate_vision_hf(analysis_prompt, img_bytes)
                 except Exception as e:
                     st.error(f"Could not analyze the image. Error: {e}")
                     # Clear all related state on error
@@ -3179,14 +3182,13 @@ with col2:
                     try:
                         chat_contents = [question, st.session_state.chat_image]
 
-                        if not client:
-                            ai_response = generate_vision_hf(question, st.session_state.chat_image.getvalue())
-                        else:
-                            response = client.models.generate_content(
-                                model="gemini-flash-lite-latest",
-                                contents=chat_contents
-                            )
-                            ai_response = response.candidates[0].content.parts[0].text
+                        # Convert PIL Image to Bytes for HF API
+                        img_byte_arr = BytesIO()
+                        st.session_state.chat_image.save(img_byte_arr, format='PNG')
+                        img_bytes = img_byte_arr.getvalue()
+                        
+                        # Use Qwen2-VL for vision chat as requested
+                        ai_response = generate_vision_hf(question, img_bytes)
                         
                         st.session_state.image_chat_history.append({"role": "assistant", "content": ai_response})
                         st.rerun()
@@ -4063,29 +4065,23 @@ with col2:
         with st.container(border=True):
             st.markdown("##### ✨ Feeling Lucky?")
             def generate_random_prompt():
-                subjects = [
-                    "A majestic dragon soaring over a volcanic landscape", "An ancient tree spirit with glowing eyes",
-                    "A celestial fox with nine tails, leaping through stars", "A forgotten library in the clouds",
-                    "A knight in ethereal, glowing armor", "A city carved into a giant crystal",
-                    "A futuristic city skyline at sunset", "A robot gardener tending to glowing alien plants",
-                    "An alien marketplace on a distant planet", "A lone astronaut discovering an ancient alien artifact",
-                    "A Roman legion marching through a dense forest", "A samurai warrior meditating under a cherry blossom tree",
-                    "A hidden waterfall oasis in a lush jungle", "A majestic lion with a crown of stars",
-                    "A clock melting over a branch, in the style of Dali", "A staircase that spirals into the clouds",
-                    "An old watchmaker in his workshop, surrounded by timepieces", "A street artist painting a mural on a brick wall"
-                ]
-                details = [
-                    "in the style of a classical oil painting", "as a vibrant watercolor illustration",
-                    "in the style of Hayao Miyazaki", "in the style of a detailed charcoal sketch",
-                    "with an impressionist art style, visible brush strokes", "in a surrealist style, like Salvador Dalí",
-                    "with a pop art aesthetic, like Andy Warhol", "as a vintage Japanese ukiyo-e woodblock print",
-                    "with dramatic, cinematic lighting", "with an ethereal, otherworldly glow",
-                    "in vibrant, rich, saturated colors", "with a soft, dreamy, and gentle focus",
-                    "rendered in Unreal Engine 5, hyperrealistic", "as a hyper-detailed, 8K resolution photograph",
-                    "with a glossy, reflective finish", "with a rough, textured, matte finish"
-                ]
-                full_prompt = f"{random.choice(subjects)}, {random.choice(details)}"
-                st.session_state.main_prompt = full_prompt
+                with st.spinner("✨ AI is dreaming up a creative vision..."):
+                    system_prompt = """You are a master prompt engineer for high-end AI image generators like FLUX or Midjourney. 
+                    Generate a single, highly detailed, and visually stunning prompt for an image. 
+                    Include specifics about the subject, atmosphere, lighting (e.g., volumetric, cinematic), lens (e.g., 35mm), and artistic style. 
+                    The prompt should be exactly one paragraph. Do not include any meta-comments or 'Here is your prompt'."""
+                    
+                    themes = ["Cybernetic Nature", "Ancient Futurism", "Celestial Architecture", "Ethereal Portraits", "Cosmic Horrors", "Whimsical Steampunk"]
+                    theme = random.choice(themes)
+                    
+                    try:
+                        full_prompt = generate_text_hf(f"Generate a unique and complex image prompt themed around: {theme}", system_prompt=system_prompt)
+                        # Remove any leading/trailing quotes often returned by LLMs
+                        full_prompt = full_prompt.strip().strip('"').strip("'")
+                        st.session_state.main_prompt = full_prompt
+                    except Exception as e:
+                        # Fallback to a simple random one if API fails
+                        st.session_state.main_prompt = f"A beautiful {theme} masterpiece, highly detailed, 8k."
 
             st.button(
                 "🎲 Generate Random Prompt",
@@ -6294,21 +6290,16 @@ with col2:
 
         # --- START: REVISED QUICK ACTION BUTTONS ---
         def set_random_prompt():
-            """Generates and sets a full random prompt."""
-            subjects = [
-                "A majestic dragon soaring over a volcanic landscape", "An ancient tree spirit with glowing eyes",
-                "A celestial fox with nine tails, leaping through stars", "A forgotten library in the clouds",
-                "A futuristic city skyline at sunset", "A robot gardener tending to glowing alien plants",
-                "A samurai warrior meditating under a cherry blossom tree", "A hidden waterfall oasis in a lush jungle",
-                "A clock melting over a branch, in the style of Dali", "An old watchmaker in his workshop"
-            ]
-            details = [
-                "in the style of a classical oil painting", "as a vibrant watercolor illustration",
-                "in the style of Hayao Miyazaki", "as a detailed charcoal sketch",
-                "with dramatic, cinematic lighting", "with an ethereal, otherworldly glow",
-                "in vibrant, rich, saturated colors", "rendered in Unreal Engine 5, hyperrealistic"
-            ]
-            st.session_state.main_prompt = f"{random.choice(subjects)}, {random.choice(details)}"
+            """Generates and sets a full random prompt using Qwen 2.5."""
+            with st.spinner("✨ AI is dreaming up a creative vision..."):
+                system_prompt = "You are a master prompt engineer. Generate a single, highly detailed, and visually stunning prompt for an AI image generator (one paragraph). No meta-talk."
+                themes = ["Cybernetic Nature", "Ancient Futurism", "Celestial Architecture", "Ethereal Portraits", "Cosmic Horrors", "Whimsical Steampunk"]
+                theme = random.choice(themes)
+                try:
+                    full_prompt = generate_text_hf(f"Generate a unique image prompt themed around: {theme}", system_prompt=system_prompt)
+                    st.session_state.main_prompt = full_prompt.strip().strip('"').strip("'")
+                except:
+                    st.session_state.main_prompt = f"A beautiful {theme} masterpiece, highly detailed."
 
         st.button("🎲 Surprise Me! (Full Prompt)", on_click=set_random_prompt, use_container_width=True, help="Generate a completely new random prompt.")
 
