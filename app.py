@@ -6396,12 +6396,33 @@ body {
 
 
 # Display the randomly selected image
-
+# Footer
+st.markdown("---")
 
 # --- END: RANDOM GALLERY IMAGE DISPLAY ---
 st.warning(
-    "🛠️ Creative Utilities are currently in **Beta**. "
-    "Some tools may have bugs or incomplete functionality. "
-    "These features recently migrated from Gemini image tools to FLUX/Hugging Face, "
-    "so improvements and fixes are ongoing."
+    "🛠️ Creative Utilities are currently in **Beta**.\n\n"
+    
+    "**Technical Background:**\n"
+    "- DreamCanvas originally relied on **Gemini 1.5 Flash (experimental image generation)** "
+    "for core image synthesis and editing capabilities.\n"
+    "- In late 2025, Google discontinued the `gemini-1.5-flash-exp-image-generation` endpoint, "
+    "which previously supported integrated multimodal generation and editing workflows.\n\n"
+    
+    "**Current Architecture:**\n"
+    "- Image generation now uses **Hugging Face Inference API**.\n"
+    "- Primary model: **FLUX.1-schnell (Black Forest Labs)** for fast diffusion-based synthesis.\n"
+    "- Text reasoning and description generation use **Qwen 2.5 Instruct models**.\n\n"
+    
+    "**Why Some Utilities Are Unstable:**\n"
+    "- Gemini previously supported **native multimodal operations** (image + text reasoning).\n"
+    "- FLUX models are **pure diffusion generators** and lack built-in editing APIs.\n"
+    "- Several tools (inpainting, contextual edits, semantic adjustments, etc.) now require "
+    "custom pipelines or external models.\n"
+    "- Hugging Face inference also introduces **rate limits, latency variance, and output differences**.\n\n"
+    
+    "**Current Status:**\n"
+    "- Core image generation is stable.\n"
+    "- Advanced utilities are being rebuilt to work with the new backend.\n"
+    "- Some tools may produce inconsistent results or temporary errors during this transition."
 )
