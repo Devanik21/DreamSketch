@@ -2733,9 +2733,7 @@ with col2:
                             "Do not add, remove, or alter any elements."
                         )
 
-                        if not client:
-                            st.error("🔑 Gemini API key not found. This advanced feature requires a Gemini API key.")
-                        else:
+                        if client:
                             response = client.models.generate_content(
                                 model="gemini-flash-lite-latest-exp-image-generation",
                                 contents=[upscale_prompt, original_pil_upscale],
@@ -2751,6 +2749,8 @@ with col2:
                                         "original_filename": upscaler_image.name
                                     }
                                     break
+                        else:
+                            st.info("💡 Upscaling is an advanced feature that currently requires a Gemini API key. Other creative tools are available via AI models.")
 
 
 
@@ -2883,14 +2883,14 @@ with col2:
                                 f"Replace the masked (white) area with: '{inpainting_prompt}'. "
                                 "Ensure the new content blends seamlessly with the original image in terms of style, lighting, and texture."
                             )
-                            if not client:
-                                st.error("🔑 Gemini API key not found. This advanced feature requires a Gemini API key.")
-                            else:
+                            if client:
                                 response = client.models.generate_content(
                                     model="gemini-flash-lite-latest-exp-image-generation",
                                     contents=[inpaint_api_prompt, original_for_api, mask_pil],
                                     config=types.GenerateContentConfig(response_modalities=["text", "image"])
                                 )
+                            else:
+                                st.info("💡 Magic Erase is an advanced feature that currently requires a Gemini API key.")
                             st.session_state.inpainting_result_dict = None
                             for part in response.candidates[0].content.parts:
                                 if part.inline_data:
@@ -2956,14 +2956,17 @@ with col2:
                         try:
                             # Analyze the original image to get its style
                             analysis_prompt = "In 10 words or less, describe the visual style of this image (e.g., 'vibrant anime style, sunset lighting'). Do not describe the content, only the style."
-                            if not client:
-                                image_style = "vibrant realistic style" # Default fallback
-                            else:
-                                analysis_response = client.models.generate_content(
-                                    model="gemini-flash-lite-latest", 
-                                    contents=[analysis_prompt, original_pil]
-                                )
-                                image_style = analysis_response.candidates[0].content.parts[0].text.strip()
+                            try:
+                                # Convert PIL Image to Bytes for Qwen
+                                buffer = BytesIO()
+                                original_pil.save(buffer, format="JPEG")
+                                img_bytes = buffer.getvalue()
+                                
+                                # Use Qwen2-VL to describe style
+                                image_style = generate_vision_hf(analysis_prompt, img_bytes)
+                            except:
+                                image_style = "vibrant realistic style" # Fallback
+                            
                             st.info(f"Detected Style: {image_style}")
                             
                             w, h = original_pil.size
@@ -2982,14 +2985,14 @@ with col2:
                                 f"The new content to add is: '{outpainting_prompt}'. Do not introduce clashing styles."
                             )
 
-                            if not client:
-                                st.error("🔑 Gemini API key not found. Outpainting requires a Gemini API key.")
-                            else:
+                            if client:
                                 response = client.models.generate_content(
                                     model="gemini-flash-lite-latest-exp-image-generation",
                                     contents=[outpaint_api_prompt, new_img, mask],
                                     config=types.GenerateContentConfig(response_modalities=["text", "image"])
                                 )
+                            else:
+                                st.info("💡 Outpainting is an advanced feature that currently requires a Gemini API key.")
 
                             st.session_state.outpainting_result_dict = None
                             for part in response.candidates[0].content.parts:
