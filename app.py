@@ -2726,17 +2726,31 @@ with col2:
                 with st.spinner("Performing high-resolution upscale... This may take a moment."):
                     try:
                         # This prompt is crucial for telling the model to *only* upscale
-                        # Local High-Quality Upscale using Lanczos
-                        new_size = (original_pil_upscale.width * 4, original_pil_upscale.height * 4)
-                        upscaled_image = original_pil_upscale.resize(new_size, resample=Image.Resampling.LANCZOS)
-                        
-                        output_buffer = BytesIO()
-                        upscaled_image.save(output_buffer, format="PNG")
-                        st.session_state.upscaled_result_dict = {
-                            "id": str(uuid.uuid4()),
-                            "data": output_buffer.getvalue(),
-                            "original_filename": upscaler_image.name
-                        }
+                        upscale_prompt = (
+                            "Perform a 4x photorealistic upscale of the provided image. "
+                            "It is critically important to not change the content, style, composition, or colors of the original image. "
+                            "The output must be a very high contrast , high-resolution, high-detail, and faithful version of the original. "
+                            "Do not add, remove, or alter any elements."
+                        )
+
+                        if client:
+                            response = client.models.generate_content(
+                                model="gemini-flash-lite-latest-exp-image-generation",
+                                contents=[upscale_prompt, original_pil_upscale],
+                                config=types.GenerateContentConfig(response_modalities=["text", "image"])
+                            )
+                            
+                            st.session_state.upscaled_result_dict = None
+                            for part in response.candidates[0].content.parts:
+                                if part.inline_data:
+                                    st.session_state.upscaled_result_dict = {
+                                        "id": str(uuid.uuid4()),
+                                        "data": part.inline_data.data,
+                                        "original_filename": upscaler_image.name
+                                    }
+                                    break
+                        else:
+                            st.info("💡 Upscaling is an advanced feature that currently requires a Gemini API key. Other creative tools are available via AI models.")
 
 
 
@@ -2864,24 +2878,28 @@ with col2:
                             original_for_api = original_pil_inpainting.convert("RGB")
                             mask_pil = Image.fromarray(canvas_result.image_data).convert("L")
                             
-                            # 1. Describe the original image to maintain context
-                            description_prompt = "Describe this image in detail, focusing on the composition and main subjects."
-                            img_description = generate_vision_hf(description_prompt, st.session_state.inpainting_img_bytes)
-                            
-                            # 2. Construct Flux prompt based on description and edit
-                            flux_edit_prompt = (
-                                f"A high-quality image. Original scene: {img_description}. "
-                                f"Modification: In the specific area described, replace/add: {inpainting_prompt}. "
-                                "Ensure the edit blends perfectly with the original style and lighting."
+                            inpaint_api_prompt = (
+                                "You are an expert image editor. Use the provided mask to perform an inpainting task. "
+                                f"Replace the masked (white) area with: '{inpainting_prompt}'. "
+                                "Ensure the new content blends seamlessly with the original image in terms of style, lighting, and texture."
                             )
-                            
-                            # 3. Generate new image with Flux
-                            image_bytes = generate_image_hf(flux_edit_prompt)
-                            st.session_state.inpainting_result_dict = {
-                                "id": str(uuid.uuid4()),
-                                "data": image_bytes,
-                                "original_filename": inpainting_image_file.name
-                            }
+                            if client:
+                                response = client.models.generate_content(
+                                    model="gemini-flash-lite-latest-exp-image-generation",
+                                    contents=[inpaint_api_prompt, original_for_api, mask_pil],
+                                    config=types.GenerateContentConfig(response_modalities=["text", "image"])
+                                )
+                            else:
+                                st.info("💡 Magic Erase is an advanced feature that currently requires a Gemini API key.")
+                            st.session_state.inpainting_result_dict = None
+                            for part in response.candidates[0].content.parts:
+                                if part.inline_data:
+                                    st.session_state.inpainting_result_dict = {
+                                        "id": str(uuid.uuid4()),
+                                        "data": part.inline_data.data,
+                                        "original_filename": inpainting_image_file.name
+                                    }
+                                    break
                             if not st.session_state.inpainting_result_dict:
                                 st.error("The model did not return an edited image. Please try again.")
                         except Exception as e:
@@ -2961,22 +2979,34 @@ with col2:
                             new_img.paste(original_pil, (paste_x, paste_y))
                             mask.paste(0, (paste_x, paste_y, paste_x + w, paste_y + h))
                             
-                            # Construct Flux prompt for expansion
-                            flux_outpaint_prompt = (
-                                f"A high-quality image that is a logical extension of an existing scene. "
-                                f"The expanded area should include: {outpainting_prompt}. "
-                                f"Match the detected style: {image_style}. "
-                                "Create a seamless, wide-angle cinematic result."
+                            outpaint_api_prompt = (
+                                "You are an expert image editor performing an outpainting task. "
+                                f"Fill the white area of the mask with a seamless, logical extension of the original image, matching the detected style: '{image_style}'. "
+                                f"The new content to add is: '{outpainting_prompt}'. Do not introduce clashing styles."
                             )
+
+                            if client:
+                                response = client.models.generate_content(
+                                    model="gemini-flash-lite-latest-exp-image-generation",
+                                    contents=[outpaint_api_prompt, new_img, mask],
+                                    config=types.GenerateContentConfig(response_modalities=["text", "image"])
+                                )
+                            else:
+                                st.info("💡 Outpainting is an advanced feature that currently requires a Gemini API key.")
+
+                            st.session_state.outpainting_result_dict = None
+                            for part in response.candidates[0].content.parts:
+                                if part.inline_data:
+                                    st.session_state.outpainting_result_dict = {
+                                        "id": str(uuid.uuid4()),
+                                        "image_data": part.inline_data.data,
+                                        "prompt": outpainting_prompt,
+                                        "style": image_style
+                                    }
+                                    break
                             
-                            # Generate new image with Flux
-                            image_bytes = generate_image_hf(flux_outpaint_prompt)
-                            st.session_state.outpainting_result_dict = {
-                                "id": str(uuid.uuid4()),
-                                "image_data": image_bytes,
-                                "prompt": outpainting_prompt,
-                                "style": image_style
-                            }
+                            if not st.session_state.outpainting_result_dict:
+                                st.error("The model did not return an image. Please try again.")
 
                         except Exception as e:
                             st.error(f"Outpainting failed: {e}")
@@ -3366,23 +3396,24 @@ with col2:
                             "Do not alter the original composition or content, only add color."
                         )
 
-                            # 1. Analyze for context
-                            context_prompt = "Describe the likely natural colors for this scene (e.g., green trees, blue sky, skin tones)."
-                            color_context = generate_vision_hf(context_prompt, st.session_state.colorizer_img_bytes)
-                            
-                            # 2. Construct Flux prompt
-                            flux_color_prompt = (
-                                f"A high-quality realistic color photo. Scene description: {color_context}. "
-                                "Add vibrant, realistic colors to this scene. Ensure historically accurate and contextually appropriate colors."
+                        if client:
+                            response = client.models.generate_content(
+                                model="gemini-flash-lite-latest-exp-image-generation",
+                                contents=[colorize_prompt, original_pil_colorize],
+                                config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
+                        else:
+                            st.info("💡 Image Colorization is an advanced feature that currently requires a Gemini API key.")
                             
-                            # 3. Generate image with Flux
-                            image_bytes = generate_image_hf(flux_color_prompt)
-                            st.session_state.colorized_result_dict = {
-                                "id": str(uuid.uuid4()),
-                                "data": image_bytes,
-                                "original_filename": colorize_image.name
-                            }
+                            st.session_state.colorized_result_dict = None
+                            for part in response.candidates[0].content.parts:
+                                if part.inline_data:
+                                    st.session_state.colorized_result_dict = {
+                                        "id": str(uuid.uuid4()),
+                                        "data": part.inline_data.data,
+                                        "original_filename": colorize_image.name
+                                    }
+                                    break
 
 #                        if not st.session_state.colorized_result_data:
  #                           st.error("The model did not return a colorized image. Please try again.")
@@ -3892,23 +3923,24 @@ with col2:
                             "Do not alter the subject itself. The final image should be a PNG with an alpha channel."
                         )
 
-                            # 1. Identify the subject
-                            subject_prompt = "Identify the main subject in this image in 5 words or less."
-                            subject_text = generate_vision_hf(subject_prompt, st.session_state.bg_remover_img_bytes)
-                            
-                            # 2. Construct Flux prompt
-                            flux_bg_prompt = (
-                                f"A high-quality image of {subject_text} isolated on a plain, solid clean white background. "
-                                "Professional studio photography, sharp focus, clean edges."
+                        if client:
+                            response = client.models.generate_content(
+                                model="gemini-flash-lite-latest-exp-image-generation",
+                                contents=[bg_removal_prompt, original_pil_bg],
+                                config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
-                            
-                            # 3. Generate image with Flux
-                            image_bytes = generate_image_hf(flux_bg_prompt)
-                            st.session_state.bg_remover_result_dict = {
-                                "id": str(uuid.uuid4()),
-                                "data": image_bytes,
-                                "original_filename": bg_remover_image_file.name
-                            }
+                        else:
+                            st.info("💡 Background Removal is an advanced feature that currently requires a Gemini API key.")
+                        
+                        st.session_state.bg_remover_result_dict = None
+                        for part in response.candidates[0].content.parts:
+                            if part.inline_data:
+                                st.session_state.bg_remover_result_dict = {
+                                    "id": str(uuid.uuid4()),
+                                    "data": part.inline_data.data,
+                                    "original_filename": bg_remover_image_file.name
+                                }
+                                break
 
                         if not st.session_state.bg_remover_result_dict:
                             st.error("The model did not return an image. Please try again.")
