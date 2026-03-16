@@ -3396,14 +3396,14 @@ with col2:
                             "Do not alter the original composition or content, only add color."
                         )
 
-                        if not client:
-                            st.error("🔑 Gemini API key not found.")
-                        else:
+                        if client:
                             response = client.models.generate_content(
                                 model="gemini-flash-lite-latest-exp-image-generation",
                                 contents=[colorize_prompt, original_pil_colorize],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
+                        else:
+                            st.info("💡 Image Colorization is an advanced feature that currently requires a Gemini API key.")
                             
                             st.session_state.colorized_result_dict = None
                             for part in response.candidates[0].content.parts:
@@ -3923,14 +3923,14 @@ with col2:
                             "Do not alter the subject itself. The final image should be a PNG with an alpha channel."
                         )
 
-                        if not client:
-                            st.error("🔑 Gemini API key not found.")
-                        else:
+                        if client:
                             response = client.models.generate_content(
                                 model="gemini-flash-lite-latest-exp-image-generation",
                                 contents=[bg_removal_prompt, original_pil_bg],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
+                        else:
+                            st.info("💡 Background Removal is an advanced feature that currently requires a Gemini API key.")
                         
                         st.session_state.bg_remover_result_dict = None
                         for part in response.candidates[0].content.parts:
