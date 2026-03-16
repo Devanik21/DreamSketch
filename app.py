@@ -140,8 +140,31 @@ def generate_vision_hf(prompt, image_bytes):
             result = response.json()
             if isinstance(result, list) and len(result) > 0 and 'generated_text' in result[0]:
                 return result[0]['generated_text'].strip()
-        return "I can see the image, but I'm having trouble describing it right now. (HF Error or Limit)"
+            elif isinstance(result, dict) and 'generated_text' in result:
+                return result['generated_text'].strip()
+        
+        # Fallback to Gemini if HF fails and client exists
+        if client:
+            try:
+                vision_response = client.models.generate_content(
+                    model="gemini-flash-lite-latest",
+                    contents=[prompt, Image.open(BytesIO(image_bytes))]
+                )
+                return vision_response.candidates[0].content.parts[0].text
+            except:
+                pass
+                
+        return f"Vision Error (HF {response.status_code}): {response.text[:100]}"
     except Exception as e:
+         if client:
+            try:
+                vision_response = client.models.generate_content(
+                    model="gemini-flash-lite-latest",
+                    contents=[prompt, Image.open(BytesIO(image_bytes))]
+                )
+                return vision_response.candidates[0].content.parts[0].text
+            except:
+                pass
          return f"Chat Error: {e}"
 
 # --- END: HUGGING FACE API SETUP ---
@@ -3071,21 +3094,14 @@ with col2:
 
             with st.spinner("Letting the AI study your image..."):
                 try:
-                    prompt_for_analysis = [
-                        "You are an expert prompt writer for AI image generators. Look at the provided image and write a single, detailed, plain-text prompt that could be used to generate a similar image. Do not include any analysis, explanations, headings, or markdown formatting. Only output the prompt itself.",
-                        st.session_state.analysis_image # Use the image from session state
-                    ]
-                    if not client:
-                        st.error("🔑 Gemini API key not found. Image analysis requires a Gemini API key.")
-                    else:
-                        # Convert PIL Image to Bytes for HF API
-                        img_byte_arr = BytesIO()
-                        st.session_state.analysis_image.save(img_byte_arr, format='PNG')
-                        img_bytes = img_byte_arr.getvalue()
-                        
-                        # Generate prompt using Qwen2-VL
-                        analysis_prompt = "Look at the provided image and write a single, detailed, plain-text prompt that could be used to generate a similar image. Do not include any analysis, explanations, headings, or markdown formatting. Only output the prompt itself."
-                        st.session_state.analyzed_prompt_text = generate_vision_hf(analysis_prompt, img_bytes)
+                    # Convert PIL Image to Bytes for HF API
+                    img_byte_arr = BytesIO()
+                    st.session_state.analysis_image.save(img_byte_arr, format='PNG')
+                    img_bytes = img_byte_arr.getvalue()
+                    
+                    # Generate prompt using Qwen2-VL
+                    analysis_prompt = "Look at the provided image and write a single, detailed, plain-text prompt that could be used to generate a similar image. Do not include any analysis, explanations, headings, or markdown formatting. Only output the prompt itself."
+                    st.session_state.analyzed_prompt_text = generate_vision_hf(analysis_prompt, img_bytes)
                 except Exception as e:
                     st.error(f"Could not analyze the image. Error: {e}")
                     # Clear all related state on error
