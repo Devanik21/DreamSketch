@@ -1,0 +1,3 @@
+timestamp,endpoint,latency_ms
+2023-09-01T10:00:00Z,gemini_generate,2450
+2023-09-01T10:05:00Z,gemini_generate,2310
