@@ -1,0 +1,3 @@
+method: "bicubic_interpolation"
+factor: 4
+sharpen_amount: 1.5
