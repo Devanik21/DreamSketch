@@ -2554,7 +2554,7 @@ with col1:
             with st.expander("🔍 Preview what will be added to your prompt"):
                 st.markdown("**Added to your prompt:**")
                 st.code(museum_prompt_fragment, language=None)
-                st.markdown("**Added to your negative prompt (blocks frame/wall renders):**")
+                #st.markdown("**Added to your negative prompt (blocks frame/wall renders):**")
                 #st.code(MUSEUM_NEGATIVE_TERMS, language=None)
         # --- END: MUSEUM-GRADE PAINTING STYLE MODULE ---
 
