@@ -60,7 +60,7 @@ def generate_image_hf(prompt):
         raise Exception("Hugging Face API key not found in secrets.toml.")
         
     # Using FLUX.1-schnell for fast, high-quality generation
-    API_URL = "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell"
+    API_URL = "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-Krea-dev"
     headers = {"Authorization": f"Bearer {hf_api_key}"}
     
     payload = {
