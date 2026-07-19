@@ -66,34 +66,43 @@ HF_IMAGE_MODELS = [
     "ByteDance/Hyper-SD",
 ]
 
-# --- START: TRULY-FREE, NO-API-KEY FALLBACK (Pollinations.ai) ---
-# IMPORTANT CONTEXT FOR WHY THIS EXISTS:
-# The "402 Payment Required" error from router.huggingface.co does NOT mean any single model
-# is paid — it means the Hugging Face ACCOUNT has used up its monthly included Inference
-# Providers credits. That quota is shared across every provider (fal-ai, together, replicate,
-# hf-inference, etc.) and every model on the router, so switching models alone cannot fix it;
-# only waiting for the monthly reset, buying pre-paid credits, or subscribing to PRO does.
-#
-# Because of that, once HF Inference Providers is exhausted this function automatically falls
-# back to Pollinations.ai — an open-source (MIT), no-signup, no-API-key image generation
-# service (Flux-based) that never requires payment or credits for standard use. It is rate
-# limited for anonymous requests (roughly one image per ~15 seconds), but it means the app
-# never fully stops working just because the HF free tier ran out for the month.
-POLLINATIONS_IMAGE_MODELS = ["flux", "turbo"]  # Pollinations' free, keyless image models
+# =====================================================================================
+# THREE-TIER FREE IMAGE BACKEND
+# =====================================================================================
+# Tier 1 — Hugging Face Inference Providers (best quality, but a shared MONTHLY credit
+#          pool across your whole account — once it's gone, every model/provider 402s).
+# Tier 2 — Pollinations.ai: open-source (MIT), no signup, no API key, no payment ever.
+#          Hits gen.pollinations.ai (the actively maintained endpoint — the old
+#          image.pollinations.ai/prompt path is legacy and throws more 500s lately).
+#          Rate limited (~1 req/15s anonymously) and occasionally flaky (server-side
+#          500s are a known, currently-open issue on their GitHub), so it's retried
+#          with backoff across multiple models before giving up.
+# Tier 3 — AI Horde (aihorde.net): a free, community-run, crowdsourced GPU network.
+#          No daily cap and no payment, ever — anonymous requests just queue at the
+#          lowest priority behind registered users. This is the real answer to
+#          "100+ generations/day for free": it has no ceiling, only a queue.
+#          Get a free personal key at https://aihorde.net/register (optional — jumps
+#          you ahead of the anonymous queue) and drop it in secrets.toml as
+#          ai_horde_api_key. Without one it still works using the shared anonymous
+#          key "0000000000".
+# =====================================================================================
+
+POLLINATIONS_IMAGE_MODELS = ["flux", "zimage", "turbo"]  # free, keyless Pollinations models
 
 
 def generate_image_pollinations(prompt, negative_prompt=None, width=1024, height=1024):
     """
-    Generates an image using Pollinations.ai — free, open-source, and requires no API key
-    or account. Used as an automatic fallback when Hugging Face Inference Providers is
-    unavailable or out of credits. Returns image bytes (JPEG/PNG) or raises on failure.
+    Generates an image using Pollinations.ai — free, open-source, no API key or account
+    required. Hits the current gen.pollinations.ai endpoint with retry/backoff across
+    several models, since individual requests occasionally 500 under load.
+    Returns image bytes or raises on total failure.
     """
     last_error = None
     for model_id in POLLINATIONS_IMAGE_MODELS:
-        for attempt in range(2):  # brief retry to ride out anonymous rate limiting
+        for attempt in range(3):
             try:
                 encoded_prompt = quote(prompt.strip()[:2000])
-                url = f"https://image.pollinations.ai/prompt/{encoded_prompt}"
+                url = f"https://gen.pollinations.ai/image/{encoded_prompt}"
                 params = {
                     "model": model_id,
                     "width": width,
@@ -102,37 +111,124 @@ def generate_image_pollinations(prompt, negative_prompt=None, width=1024, height
                     "nologo": "true",
                     "enhance": "false",
                 }
-                # Best-effort: Pollinations doesn't officially guarantee a negative-prompt
-                # parameter on every model, but passing it is harmless if ignored.
+                pollinations_key = st.secrets.get("pollinations_api_key")
+                if pollinations_key:
+                    params["key"] = pollinations_key
+                # Best-effort: not every model guarantees a negative-prompt parameter,
+                # but passing it is harmless if a given model ignores it.
                 if negative_prompt and negative_prompt.strip():
                     params["negative"] = negative_prompt.strip()[:500]
 
-                response = requests.get(url, params=params, timeout=120)
+                response = requests.get(url, params=params, timeout=90)
 
-                if response.status_code == 200 and response.content:
+                if response.status_code == 200 and response.content and len(response.content) > 500:
                     return response.content
                 elif response.status_code == 429:
-                    last_error = Exception("Pollinations.ai rate limit hit (anonymous tier), retrying...")
-                    time.sleep(6)
+                    last_error = Exception("Pollinations.ai rate limit hit (anonymous tier)")
+                    time.sleep(8)
+                    continue
+                elif response.status_code >= 500:
+                    # Known intermittent server-side issue — worth a couple of retries
+                    # with backoff before moving to the next model.
+                    last_error = Exception(f"Pollinations.ai server error {response.status_code}")
+                    time.sleep(2 * (attempt + 1))
                     continue
                 else:
                     last_error = Exception(f"Pollinations.ai returned status {response.status_code}")
+                    break  # non-retryable (e.g. bad request) — try the next model instead
 
             except Exception as e:
                 last_error = e
+                time.sleep(2)
                 continue
 
     raise Exception(f"Pollinations.ai generation failed: {last_error}")
-# --- END: TRULY-FREE, NO-API-KEY FALLBACK (Pollinations.ai) ---
+
+
+# AI Horde: use a general-purpose, near-universally-available model as the default so
+# anonymous requests don't sit in queue waiting for a rare specialist worker.
+AI_HORDE_MODELS = ["stable_diffusion", "AlbedoBase XL (SDXL)"]
+
+
+def generate_image_ai_horde(prompt, negative_prompt=None, width=1024, height=1024, max_wait_seconds=150):
+    """
+    Generates an image via AI Horde (aihorde.net) — a free, community-run, crowdsourced
+    GPU cluster with no payment tier and no daily cap. Anonymous requests (API key
+    '0000000000') simply queue at the lowest priority; a personal key from
+    aihorde.net/register (put it in secrets.toml as ai_horde_api_key) jumps the queue but
+    isn't required. This is async: submit a job, poll until done, then fetch the result.
+    Returns image bytes or raises on failure/timeout.
+    """
+    api_key = st.secrets.get("ai_horde_api_key") or "0000000000"
+    base_url = "https://aihorde.net/api/v2"
+    headers = {"apikey": api_key, "Content-Type": "application/json"}
+
+    # AI Horde requires width/height as multiples of 64.
+    safe_width = max(64, round(width / 64) * 64)
+    safe_height = max(64, round(height / 64) * 64)
+
+    combined_prompt = prompt.strip()
+    if negative_prompt and negative_prompt.strip():
+        # AI Horde convention: negative prompt goes in the same string after "###".
+        combined_prompt = f"{combined_prompt} ### {negative_prompt.strip()}"
+
+    payload = {
+        "prompt": combined_prompt[:2500],
+        "params": {
+            "width": safe_width,
+            "height": safe_height,
+            "steps": 30,
+            "cfg_scale": 7.5,
+            "sampler_name": "k_euler_a",
+            "karras": True,
+            "n": 1,
+        },
+        "models": AI_HORDE_MODELS,
+        "r2": False,       # return the image inline as base64 rather than a download URL
+        "nsfw": False,
+        "trusted_workers": False,
+    }
+
+    submit_resp = requests.post(f"{base_url}/generate/async", headers=headers, json=payload, timeout=30)
+    if submit_resp.status_code not in (200, 202):
+        raise Exception(f"AI Horde submission failed: {submit_resp.status_code} {submit_resp.text[:200]}")
+
+    job_id = submit_resp.json().get("id")
+    if not job_id:
+        raise Exception("AI Horde did not return a job id.")
+
+    elapsed = 0
+    poll_interval = 4
+    while elapsed < max_wait_seconds:
+        time.sleep(poll_interval)
+        elapsed += poll_interval
+        check_resp = requests.get(f"{base_url}/generate/check/{job_id}", timeout=20)
+        if check_resp.status_code == 200 and check_resp.json().get("done"):
+            break
+
+    status_resp = requests.get(f"{base_url}/generate/status/{job_id}", timeout=30)
+    if status_resp.status_code != 200:
+        raise Exception(f"AI Horde status check failed: {status_resp.status_code}")
+
+    status_data = status_resp.json()
+    generations = status_data.get("generations", [])
+    if not generations:
+        raise Exception("AI Horde job timed out or returned no generations (queue may be busy).")
+
+    image_b64 = generations[0].get("img")
+    if not image_b64:
+        raise Exception("AI Horde returned a generation with no image data.")
+
+    return base64.b64decode(image_b64)
 
 
 def generate_image_hf(prompt, negative_prompt=None, width=1024, height=1024):
     """
-    Generates an image using Hugging Face InferenceClient.
-    Tries multiple currently supported models/providers automatically, and if the entire
-    Hugging Face account is out of credits (or any other failure occurs), automatically
-    falls back to the free, keyless Pollinations.ai backend so generation still succeeds.
-    Returns image bytes.
+    Generates an image using a three-tier fallback chain:
+      1) Hugging Face Inference Providers (best quality; monthly credit pool)
+      2) Pollinations.ai (free, keyless, occasionally flaky)
+      3) AI Horde (free, community-run, no daily cap — the real "100+/day" backstop)
+    Returns image bytes from whichever tier succeeds first.
     """
     hf_api_key = st.secrets.get("huggingface_api_key")
     last_error = None
@@ -140,10 +236,12 @@ def generate_image_hf(prompt, negative_prompt=None, width=1024, height=1024):
     if not hf_api_key:
         last_error = Exception("Hugging Face API key not found in secrets.toml.")
     else:
-        # Try the main HF path first, then fallback providers if available
         providers = [None, "hf-inference", "fal-ai"]
+        credits_exhausted = False
 
         for provider in providers:
+            if credits_exhausted:
+                break
             try:
                 client_kwargs = {"api_key": hf_api_key}
                 if provider is not None:
@@ -169,10 +267,11 @@ def generate_image_hf(prompt, negative_prompt=None, width=1024, height=1024):
 
                     except Exception as e:
                         last_error = e
-                        # If this is a credit/payment error, there's no point burning time
-                        # trying every other model on this provider too — the whole account
-                        # is out of quota, not just this model. Break out to try Pollinations sooner.
+                        # A 402/credits error means the whole ACCOUNT is out of quota —
+                        # every other model and provider will fail the same way, so stop
+                        # burning time here and go straight to the free fallbacks.
                         if "402" in str(e) or "Payment Required" in str(e) or "credits" in str(e).lower():
+                            credits_exhausted = True
                             break
                         continue
 
@@ -180,13 +279,20 @@ def generate_image_hf(prompt, negative_prompt=None, width=1024, height=1024):
                 last_error = e
                 continue
 
-    # --- Automatic fallback to the free, no-key Pollinations.ai backend ---
+    # --- Tier 2: Pollinations.ai (free, keyless) ---
     try:
         return generate_image_pollinations(prompt, negative_prompt=negative_prompt, width=width, height=height)
-    except Exception as fallback_error:
+    except Exception as pollinations_error:
+        pass  # fall through to Tier 3
+
+    # --- Tier 3: AI Horde (free, community-run, no daily cap) ---
+    try:
+        return generate_image_ai_horde(prompt, negative_prompt=negative_prompt, width=width, height=height)
+    except Exception as horde_error:
         raise Exception(
-            f"HF image generation failed: {last_error} | "
-            f"Free fallback (Pollinations.ai) also failed: {fallback_error}"
+            f"HF failed: {last_error} | "
+            f"Pollinations.ai failed: {pollinations_error} | "
+            f"AI Horde failed: {horde_error}"
         )
 
 def generate_text_hf(prompt, system_prompt="You are a creative AI. Write a concise, 1-2 sentence description of the following image concept. No fluff, just the description."):
