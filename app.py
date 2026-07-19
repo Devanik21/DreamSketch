@@ -1539,24 +1539,14 @@ MUSEUM_PAINTING_STYLES = {
     ),
 }
 
-# Shared closing clause appended to every museum style at generation time. This is what
-# actually enforces "artwork only" — it explicitly tells the model to render just the
-# painted/drawn surface, filling the frame, with nothing else in the shot.
+
 MUSEUM_NO_FRAME_GUARD = (
-    "the image shows ONLY the painted artwork surface itself, filling the entire frame "
-    "edge-to-edge, flat full-bleed reproduction of the artwork, no picture frame, no wood "
-    "or gilded frame, no wall, no mounting, no glass or glare, no gallery, no museum room, "
-    "no plaque, no placard, no border, not a photograph of a hanging painting"
+    "the image shows ONLY the painted artwork surface itself, filling the entire picture with no frame visible "
 )
 
 # Negative-prompt terms auto-appended whenever Museum Painting Mode is enabled, as a second
 # layer of protection against the model rendering a framed-canvas-on-a-wall photo.
-MUSEUM_NEGATIVE_TERMS = (
-    "picture frame, wood frame, gold frame, gilded frame, ornate frame, frame border, "
-    "wall, hanging on wall, museum wall, gallery wall, museum room, gallery interior, "
-    "wall plaque, placard, label, description card, glass reflection, glare, vignette, "
-    "border, matting, photograph of a painting, picture of a painting on display"
-)
+
 # --- END: MUSEUM-GRADE PAINTING STYLE PROMPTS ---
 
 # Sidebar for advanced options
@@ -2565,7 +2555,7 @@ with col1:
                 st.markdown("**Added to your prompt:**")
                 st.code(museum_prompt_fragment, language=None)
                 st.markdown("**Added to your negative prompt (blocks frame/wall renders):**")
-                st.code(MUSEUM_NEGATIVE_TERMS, language=None)
+                #st.code(MUSEUM_NEGATIVE_TERMS, language=None)
         # --- END: MUSEUM-GRADE PAINTING STYLE MODULE ---
 
         # Prompt enhancement options
@@ -2602,10 +2592,7 @@ with col1:
                             f"{enhanced_prompt}, {MUSEUM_PAINTING_STYLES[museum_style_name]}, "
                             f"{MUSEUM_NO_FRAME_GUARD}"
                         )
-                        if negative_prompt and negative_prompt.strip():
-                            negative_prompt = f"{negative_prompt.strip()}, {MUSEUM_NEGATIVE_TERMS}"
-                        else:
-                            negative_prompt = MUSEUM_NEGATIVE_TERMS
+
                     # --- END: MUSEUM PAINTING MODE INJECTION ---
 
                     # --- ADDED: Step 2 - Add the new prompt to history ---
