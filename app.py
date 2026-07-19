@@ -49,82 +49,216 @@ def image_to_url(img, width, height, clamp, channels, output_format):
 st_image.image_to_url = image_to_url
 # --- END: MONKEY-PATCH V2 ---
 
-# add this import near the top with your other imports
-from huggingface_hub import InferenceClient
+# --- START: IMAGE BACKEND SETUP ---
+try:
+    from google.genai import types
+except Exception:
+    types = None
 
-
-# put this near your constants
-HF_IMAGE_MODELS = [
-    "black-forest-labs/FLUX.1-Krea-dev",
-    "black-forest-labs/FLUX.1-dev",
-    "Qwen/Qwen-Image",
-    "ByteDance/Hyper-SD",
+GEMINI_IMAGE_MODELS = [
+    "gemini-3.1-flash-image",
+    "gemini-3-pro-image",
+    "gemini-2.5-flash-image",
 ]
 
+ASPECT_RATIO_MAP = {
+    "Square (1:1)": "1:1",
+    "Portrait (3:4)": "3:4",
+    "Landscape (4:3)": "4:3",
+    "Wide (16:9)": "16:9",
+    "Ultra-wide (21:9)": "21:9",
+    "Vertical (9:16)": "9:16",
+}
 
-def generate_image_hf(prompt, negative_prompt=None, width=1024, height=1024):
-    """
-    Generates an image using Hugging Face InferenceClient.
-    Tries multiple currently supported models/providers automatically.
-    Returns image bytes (PNG).
-    """
-    hf_api_key = st.secrets.get("huggingface_api_key")
-    if not hf_api_key:
-        raise Exception("Hugging Face API key not found in secrets.toml.")
+QUALITY_IMAGE_SIZE_MAP = {
+    "Standard": "1K",
+    "High": "2K",
+    "Ultra": "4K",
+}
 
-    last_error = None
+PAINTING_MEDIUM_OPTIONS = [
+    "None",
+    "Oil Painting",
+    "Watercolor",
+    "Acrylic Painting",
+    "Gouache",
+    "Tempera",
+    "Fresco",
+    "Ink Wash",
+    "Sumi-e",
+    "Chinese Ink",
+    "Pastel",
+    "Charcoal",
+    "Colored Pencil",
+    "Graphite",
+    "Pen and Ink",
+    "Marker Illustration",
+    "Digital Painting",
+    "Mixed Media",
+    "Palette Knife Oil",
+    "Impasto Oil",
+    "Encaustic",
+    "Egg Tempera",
+]
 
-    # Try the main HF path first, then fallback providers if available
-    providers = [None, "hf-inference", "fal-ai"]
+MEDIUM_PROMPTS = {
+    "Oil Painting": "museum-quality oil painting on canvas, rich brushwork, visible texture, archival fine art finish",
+    "Watercolor": "museum-quality watercolor on cotton paper, transparent washes, soft edges, elegant pigment flow",
+    "Acrylic Painting": "museum-quality acrylic painting on canvas, layered brushwork, vibrant pigment, polished surface",
+    "Gouache": "museum-quality gouache painting, matte finish, opaque color layers, refined illustration quality",
+    "Tempera": "museum-quality tempera painting, luminous flat layers, classical fine art craftsmanship",
+    "Fresco": "museum-quality fresco, historical wall-painting texture, mineral pigments, timeless mural aesthetic",
+    "Ink Wash": "museum-quality ink wash painting, elegant tonal gradients, expressive minimal brushwork",
+    "Sumi-e": "museum-quality sumi-e painting, poetic brushstrokes, monochrome harmony, graceful negative space",
+    "Chinese Ink": "museum-quality Chinese ink painting, expressive linework, atmospheric ink flow, refined traditional art",
+    "Pastel": "museum-quality pastel artwork, velvety pigment texture, soft powdery transitions, gallery finish",
+    "Charcoal": "museum-quality charcoal drawing, dramatic tonal contrast, rich shading, archival paper texture",
+    "Colored Pencil": "museum-quality colored pencil artwork, precise layered strokes, refined illustrative detail",
+    "Graphite": "museum-quality graphite drawing, subtle tonal rendering, crisp highlights, fine draftsmanship",
+    "Pen and Ink": "museum-quality pen and ink illustration, clean linework, crosshatching, classic editorial art",
+    "Marker Illustration": "museum-quality marker illustration, bold clean color blocks, polished concept-art presentation",
+    "Digital Painting": "museum-quality digital painting, highly polished composition, painterly realism, premium concept art",
+    "Mixed Media": "museum-quality mixed media artwork, layered textures, collage elements, experimental fine art finish",
+    "Palette Knife Oil": "museum-quality palette knife oil painting, thick impasto texture, dramatic tactile surface",
+    "Impasto Oil": "museum-quality impasto oil painting, thick expressive paint, sculpted brush texture, exhibition quality",
+    "Encaustic": "museum-quality encaustic painting, luminous wax texture, layered translucency, handcrafted fine art finish",
+    "Egg Tempera": "museum-quality egg tempera painting, precise detail, luminous antique finish, classical mastery",
+}
 
-    for provider in providers:
-        try:
-            client_kwargs = {"api_key": hf_api_key}
-            if provider is not None:
-                client_kwargs["provider"] = provider
+MUSEUM_FINISH_PROMPTS = {
+    "Museum Quality": "museum-quality fine art, exhibition-ready, archival materials, masterful craftsmanship",
+    "Gallery Quality": "gallery-quality presentation, curated composition, refined aesthetics, professional finishing",
+    "Masterpiece": "masterpiece-level composition, iconic, emotionally resonant, highly detailed, unforgettable",
+    "Archival Canvas": "archival canvas, long-lasting pigment, conservation-grade finish, premium fine art presentation",
+    "Old Master": "old master technique, classical realism, museum collection quality, timeless fine art",
+}
 
-            client = InferenceClient(**client_kwargs)
+QUALITY_PROMPTS = {
+    "Standard": "clean composition, balanced detail",
+    "High": "high detail, polished composition, refined finish",
+    "Ultra": "ultra-detailed, exhibition-ready, premium cinematic finish",
+}
 
-            for model_id in HF_IMAGE_MODELS:
-                try:
-                    kwargs = {
-                        "model": model_id,
-                        "width": width,
-                        "height": height,
-                    }
-                    if negative_prompt and negative_prompt.strip():
-                        kwargs["negative_prompt"] = negative_prompt.strip()
+def _normalize_aspect_ratio(label: str) -> str:
+    return ASPECT_RATIO_MAP.get(label, "1:1")
 
-                    image = client.text_to_image(prompt, **kwargs)
+def _normalize_image_size(label: str) -> str:
+    return QUALITY_IMAGE_SIZE_MAP.get(label, "1K")
 
+def _extract_image_bytes_from_gemini_response(response) -> bytes:
+    parts = []
+    if getattr(response, "parts", None):
+        parts = list(response.parts)
+    elif getattr(response, "candidates", None):
+        for cand in response.candidates:
+            content = getattr(cand, "content", None)
+            if content and getattr(content, "parts", None):
+                parts.extend(content.parts)
+
+    for part in parts:
+        inline_data = getattr(part, "inline_data", None)
+        if inline_data is not None:
+            try:
+                image = part.as_image()
+                if image:
                     buffered = BytesIO()
                     image.save(buffered, format="PNG")
                     return buffered.getvalue()
+            except Exception:
+                data = getattr(inline_data, "data", None)
+                if data:
+                    if isinstance(data, str):
+                        return base64.b64decode(data)
+                    return data
 
+    raise Exception("The model did not return an image.")
+
+def _safe_gemini_text_from_response(response, fallback_text=""):
+    if getattr(response, "text", None):
+        return str(response.text).strip()
+    if getattr(response, "candidates", None):
+        for cand in response.candidates:
+            content = getattr(cand, "content", None)
+            if content and getattr(content, "parts", None):
+                for part in content.parts:
+                    if getattr(part, "text", None):
+                        return str(part.text).strip()
+    return fallback_text
+
+def generate_image_hf(prompt, negative_prompt=None, width=1024, height=1024, aspect_ratio="1:1", quality_level="High"):
+    """
+    Robust image generation helper that prefers Gemini native image models.
+    """
+    prompt_text = prompt.strip()
+    if negative_prompt and negative_prompt.strip():
+        prompt_text += f" Avoid: {negative_prompt.strip()}."
+
+    image_size = _normalize_image_size(quality_level)
+    aspect_ratio = aspect_ratio or "1:1"
+
+    last_error = None
+
+    try:
+        from google.genai import types as genai_types
+    except Exception as e:
+        genai_types = None
+        last_error = e
+
+    if client and genai_types:
+        try:
+            for model_id in GEMINI_IMAGE_MODELS:
+                try:
+                    config = genai_types.GenerateContentConfig(
+                        response_modalities=["IMAGE"],
+                        response_format={
+                            "image": {
+                                "aspect_ratio": aspect_ratio,
+                                "image_size": image_size,
+                            }
+                        },
+                    )
+                    response = client.models.generate_content(
+                        model=model_id,
+                        contents=[prompt_text],
+                        config=config,
+                    )
+                    return _extract_image_bytes_from_gemini_response(response)
                 except Exception as e:
                     last_error = e
                     continue
-
         except Exception as e:
             last_error = e
-            continue
 
-    raise Exception(f"HF image generation failed: {last_error}")
+    raise Exception(f"Image generation failed. Gemini backend error: {last_error}")
+
+def _generate_text_with_gemini(prompt: str, system_prompt: str = "") -> str:
+    if not client:
+        return ""
+    try:
+        full_prompt = prompt if not system_prompt else f"{system_prompt}\n\n{prompt}"
+        response = client.models.generate_content(
+            model="gemini-3.5-flash",
+            contents=[full_prompt],
+        )
+        return _safe_gemini_text_from_response(response, "")
+    except Exception:
+        return ""
 
 def generate_text_hf(prompt, system_prompt="You are a creative AI. Write a concise, 1-2 sentence description of the following image concept. No fluff, just the description."):
     """
-    Generates text using Hugging Face Inference API (Qwen 2.5 7B Instruct) as a replacement for Gemini text descriptions.
+    Generates concise text, preferring Gemini and falling back to Hugging Face if needed.
     """
+    gemini_text = _generate_text_with_gemini(prompt, system_prompt=system_prompt)
+    if gemini_text:
+        return gemini_text
+
     hf_api_key = st.secrets.get("huggingface_api_key")
     if not hf_api_key:
-        return "AI Description unavailable (No Hugging Face API key)."
-        
+        return "AI Description unavailable."
+
     API_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B-Instruct"
     headers = {"Authorization": f"Bearer {hf_api_key}"}
-    
-    # Qwen instruction format
     qwen_prompt = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
-    
     payload = {
         "inputs": qwen_prompt,
         "parameters": {
@@ -133,79 +267,58 @@ def generate_text_hf(prompt, system_prompt="You are a creative AI. Write a conci
             "temperature": 0.7
         }
     }
-    
+
     try:
-        response = requests.post(API_URL, headers=headers, json=payload)
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=60)
         if response.status_code == 200:
             result = response.json()
-            if isinstance(result, list) and len(result) > 0 and 'generated_text' in result[0]:
+            if isinstance(result, list) and result and 'generated_text' in result[0]:
                 text = result[0]['generated_text'].strip()
-                # Clean up any residual markdown formatting or prompt leakage
                 return text.split("<|im_end|>")[0].strip()
-        return "Generated via Hugging Face Qwen 2.5."
+        return "Generated via AI text backend."
     except Exception:
-         return "Generated via Hugging Face Qwen 2.5."
+        return "Generated via AI text backend."
 
 def generate_vision_hf(prompt, image_bytes):
     """
-    Experimental: Chat with an image using Hugging Face Qwen2-VL.
+    Robust image chat helper that prefers Gemini vision models and falls back to Hugging Face if needed.
     """
+    if client:
+        try:
+            image = Image.open(BytesIO(image_bytes))
+            response = client.models.generate_content(
+                model="gemini-3.5-flash",
+                contents=[prompt, image],
+            )
+            text = _safe_gemini_text_from_response(response, "")
+            if text:
+                return text
+        except Exception:
+            pass
+
     hf_api_key = st.secrets.get("huggingface_api_key")
     if not hf_api_key:
-        return "I need a Hugging Face API key to chat about this image without Gemini."
-        
+        return "I need a model key to chat about this image."
+
     API_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2-VL-7B-Instruct"
     headers = {"Authorization": f"Bearer {hf_api_key}"}
-    
-    # Base64 encode the image for the multimodal prompt
     base64_image = base64.b64encode(image_bytes).decode('utf-8')
     data_url = f"data:image/jpeg;base64,{base64_image}"
-    
-    # Standard ChatML-like prompt with image token
-    # Note: Different models use different multimodal tokens. Qwen2-VL uses <|vision_start|>...
-    # For HF API, sometimes just sending the prompt is enough if the model handles it.
-    
-    payload = {
-        "inputs": {
-            "image": data_url,
-            "text": prompt
-        }
-    }
-    
+    payload = {"inputs": {"image": data_url, "text": prompt}}
+
     try:
-        response = requests.post(API_URL, headers=headers, json=payload)
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=60)
         if response.status_code == 200:
             result = response.json()
-            if isinstance(result, list) and len(result) > 0 and 'generated_text' in result[0]:
+            if isinstance(result, list) and result and 'generated_text' in result[0]:
                 return result[0]['generated_text'].strip()
-            elif isinstance(result, dict) and 'generated_text' in result:
+            if isinstance(result, dict) and 'generated_text' in result:
                 return result['generated_text'].strip()
-        
-        # Fallback to Gemini if HF fails and client exists
-        if client:
-            try:
-                vision_response = client.models.generate_content(
-                    model="gemini-flash-lite-latest",
-                    contents=[prompt, Image.open(BytesIO(image_bytes))]
-                )
-                return vision_response.candidates[0].content.parts[0].text
-            except:
-                pass
-                
         return f"Vision Error (HF {response.status_code}): {response.text[:100]}"
     except Exception as e:
-         if client:
-            try:
-                vision_response = client.models.generate_content(
-                    model="gemini-flash-lite-latest",
-                    contents=[prompt, Image.open(BytesIO(image_bytes))]
-                )
-                return vision_response.candidates[0].content.parts[0].text
-            except:
-                pass
-         return f"Chat Error: {e}"
+        return f"Chat Error: {e}"
 
-# --- END: HUGGING FACE API SETUP ---
+# --- END: IMAGE BACKEND SETUP ---
 
 # --- START: GEMINI ADVANCED TOOLS SETUP ---
 def initialize_gemini_client():
@@ -1262,6 +1375,51 @@ STYLE_CATEGORIES = {
     ]
 }
 
+
+def build_enhanced_prompt(
+    base_prompt: str,
+    selected_style: str,
+    color_mood: str,
+    lighting: str,
+    quality_level: str,
+    painting_medium: str,
+    museum_finish: str,
+    enhance_prompt: bool,
+    preset_applied=None,
+) -> str:
+    parts = [base_prompt.strip()]
+
+    if preset_applied:
+        parts.extend([
+            f"{preset_applied['styles'][0]} style",
+            f"{preset_applied['color_mood']} color palette",
+            f"{preset_applied['lighting']} lighting",
+            preset_applied['enhancement'],
+        ])
+    elif enhance_prompt:
+        parts.extend([
+            f"{selected_style} style",
+            f"{color_mood} color palette",
+            f"{lighting} lighting",
+        ])
+
+    if painting_medium and painting_medium != "None":
+        parts.append(MEDIUM_PROMPTS.get(painting_medium, painting_medium))
+
+    if museum_finish and museum_finish != "None":
+        parts.append(MUSEUM_FINISH_PROMPTS.get(museum_finish, museum_finish))
+
+    parts.append(QUALITY_PROMPTS.get(quality_level, f"{quality_level.lower()} quality"))
+
+    cleaned = []
+    seen = set()
+    for part in parts:
+        p = str(part).strip().strip(",")
+        if p and p not in seen:
+            cleaned.append(p)
+            seen.add(p)
+    return ", ".join(cleaned)
+
 # Sidebar for advanced options
 with st.sidebar:
     st.markdown("### 🎨 Creative Controls")
@@ -1269,6 +1427,14 @@ with st.sidebar:
     # Style selection
     selected_category = st.selectbox("🎭 Style Category", list(STYLE_CATEGORIES.keys()))
     selected_style = st.selectbox("✨ Specific Style", STYLE_CATEGORIES[selected_category])
+
+    # Painting medium
+    painting_medium = st.selectbox("🖌️ Painting Medium", PAINTING_MEDIUM_OPTIONS, index=0)
+    museum_finish = st.selectbox(
+        "🏛️ Fine Art Finish",
+        ["None", "Museum Quality", "Gallery Quality", "Masterpiece", "Archival Canvas", "Old Master"],
+        index=0,
+    )
     
     # Advanced settings
     st.markdown("### ⚙️ Advanced Settings")
@@ -2252,15 +2418,19 @@ with col1:
                 if not prompt.strip():
                     st.markdown('<div class="error-box">❌ Please enter a prompt to begin your creative journey!</div>', unsafe_allow_html=True)
                 else:
-                    # Enhance prompt if requested or preset applied
-                    if enhance_prompt or (hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied):
-                        if hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied:
-                            preset = st.session_state.preset_applied
-                            enhanced_prompt = f"{prompt}, {preset['styles'][0]} style, {preset['color_mood']} color palette, {preset['lighting']} lighting, {preset['enhancement']}, {quality_level} quality"
-                        else:
-                            enhanced_prompt = f"{prompt}, {selected_style} style, {color_mood} color palette, {lighting} lighting, {quality_level} quality"
-                    else:
-                        enhanced_prompt = prompt
+                    preset = st.session_state.preset_applied if hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied else None
+
+                    enhanced_prompt = build_enhanced_prompt(
+                        base_prompt=prompt,
+                        selected_style=selected_style,
+                        color_mood=color_mood,
+                        lighting=lighting,
+                        quality_level=quality_level,
+                        painting_medium=painting_medium,
+                        museum_finish=museum_finish,
+                        enhance_prompt=enhance_prompt,
+                        preset_applied=preset,
+                    )
 
                     # --- ADDED: Step 2 - Add the new prompt to history ---
                     if enhanced_prompt not in st.session_state.prompt_history:
@@ -2269,7 +2439,7 @@ with col1:
                     # ---
 
                     # Show enhanced prompt
-                    if enhance_prompt or (hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied):
+                    if enhance_prompt or preset:
                         st.markdown("**Enhanced Prompt:**")
                         st.code(enhanced_prompt, language=None)
 
@@ -2282,21 +2452,24 @@ with col1:
                     # --- START: GENERATION LOGIC ---
                     generation_successful = False
                     try:
-                        status_text.text("🎨 Initializing Hugging Face FLUX...")
+                        status_text.text("🎨 Starting image generation...")
                         progress_bar.progress(20)
-                        
+
                         status_text.text("✨ Creating your masterpiece...")
                         progress_bar.progress(60)
-                        
-                        # Direct call to HF for image
-                        image_data = generate_image_hf(enhanced_prompt, negative_prompt=negative_prompt)
-                        
+
+                        image_data = generate_image_hf(
+                            enhanced_prompt,
+                            negative_prompt=negative_prompt,
+                            aspect_ratio=_normalize_aspect_ratio(aspect_ratio),
+                            quality_level=quality_level,
+                        )
+
                         status_text.text("✍️ Writing description...")
                         progress_bar.progress(80)
-                        
-                        # Generate description with Qwen
+
                         description = generate_text_hf(enhanced_prompt)
-                        
+
                         progress_bar.progress(100)
                         status_text.text("🎉 Masterpiece complete!")
                         
@@ -2309,6 +2482,8 @@ with col1:
                                 'enhanced_prompt': enhanced_prompt,
                                 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
                                 'style_used': selected_style,
+                                'painting_medium': painting_medium,
+                                'museum_finish': museum_finish,
                                 'color_mood': color_mood,
                                 'lighting': lighting,
                                 'description': description,
@@ -2430,7 +2605,8 @@ with col1:
                                 'id': str(uuid.uuid4()), 'image_data': new_image_data,
                                 'original_prompt': f"Variation of: {img_data['original_prompt']}",
                                 'enhanced_prompt': variation_prompt, 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                                'style_used': img_data.get('style_used'), 'color_mood': img_data.get('color_mood'),
+                                'style_used': img_data.get('style_used'), 'painting_medium': img_data.get('painting_medium'),
+                                'museum_finish': img_data.get('museum_finish'), 'color_mood': img_data.get('color_mood'),
                                 'lighting': img_data.get('lighting'), 'description': new_description,
                                 'aspect_ratio': img_data.get('aspect_ratio'), 'quality_level': img_data.get('quality_level')
                             }
@@ -2773,7 +2949,7 @@ with col2:
 
                         if client:
                             response = client.models.generate_content(
-                                model="gemini-flash-lite-latest-exp-image-generation",
+                                model="gemini-3.1-flash-image",
                                 contents=[upscale_prompt, original_pil_upscale],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
@@ -2923,7 +3099,7 @@ with col2:
                             )
                             if client:
                                 response = client.models.generate_content(
-                                    model="gemini-flash-lite-latest-exp-image-generation",
+                                    model="gemini-3.1-flash-image",
                                     contents=[inpaint_api_prompt, original_for_api, mask_pil],
                                     config=types.GenerateContentConfig(response_modalities=["text", "image"])
                                 )
@@ -3025,7 +3201,7 @@ with col2:
 
                             if client:
                                 response = client.models.generate_content(
-                                    model="gemini-flash-lite-latest-exp-image-generation",
+                                    model="gemini-3.1-flash-image",
                                     contents=[outpaint_api_prompt, new_img, mask],
                                     config=types.GenerateContentConfig(response_modalities=["text", "image"])
                                 )
@@ -3436,7 +3612,7 @@ with col2:
 
                         if client:
                             response = client.models.generate_content(
-                                model="gemini-flash-lite-latest-exp-image-generation",
+                                model="gemini-3.1-flash-image",
                                 contents=[colorize_prompt, original_pil_colorize],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
@@ -3963,7 +4139,7 @@ with col2:
 
                         if client:
                             response = client.models.generate_content(
-                                model="gemini-flash-lite-latest-exp-image-generation",
+                                model="gemini-3.1-flash-image",
                                 contents=[bg_removal_prompt, original_pil_bg],
                                 config=types.GenerateContentConfig(response_modalities=["text", "image"])
                             )
