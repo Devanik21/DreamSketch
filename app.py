@@ -49,29 +49,67 @@ def image_to_url(img, width, height, clamp, channels, output_format):
 st_image.image_to_url = image_to_url
 # --- END: MONKEY-PATCH V2 ---
 
-# --- START: HUGGING FACE API SETUP ---
-def generate_image_hf(prompt):
+# add this import near the top with your other imports
+from huggingface_hub import InferenceClient
+
+
+# put this near your constants
+HF_IMAGE_MODELS = [
+    "black-forest-labs/FLUX.1-Krea-dev",
+    "black-forest-labs/FLUX.1-dev",
+    "Qwen/Qwen-Image",
+    "ByteDance/Hyper-SD",
+]
+
+
+def generate_image_hf(prompt, negative_prompt=None, width=1024, height=1024):
     """
-    Generates an image using Hugging Face Inference API as a fallback.
-    Returns bytes of the image or raises Exception.
+    Generates an image using Hugging Face InferenceClient.
+    Tries multiple currently supported models/providers automatically.
+    Returns image bytes (PNG).
     """
     hf_api_key = st.secrets.get("huggingface_api_key")
     if not hf_api_key:
         raise Exception("Hugging Face API key not found in secrets.toml.")
-        
-    # Using FLUX.1-schnell for fast, high-quality generation
-    API_URL = "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-Krea-dev"
-    headers = {"Authorization": f"Bearer {hf_api_key}"}
-    
-    payload = {
-        "inputs": prompt
-    }
-    
-    response = requests.post(API_URL, headers=headers, json=payload)
-    if response.status_code != 200:
-        raise Exception(f"HF API Error ({response.status_code}): {response.text}")
-        
-    return response.content
+
+    last_error = None
+
+    # Try the main HF path first, then fallback providers if available
+    providers = [None, "hf-inference", "fal-ai"]
+
+    for provider in providers:
+        try:
+            client_kwargs = {"api_key": hf_api_key}
+            if provider is not None:
+                client_kwargs["provider"] = provider
+
+            client = InferenceClient(**client_kwargs)
+
+            for model_id in HF_IMAGE_MODELS:
+                try:
+                    kwargs = {
+                        "model": model_id,
+                        "width": width,
+                        "height": height,
+                    }
+                    if negative_prompt and negative_prompt.strip():
+                        kwargs["negative_prompt"] = negative_prompt.strip()
+
+                    image = client.text_to_image(prompt, **kwargs)
+
+                    buffered = BytesIO()
+                    image.save(buffered, format="PNG")
+                    return buffered.getvalue()
+
+                except Exception as e:
+                    last_error = e
+                    continue
+
+        except Exception as e:
+            last_error = e
+            continue
+
+    raise Exception(f"HF image generation failed: {last_error}")
 
 def generate_text_hf(prompt, system_prompt="You are a creative AI. Write a concise, 1-2 sentence description of the following image concept. No fluff, just the description."):
     """
