@@ -7,3 +7,4 @@ scikit-learn
 numpy
 opencv-python
 streamlit-drawable-canvas
+huggingface_hub>=0.34.0
