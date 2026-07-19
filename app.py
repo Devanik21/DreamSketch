@@ -2289,7 +2289,7 @@ with col1:
                         progress_bar.progress(60)
                         
                         # Direct call to HF for image
-                        image_data = generate_image_hf(enhanced_prompt)
+                        image_data = generate_image_hf(enhanced_prompt, negative_prompt=negative_prompt)
                         
                         status_text.text("✍️ Writing description...")
                         progress_bar.progress(80)
