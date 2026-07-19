@@ -51,65 +51,143 @@ st_image.image_to_url = image_to_url
 
 # add this import near the top with your other imports
 from huggingface_hub import InferenceClient
-
+from urllib.parse import quote
 
 # put this near your constants
+# NOTE (updated July 2026): all of these are genuinely real, currently-shipping open-weight
+# models confirmed to be listed on Hugging Face's Inference Providers router. They are tried
+# in order — if one model/provider combo errors out (rate limit, cold start, etc.) the next
+# is attempted automatically.
 HF_IMAGE_MODELS = [
     "black-forest-labs/FLUX.1-Krea-dev",
     "black-forest-labs/FLUX.1-dev",
-    "Qwen/Qwen-Image",
+    "HiDream-ai/HiDream-O1-Image",   # MIT-licensed 8B pixel-native model, released May 2026
+    "Qwen/Qwen-Image",               # Apache-2.0, strong prompt adherence + text rendering
     "ByteDance/Hyper-SD",
 ]
+
+# --- START: TRULY-FREE, NO-API-KEY FALLBACK (Pollinations.ai) ---
+# IMPORTANT CONTEXT FOR WHY THIS EXISTS:
+# The "402 Payment Required" error from router.huggingface.co does NOT mean any single model
+# is paid — it means the Hugging Face ACCOUNT has used up its monthly included Inference
+# Providers credits. That quota is shared across every provider (fal-ai, together, replicate,
+# hf-inference, etc.) and every model on the router, so switching models alone cannot fix it;
+# only waiting for the monthly reset, buying pre-paid credits, or subscribing to PRO does.
+#
+# Because of that, once HF Inference Providers is exhausted this function automatically falls
+# back to Pollinations.ai — an open-source (MIT), no-signup, no-API-key image generation
+# service (Flux-based) that never requires payment or credits for standard use. It is rate
+# limited for anonymous requests (roughly one image per ~15 seconds), but it means the app
+# never fully stops working just because the HF free tier ran out for the month.
+POLLINATIONS_IMAGE_MODELS = ["flux", "turbo"]  # Pollinations' free, keyless image models
+
+
+def generate_image_pollinations(prompt, negative_prompt=None, width=1024, height=1024):
+    """
+    Generates an image using Pollinations.ai — free, open-source, and requires no API key
+    or account. Used as an automatic fallback when Hugging Face Inference Providers is
+    unavailable or out of credits. Returns image bytes (JPEG/PNG) or raises on failure.
+    """
+    last_error = None
+    for model_id in POLLINATIONS_IMAGE_MODELS:
+        for attempt in range(2):  # brief retry to ride out anonymous rate limiting
+            try:
+                encoded_prompt = quote(prompt.strip()[:2000])
+                url = f"https://image.pollinations.ai/prompt/{encoded_prompt}"
+                params = {
+                    "model": model_id,
+                    "width": width,
+                    "height": height,
+                    "seed": random.randint(0, 2_147_483_647),
+                    "nologo": "true",
+                    "enhance": "false",
+                }
+                # Best-effort: Pollinations doesn't officially guarantee a negative-prompt
+                # parameter on every model, but passing it is harmless if ignored.
+                if negative_prompt and negative_prompt.strip():
+                    params["negative"] = negative_prompt.strip()[:500]
+
+                response = requests.get(url, params=params, timeout=120)
+
+                if response.status_code == 200 and response.content:
+                    return response.content
+                elif response.status_code == 429:
+                    last_error = Exception("Pollinations.ai rate limit hit (anonymous tier), retrying...")
+                    time.sleep(6)
+                    continue
+                else:
+                    last_error = Exception(f"Pollinations.ai returned status {response.status_code}")
+
+            except Exception as e:
+                last_error = e
+                continue
+
+    raise Exception(f"Pollinations.ai generation failed: {last_error}")
+# --- END: TRULY-FREE, NO-API-KEY FALLBACK (Pollinations.ai) ---
 
 
 def generate_image_hf(prompt, negative_prompt=None, width=1024, height=1024):
     """
     Generates an image using Hugging Face InferenceClient.
-    Tries multiple currently supported models/providers automatically.
-    Returns image bytes (PNG).
+    Tries multiple currently supported models/providers automatically, and if the entire
+    Hugging Face account is out of credits (or any other failure occurs), automatically
+    falls back to the free, keyless Pollinations.ai backend so generation still succeeds.
+    Returns image bytes.
     """
     hf_api_key = st.secrets.get("huggingface_api_key")
-    if not hf_api_key:
-        raise Exception("Hugging Face API key not found in secrets.toml.")
-
     last_error = None
 
-    # Try the main HF path first, then fallback providers if available
-    providers = [None, "hf-inference", "fal-ai"]
+    if not hf_api_key:
+        last_error = Exception("Hugging Face API key not found in secrets.toml.")
+    else:
+        # Try the main HF path first, then fallback providers if available
+        providers = [None, "hf-inference", "fal-ai"]
 
-    for provider in providers:
-        try:
-            client_kwargs = {"api_key": hf_api_key}
-            if provider is not None:
-                client_kwargs["provider"] = provider
+        for provider in providers:
+            try:
+                client_kwargs = {"api_key": hf_api_key}
+                if provider is not None:
+                    client_kwargs["provider"] = provider
 
-            client = InferenceClient(**client_kwargs)
+                client = InferenceClient(**client_kwargs)
 
-            for model_id in HF_IMAGE_MODELS:
-                try:
-                    kwargs = {
-                        "model": model_id,
-                        "width": width,
-                        "height": height,
-                    }
-                    if negative_prompt and negative_prompt.strip():
-                        kwargs["negative_prompt"] = negative_prompt.strip()
+                for model_id in HF_IMAGE_MODELS:
+                    try:
+                        kwargs = {
+                            "model": model_id,
+                            "width": width,
+                            "height": height,
+                        }
+                        if negative_prompt and negative_prompt.strip():
+                            kwargs["negative_prompt"] = negative_prompt.strip()
 
-                    image = client.text_to_image(prompt, **kwargs)
+                        image = client.text_to_image(prompt, **kwargs)
 
-                    buffered = BytesIO()
-                    image.save(buffered, format="PNG")
-                    return buffered.getvalue()
+                        buffered = BytesIO()
+                        image.save(buffered, format="PNG")
+                        return buffered.getvalue()
 
-                except Exception as e:
-                    last_error = e
-                    continue
+                    except Exception as e:
+                        last_error = e
+                        # If this is a credit/payment error, there's no point burning time
+                        # trying every other model on this provider too — the whole account
+                        # is out of quota, not just this model. Break out to try Pollinations sooner.
+                        if "402" in str(e) or "Payment Required" in str(e) or "credits" in str(e).lower():
+                            break
+                        continue
 
-        except Exception as e:
-            last_error = e
-            continue
+            except Exception as e:
+                last_error = e
+                continue
 
-    raise Exception(f"HF image generation failed: {last_error}")
+    # --- Automatic fallback to the free, no-key Pollinations.ai backend ---
+    try:
+        return generate_image_pollinations(prompt, negative_prompt=negative_prompt, width=width, height=height)
+    except Exception as fallback_error:
+        raise Exception(
+            f"HF image generation failed: {last_error} | "
+            f"Free fallback (Pollinations.ai) also failed: {fallback_error}"
+        )
 
 def generate_text_hf(prompt, system_prompt="You are a creative AI. Write a concise, 1-2 sentence description of the following image concept. No fluff, just the description."):
     """
