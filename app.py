@@ -1341,110 +1341,116 @@ STYLE_CATEGORIES = {
 }
 
 # --- START: MUSEUM-GRADE PAINTING STYLE PROMPTS ---
-# Each entry is a hand-crafted, gallery/conservation-vocabulary prompt fragment describing
-# a specific fine-art medium at "museum grade" fidelity. These are appended to the user's
-# creative prompt (kept separate from STYLE_CATEGORIES so they can be toggled independently).
+# Each entry is a hand-crafted, conservation-vocabulary prompt fragment describing a specific
+# fine-art medium at "museum grade" fidelity. These describe the PAINTING SURFACE ITSELF —
+# texture, brushwork, technique — and deliberately avoid any language about frames, walls,
+# hanging, or gallery display, since that language causes the model to render a photo of a
+# framed painting on a wall instead of the artwork alone.
 MUSEUM_PAINTING_STYLES = {
     "🛢️ Oil Painting": (
         "museum-grade oil painting on fine linen canvas, rich impasto brushwork with visible "
         "bristle texture, deep glazed layers, old-master varnish sheen, masterful chiaroscuro "
-        "lighting, gallery wall presentation in a gilded frame, catalogued fine art piece worthy "
-        "of the Louvre or the Uffizi, ultra-detailed canvas weave, archival pigment depth, "
-        "museum spotlight illumination, exhibition-quality fine art photography of the finished canvas"
+        "lighting, painting quality worthy of the Louvre or the Uffizi, ultra-detailed canvas "
+        "weave, archival pigment depth"
     ),
     "💧 Watercolor": (
         "museum-grade watercolor painting on textured 100% cotton rag paper, luminous transparent "
         "glazes, soft wet-on-wet bleeding edges, visible cold-press paper grain, delicate pigment "
-        "granulation, hand-torn deckle edges, archival matting under UV-protective glass, exhibited "
-        "in a fine art print gallery, subtle color bloom, masterful control of negative space, "
-        "soft museum conservation lighting"
+        "granulation, subtle color bloom, masterful control of negative space"
     ),
     "🖌️ Gouache": (
         "museum-grade gouache painting on heavyweight illustration board, opaque matte pigment "
         "layers, flat velvety color fields, crisp hand-painted edges, visible brush texture beneath "
-        "a chalky matte finish, archival mounting, exhibited as an original illustration masterwork, "
-        "richly saturated yet non-reflective surface, gallery-quality presentation"
+        "a chalky matte finish, richly saturated yet non-reflective surface"
     ),
     "🏛️ Fresco": (
         "museum-grade fresco painting executed on wet lime plaster, pigment fused directly into the "
-        "wall surface, chalky matte mineral finish, visible plaster texture and fine hairline "
-        "craquelure, faded earthy pigments true to buon fresco technique, grand chapel or basilica "
-        "architectural setting, restored centuries-old masterpiece quality, soft diffused ambient "
-        "stone-interior lighting"
+        "plaster surface, chalky matte mineral finish, visible plaster texture and fine hairline "
+        "craquelure, faded earthy pigments true to buon fresco technique, restored centuries-old "
+        "masterpiece quality, close-up of the painted plaster surface only"
     ),
     "🥚 Egg Tempera": (
         "museum-grade egg tempera panel painting on gessoed wood panel, fine hatched brushwork with "
         "luminous jewel-like colors, smooth eggshell-satin finish, tightly rendered linear detail in "
-        "the tradition of the early Renaissance masters, gold leaf accents, gallery-cased quattrocento "
-        "altarpiece presentation, archival museum lighting"
+        "the tradition of the early Renaissance masters, gold leaf accents"
     ),
     "🔥 Encaustic": (
         "museum-grade encaustic painting using pigmented hot wax, richly layered translucent wax "
         "strata, fused surface with visible tool marks and subtle sculptural texture, warm honeyed "
-        "luminosity, preserved ancient Fayum-portrait quality, archival museum vitrine display, soft "
-        "raking gallery light revealing the wax relief surface"
+        "luminosity, preserved ancient Fayum-portrait quality"
     ),
     "🖍️ Acrylic": (
-        "museum-grade acrylic painting on gallery-wrapped stretched canvas, vivid saturated pigment "
-        "with crisp hard edges and smooth blended passages, glossy archival varnish finish, "
-        "contemporary fine-art gallery presentation, museum track lighting, exhibition-ready "
-        "large-scale canvas with visible brush and palette-knife texture"
+        "museum-grade acrylic painting on stretched canvas, vivid saturated pigment with crisp hard "
+        "edges and smooth blended passages, glossy archival varnish finish, visible brush and "
+        "palette-knife texture"
     ),
     "🎨 Pastel": (
         "museum-grade soft pastel painting on textured pastel paper, velvety powder-soft pigment "
-        "layers, delicate blended gradients with visible paper tooth, fixative sheen, framed under "
-        "museum conservation glass, exhibited fine-art pastel masterwork in the tradition of Degas, "
-        "warm gallery spotlight"
+        "layers, delicate blended gradients with visible paper tooth, fixative sheen, in the "
+        "tradition of Degas"
     ),
     "🖋️ Ink Wash (Sumi-e)": (
         "museum-grade sumi-e ink wash painting on absorbent rice paper, minimalist monochrome "
         "brushwork, graceful gestural strokes with varying ink density, visible paper fiber texture, "
-        "subtle graduated ink bleed, traditional East Asian scroll mounting, exhibited in a serene "
-        "gallery under soft natural light"
+        "subtle graduated ink bleed"
     ),
     "✏️ Charcoal & Graphite": (
         "museum-grade charcoal and graphite drawing on archival cotton paper, rich velvety blacks "
         "with masterful smudged tonal gradients, crisp precise linework, visible paper tooth and "
-        "fixative sheen, framed academic atelier study, exhibited in a fine-art drawing gallery under "
-        "soft directional light"
+        "fixative sheen"
     ),
     "🔵 Pointillism (Divisionist Oil)": (
         "museum-grade pointillist oil painting composed of thousands of tiny hand-applied dots of "
         "pure pigment, optical color mixing visible at a distance, individual dabs of paint visible "
         "up close, canvas texture beneath the dot-work, scientific color theory in the Seurat "
-        "tradition, framed exhibition-quality masterpiece under museum gallery lighting"
+        "tradition"
     ),
     "🖼️ Impasto Oil": (
         "museum-grade impasto oil painting with thick sculptural ridges of paint, dramatic "
         "palette-knife and heavy-brush texture, deep shadow pockets cast by raised paint strokes, "
-        "richly saturated pigment, tactile three-dimensional surface, gallery raking light "
-        "emphasizing the paint relief, exhibition masterpiece quality"
+        "richly saturated pigment, tactile three-dimensional paint surface, raking light emphasizing "
+        "the paint relief"
     ),
     "👑 Renaissance Master Oil": (
         "museum-grade Renaissance master oil painting, sfumato blending with soft smoky transitions, "
         "anatomically precise figures, warm golden underpainting, richly glazed translucent layers, "
-        "classical composition and idealized proportion, aged varnish patina, exhibited as an Old "
-        "Master canvas in a grand European museum hall"
+        "classical composition and idealized proportion, aged varnish patina"
     ),
     "🌑 Baroque Chiaroscuro Oil": (
         "museum-grade Baroque oil painting with dramatic tenebrism, intense chiaroscuro contrast "
         "between deep shadow and radiant light, theatrical composition, rich dark umber background, "
-        "richly rendered fabric and flesh tones in the style of Caravaggio, gilded frame, exhibited "
-        "under dramatic museum spotlighting"
+        "richly rendered fabric and flesh tones in the style of Caravaggio"
     ),
     "🌊 Ukiyo-e Woodblock Print": (
         "museum-grade ukiyo-e woodblock print, flat bold color fields separated by fine black "
         "keylines, visible woodgrain texture and subtle registration nuances, traditional washi "
-        "paper, elegant asymmetric composition, Edo-period Japanese aesthetic, archivally mounted "
-        "and exhibited in a fine-art print gallery"
+        "paper, elegant asymmetric composition, Edo-period Japanese aesthetic"
     ),
     "📜 Illuminated Manuscript Gouache": (
         "museum-grade illuminated manuscript miniature, richly detailed gouache and burnished gold "
-        "leaf on vellum, intricate decorative borders, jewel-toned pigments, meticulous fine linework "
-        "typical of medieval scriptoria, archivally preserved folio page, displayed open under "
-        "protective museum glass with soft conservation lighting"
+        "leaf on vellum, intricate decorative borders that are part of the painted page itself, "
+        "jewel-toned pigments, meticulous fine linework typical of medieval scriptoria"
     ),
 }
+
+# Shared closing clause appended to every museum style at generation time. This is what
+# actually enforces "artwork only" — it explicitly tells the model to render just the
+# painted/drawn surface, filling the frame, with nothing else in the shot.
+MUSEUM_NO_FRAME_GUARD = (
+    "the image shows ONLY the painted artwork surface itself, filling the entire frame "
+    "edge-to-edge, flat full-bleed reproduction of the artwork, no picture frame, no wood "
+    "or gilded frame, no wall, no mounting, no glass or glare, no gallery, no museum room, "
+    "no plaque, no placard, no border, not a photograph of a hanging painting"
+)
+
+# Negative-prompt terms auto-appended whenever Museum Painting Mode is enabled, as a second
+# layer of protection against the model rendering a framed-canvas-on-a-wall photo.
+MUSEUM_NEGATIVE_TERMS = (
+    "picture frame, wood frame, gold frame, gilded frame, ornate frame, frame border, "
+    "wall, hanging on wall, museum wall, gallery wall, museum room, gallery interior, "
+    "wall plaque, placard, label, description card, glass reflection, glare, vignette, "
+    "border, matting, photograph of a painting, picture of a painting on display"
+)
 # --- END: MUSEUM-GRADE PAINTING STYLE PROMPTS ---
 
 # Sidebar for advanced options
@@ -2439,7 +2445,7 @@ with col1:
         museum_mode_enabled = st.checkbox(
             "🖼️ Enable Museum Painting Mode",
             key="museum_mode_enabled",
-            help="Appends a professionally written, museum-grade medium description to your prompt. Works independently of the style controls in the sidebar."
+            help="Appends a professionally written, museum-grade medium description to your prompt — artwork only, no frame or wall. Works independently of the style controls in the sidebar."
         )
 
         if museum_mode_enabled:
@@ -2448,9 +2454,12 @@ with col1:
                 list(MUSEUM_PAINTING_STYLES.keys()),
                 key="museum_style_selected"
             )
-            museum_prompt_fragment = MUSEUM_PAINTING_STYLES[museum_style_selected]
-            with st.expander("🔍 Preview the museum-grade prompt that will be added"):
+            museum_prompt_fragment = f"{MUSEUM_PAINTING_STYLES[museum_style_selected]}, {MUSEUM_NO_FRAME_GUARD}"
+            with st.expander("🔍 Preview what will be added to your prompt"):
+                st.markdown("**Added to your prompt:**")
                 st.code(museum_prompt_fragment, language=None)
+                st.markdown("**Added to your negative prompt (blocks frame/wall renders):**")
+                st.code(MUSEUM_NEGATIVE_TERMS, language=None)
         # --- END: MUSEUM-GRADE PAINTING STYLE MODULE ---
 
         # Prompt enhancement options
@@ -2476,11 +2485,21 @@ with col1:
                     # --- START: MUSEUM PAINTING MODE INJECTION ---
                     # Independent of the "Auto-enhance" checkbox above: if the user has enabled
                     # Museum Painting Mode and picked a medium, append that hand-crafted,
-                    # museum-grade descriptor to whatever prompt has been built so far.
+                    # museum-grade descriptor PLUS a strict "artwork only" guard clause to
+                    # whatever prompt has been built so far. Also merge frame/wall exclusion
+                    # terms into the negative prompt as a second layer of protection — this is
+                    # what stops the model from rendering a framed canvas hanging on a wall.
                     museum_mode_active = st.session_state.get('museum_mode_enabled', False)
                     museum_style_name = st.session_state.get('museum_style_selected')
                     if museum_mode_active and museum_style_name in MUSEUM_PAINTING_STYLES:
-                        enhanced_prompt = f"{enhanced_prompt}, {MUSEUM_PAINTING_STYLES[museum_style_name]}"
+                        enhanced_prompt = (
+                            f"{enhanced_prompt}, {MUSEUM_PAINTING_STYLES[museum_style_name]}, "
+                            f"{MUSEUM_NO_FRAME_GUARD}"
+                        )
+                        if negative_prompt and negative_prompt.strip():
+                            negative_prompt = f"{negative_prompt.strip()}, {MUSEUM_NEGATIVE_TERMS}"
+                        else:
+                            negative_prompt = MUSEUM_NEGATIVE_TERMS
                     # --- END: MUSEUM PAINTING MODE INJECTION ---
 
                     # --- ADDED: Step 2 - Add the new prompt to history ---
