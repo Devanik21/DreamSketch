@@ -1262,6 +1262,113 @@ STYLE_CATEGORIES = {
     ]
 }
 
+# --- START: MUSEUM-GRADE PAINTING STYLE PROMPTS ---
+# Each entry is a hand-crafted, gallery/conservation-vocabulary prompt fragment describing
+# a specific fine-art medium at "museum grade" fidelity. These are appended to the user's
+# creative prompt (kept separate from STYLE_CATEGORIES so they can be toggled independently).
+MUSEUM_PAINTING_STYLES = {
+    "🛢️ Oil Painting": (
+        "museum-grade oil painting on fine linen canvas, rich impasto brushwork with visible "
+        "bristle texture, deep glazed layers, old-master varnish sheen, masterful chiaroscuro "
+        "lighting, gallery wall presentation in a gilded frame, catalogued fine art piece worthy "
+        "of the Louvre or the Uffizi, ultra-detailed canvas weave, archival pigment depth, "
+        "museum spotlight illumination, exhibition-quality fine art photography of the finished canvas"
+    ),
+    "💧 Watercolor": (
+        "museum-grade watercolor painting on textured 100% cotton rag paper, luminous transparent "
+        "glazes, soft wet-on-wet bleeding edges, visible cold-press paper grain, delicate pigment "
+        "granulation, hand-torn deckle edges, archival matting under UV-protective glass, exhibited "
+        "in a fine art print gallery, subtle color bloom, masterful control of negative space, "
+        "soft museum conservation lighting"
+    ),
+    "🖌️ Gouache": (
+        "museum-grade gouache painting on heavyweight illustration board, opaque matte pigment "
+        "layers, flat velvety color fields, crisp hand-painted edges, visible brush texture beneath "
+        "a chalky matte finish, archival mounting, exhibited as an original illustration masterwork, "
+        "richly saturated yet non-reflective surface, gallery-quality presentation"
+    ),
+    "🏛️ Fresco": (
+        "museum-grade fresco painting executed on wet lime plaster, pigment fused directly into the "
+        "wall surface, chalky matte mineral finish, visible plaster texture and fine hairline "
+        "craquelure, faded earthy pigments true to buon fresco technique, grand chapel or basilica "
+        "architectural setting, restored centuries-old masterpiece quality, soft diffused ambient "
+        "stone-interior lighting"
+    ),
+    "🥚 Egg Tempera": (
+        "museum-grade egg tempera panel painting on gessoed wood panel, fine hatched brushwork with "
+        "luminous jewel-like colors, smooth eggshell-satin finish, tightly rendered linear detail in "
+        "the tradition of the early Renaissance masters, gold leaf accents, gallery-cased quattrocento "
+        "altarpiece presentation, archival museum lighting"
+    ),
+    "🔥 Encaustic": (
+        "museum-grade encaustic painting using pigmented hot wax, richly layered translucent wax "
+        "strata, fused surface with visible tool marks and subtle sculptural texture, warm honeyed "
+        "luminosity, preserved ancient Fayum-portrait quality, archival museum vitrine display, soft "
+        "raking gallery light revealing the wax relief surface"
+    ),
+    "🖍️ Acrylic": (
+        "museum-grade acrylic painting on gallery-wrapped stretched canvas, vivid saturated pigment "
+        "with crisp hard edges and smooth blended passages, glossy archival varnish finish, "
+        "contemporary fine-art gallery presentation, museum track lighting, exhibition-ready "
+        "large-scale canvas with visible brush and palette-knife texture"
+    ),
+    "🎨 Pastel": (
+        "museum-grade soft pastel painting on textured pastel paper, velvety powder-soft pigment "
+        "layers, delicate blended gradients with visible paper tooth, fixative sheen, framed under "
+        "museum conservation glass, exhibited fine-art pastel masterwork in the tradition of Degas, "
+        "warm gallery spotlight"
+    ),
+    "🖋️ Ink Wash (Sumi-e)": (
+        "museum-grade sumi-e ink wash painting on absorbent rice paper, minimalist monochrome "
+        "brushwork, graceful gestural strokes with varying ink density, visible paper fiber texture, "
+        "subtle graduated ink bleed, traditional East Asian scroll mounting, exhibited in a serene "
+        "gallery under soft natural light"
+    ),
+    "✏️ Charcoal & Graphite": (
+        "museum-grade charcoal and graphite drawing on archival cotton paper, rich velvety blacks "
+        "with masterful smudged tonal gradients, crisp precise linework, visible paper tooth and "
+        "fixative sheen, framed academic atelier study, exhibited in a fine-art drawing gallery under "
+        "soft directional light"
+    ),
+    "🔵 Pointillism (Divisionist Oil)": (
+        "museum-grade pointillist oil painting composed of thousands of tiny hand-applied dots of "
+        "pure pigment, optical color mixing visible at a distance, individual dabs of paint visible "
+        "up close, canvas texture beneath the dot-work, scientific color theory in the Seurat "
+        "tradition, framed exhibition-quality masterpiece under museum gallery lighting"
+    ),
+    "🖼️ Impasto Oil": (
+        "museum-grade impasto oil painting with thick sculptural ridges of paint, dramatic "
+        "palette-knife and heavy-brush texture, deep shadow pockets cast by raised paint strokes, "
+        "richly saturated pigment, tactile three-dimensional surface, gallery raking light "
+        "emphasizing the paint relief, exhibition masterpiece quality"
+    ),
+    "👑 Renaissance Master Oil": (
+        "museum-grade Renaissance master oil painting, sfumato blending with soft smoky transitions, "
+        "anatomically precise figures, warm golden underpainting, richly glazed translucent layers, "
+        "classical composition and idealized proportion, aged varnish patina, exhibited as an Old "
+        "Master canvas in a grand European museum hall"
+    ),
+    "🌑 Baroque Chiaroscuro Oil": (
+        "museum-grade Baroque oil painting with dramatic tenebrism, intense chiaroscuro contrast "
+        "between deep shadow and radiant light, theatrical composition, rich dark umber background, "
+        "richly rendered fabric and flesh tones in the style of Caravaggio, gilded frame, exhibited "
+        "under dramatic museum spotlighting"
+    ),
+    "🌊 Ukiyo-e Woodblock Print": (
+        "museum-grade ukiyo-e woodblock print, flat bold color fields separated by fine black "
+        "keylines, visible woodgrain texture and subtle registration nuances, traditional washi "
+        "paper, elegant asymmetric composition, Edo-period Japanese aesthetic, archivally mounted "
+        "and exhibited in a fine-art print gallery"
+    ),
+    "📜 Illuminated Manuscript Gouache": (
+        "museum-grade illuminated manuscript miniature, richly detailed gouache and burnished gold "
+        "leaf on vellum, intricate decorative borders, jewel-toned pigments, meticulous fine linework "
+        "typical of medieval scriptoria, archivally preserved folio page, displayed open under "
+        "protective museum glass with soft conservation lighting"
+    ),
+}
+# --- END: MUSEUM-GRADE PAINTING STYLE PROMPTS ---
+
 # Sidebar for advanced options
 with st.sidebar:
     st.markdown("### 🎨 Creative Controls")
@@ -2241,7 +2348,33 @@ with col1:
             key="negative_prompt_input"
         )
         # >>> END OF CODE BLOCK <<<
-        
+
+        # --- START: MUSEUM-GRADE PAINTING STYLE MODULE ---
+        st.markdown("---")
+        st.markdown("### 🖼️ Museum Painting Mode")
+        st.caption(
+            "Render your idea as a museum-grade painting in a specific fine-art medium — "
+            "oil, watercolor, fresco, gouache, and 12+ more — each with its own hand-crafted, "
+            "gallery-conservation-level descriptive prompt."
+        )
+
+        museum_mode_enabled = st.checkbox(
+            "🖼️ Enable Museum Painting Mode",
+            key="museum_mode_enabled",
+            help="Appends a professionally written, museum-grade medium description to your prompt. Works independently of the style controls in the sidebar."
+        )
+
+        if museum_mode_enabled:
+            museum_style_selected = st.selectbox(
+                "🎨 Choose a Museum-Grade Medium",
+                list(MUSEUM_PAINTING_STYLES.keys()),
+                key="museum_style_selected"
+            )
+            museum_prompt_fragment = MUSEUM_PAINTING_STYLES[museum_style_selected]
+            with st.expander("🔍 Preview the museum-grade prompt that will be added"):
+                st.code(museum_prompt_fragment, language=None)
+        # --- END: MUSEUM-GRADE PAINTING STYLE MODULE ---
+
         # Prompt enhancement options
         enhance_prompt = st.checkbox(" 🦄 Auto-enhance prompt with selected styles", key="enhance_check")
         
@@ -2262,6 +2395,16 @@ with col1:
                     else:
                         enhanced_prompt = prompt
 
+                    # --- START: MUSEUM PAINTING MODE INJECTION ---
+                    # Independent of the "Auto-enhance" checkbox above: if the user has enabled
+                    # Museum Painting Mode and picked a medium, append that hand-crafted,
+                    # museum-grade descriptor to whatever prompt has been built so far.
+                    museum_mode_active = st.session_state.get('museum_mode_enabled', False)
+                    museum_style_name = st.session_state.get('museum_style_selected')
+                    if museum_mode_active and museum_style_name in MUSEUM_PAINTING_STYLES:
+                        enhanced_prompt = f"{enhanced_prompt}, {MUSEUM_PAINTING_STYLES[museum_style_name]}"
+                    # --- END: MUSEUM PAINTING MODE INJECTION ---
+
                     # --- ADDED: Step 2 - Add the new prompt to history ---
                     if enhanced_prompt not in st.session_state.prompt_history:
                         st.session_state.prompt_history.insert(0, enhanced_prompt)
@@ -2269,7 +2412,7 @@ with col1:
                     # ---
 
                     # Show enhanced prompt
-                    if enhance_prompt or (hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied):
+                    if enhance_prompt or museum_mode_active or (hasattr(st.session_state, 'preset_applied') and st.session_state.preset_applied):
                         st.markdown("**Enhanced Prompt:**")
                         st.code(enhanced_prompt, language=None)
 
@@ -2308,12 +2451,13 @@ with col1:
                                 'original_prompt': prompt,
                                 'enhanced_prompt': enhanced_prompt,
                                 'generation_time': time.strftime("%Y-%m-%d %H:%M:%S"),
-                                'style_used': selected_style,
+                                'style_used': f"{selected_style} + 🖼️ {museum_style_name}" if museum_mode_active and museum_style_name else selected_style,
                                 'color_mood': color_mood,
                                 'lighting': lighting,
                                 'description': description,
                                 'aspect_ratio': aspect_ratio,
-                                'quality_level': quality_level
+                                'quality_level': quality_level,
+                                'museum_style': museum_style_name if museum_mode_active else None
                             }
                             st.session_state.images.append(image_metadata)
                             save_image_to_db(image_metadata)
