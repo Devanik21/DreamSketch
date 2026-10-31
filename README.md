@@ -1,6 +1,6 @@
 # 🌈 DreamCanvas • Powered by Imagination
 
-<img width="192" height="336" alt="image" src="https://github.com/user-attachments/assets/4ed78dfc-008b-4698-a38a-393d16dfc12c" />
+<img width="1024" height="572" alt="image" src="https://github.com/user-attachments/assets/525ff4a0-7c21-49ca-b696-8bf959ef4932" />
 
  
 <div align="center">
